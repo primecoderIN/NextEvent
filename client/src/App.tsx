@@ -1,4 +1,5 @@
 import { useEffect, useState,Fragment } from "react";
+import axios from "axios";
 import "./App.css";
 import type { Event } from "./Types/Event";
 import { ListItem, Typography } from "@mui/material";
@@ -7,9 +8,8 @@ function App() {
   const [events, setEvents] = useState<Event[] | null>([]);
 
   useEffect(() => {
-    fetch("https://localhost:5001/api/events")
-      .then((response) => response.json())
-      .then((data) => setEvents(data))
+    axios.get<Event[]>("https://localhost:5001/api/events")
+      .then((response) => setEvents(response.data))
       .catch((error) => console.error("Error fetching events:", error));
   }, []);
 
