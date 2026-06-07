@@ -7,13 +7,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers(); //Make controller functionality available to the application.
 
-builder.Services.AddDbContext<AppDBContext>(options=>
+builder.Services.AddDbContext<AppDBContext>(options =>
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy.AllowAnyHeader()
+                .AllowAnyMethod()
+                .WithOrigins("http://localhost:3001");
+    });
+});
+
 
 var app = builder.Build();
+
+app.UseCors("CorsPolicy"); //Enable CORS with the defined policy.
 
 // Configure the HTTP request pipeline.
 app.MapControllers(); //When an HTTP request arrives, route it to controller actions.
@@ -30,7 +42,7 @@ try
 }
 catch (Exception ex)
 {
-    var logger =services.GetRequiredService<ILogger<Program>>();
+    var logger = services.GetRequiredService<ILogger<Program>>();
     logger.LogError(ex, "An error occured during migration");
 }
 

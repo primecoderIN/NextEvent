@@ -482,3 +482,5 @@ $RECYCLE.BIN/
 *.swp
 API/appsettings.json
 API/nextevents.db
+*.db-wal
+*.db-shm
