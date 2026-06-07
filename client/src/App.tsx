@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,Fragment } from "react";
 import "./App.css";
 import type { Event } from "./Types/Event";
+import { ListItem, Typography } from "@mui/material";
 
 function App() {
   const [events, setEvents] = useState<Event[] | null>([]);
@@ -12,19 +13,19 @@ function App() {
       .catch((error) => console.error("Error fetching events:", error));
   }, []);
 
-  console.log(events);
 
   return (
-    <>
-      <h1>Events</h1>
+    <Fragment>
+      <Typography variant="h3" >
+        Events
+      </Typography>
+
       {events?.map((event: Event) => (
-        <div key={event.id}>
-          <h2>{event.title}</h2>
-          <p>{event.description}</p>
-          <p>Date: {new Date(event.date).toLocaleDateString()}</p>
-        </div>
+        <ListItem key={event.id}>
+          <Typography variant="h5">{event.title}</Typography>
+        </ListItem>
       ))}
-    </>
+    </Fragment>
   );
 }
 
