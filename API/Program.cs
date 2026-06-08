@@ -1,3 +1,4 @@
+using Application.Events.Quaries;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
@@ -20,6 +21,11 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod()
                 .WithOrigins("http://localhost:3001");
     });
+});
+
+builder.Services.AddMediatR(x=>
+{
+    x.RegisterServicesFromAssemblyContaining<GetEventsList.Handler>();
 });
 
 

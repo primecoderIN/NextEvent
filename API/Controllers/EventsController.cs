@@ -1,16 +1,17 @@
+using Application.Events.Quaries;
 using Domain;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace API.Controllers;
 
-public class EventsController(AppDBContext context): BaseApiController
+public class EventsController(AppDBContext context, IMediator mediator): BaseApiController
 {
     [HttpGet]
     public async Task<ActionResult<List<Event>>> GetEvents()
     {
-        return await context.Events.ToListAsync();
+        return await mediator.Send(new GetEventsList.Query());
     }
 
     [HttpGet("{id}")]
