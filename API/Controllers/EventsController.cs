@@ -1,5 +1,5 @@
-using Application.Events.Quaries;
 using Application.Events.Commands;
+using Application.Events.Quaries;
 using Domain;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,17 +39,12 @@ public class EventsController: BaseApiController
     }
 
    [HttpPut("{id}")]
-   public async Task<ActionResult> UpdateEvent(string id, [FromBody] Event _event)
+   public async Task<ActionResult> UpdateEvent(string id, [FromBody] UpdateEventDto dto)
    {
-        _event.Id = id;
+       await Mediator.Send(new EditEvent.Command { Id = id, EventData = dto });
 
-        await Mediator.Send(new EditEvent.Command
-         {
-           Event = _event
-         });
-
-        return NoContent();
-    }
+       return NoContent();
+   }
 
     
 }
