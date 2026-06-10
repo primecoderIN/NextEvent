@@ -1,4 +1,5 @@
 using Application.Events.Quaries;
+using Application.Events.Commands;
 using Domain;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,5 +26,17 @@ public class EventsController: BaseApiController
 
         return Ok(_event);
     }
+
+   [HttpPost]
+public async Task<ActionResult<object>> CreateNewEvent([FromBody] Event _event)
+{
+    var id = await Mediator.Send(new CreateEvent.Command { Event = _event });
+
+    return Ok(new
+    {
+        Id = id
+    });
+}
+
     
 }
