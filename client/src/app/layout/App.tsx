@@ -1,8 +1,8 @@
 import { useEffect, useState,Fragment } from "react";
 import axios from "axios";
-import "./App.css";
-import type { Event } from "./Types/Event";
-import { ListItem, Typography } from "@mui/material";
+import { CssBaseline, ListItem, Typography } from "@mui/material";
+import type { Event } from "../../Types/Event";
+import { Navbar } from "./Navbar";
 
 function App() {
   const [events, setEvents] = useState<Event[] | null>([]);
@@ -16,9 +16,8 @@ function App() {
 
   return (
     <Fragment>
-      <Typography variant="h3" >
-        Events
-      </Typography>
+      <CssBaseline/>
+    <Navbar/>
 
       {events?.map((event: Event) => (
         <ListItem key={event.id}>
