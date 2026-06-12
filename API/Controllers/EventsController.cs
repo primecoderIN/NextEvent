@@ -51,5 +51,18 @@ public class EventsController: BaseApiController
        return NoContent();
    }
 
+   [HttpDelete("{id}")]
+   public async Task<ActionResult> DeleteEvent(string id)
+    {
+        var itemDeleted = await Mediator.Send(new DeleteEvent.Command{Id=id});
+
+        if (!itemDeleted)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
+
     
 }
