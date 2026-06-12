@@ -5,18 +5,22 @@ namespace Application.Events.Commands;
 
 public class EditEvent
 {
-    public class Command : IRequest // No return value
+    public class Command : IRequest<bool>
     {
         public required string Id { get; set; }
         public required UpdateEventDto EventData { get; set; }
     }
 
-    public class Handler(AppDBContext context) : IRequestHandler<Command>
+    public class Handler(AppDBContext context) : IRequestHandler<Command, bool>
     {
-        public async Task Handle(Command request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(Command request, CancellationToken cancellationToken)
         {
-            var eventEntity = await context.Events.FindAsync([request.Id], cancellationToken)
-                ?? throw new Exception("Event not found");
+            var eventEntity = await context.Events.FindAsync([request.Id], cancellationToken);
+
+            if (eventEntity is null)
+            {
+                return false;
+            }
 
             var dto = request.EventData;
 
@@ -31,6 +35,8 @@ public class EditEvent
             eventEntity.ChangeLongitude(dto.Longitude);
 
             await context.SaveChangesAsync(cancellationToken);
+
+            return true;
         }
     }
 }

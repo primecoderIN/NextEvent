@@ -41,7 +41,12 @@ public class EventsController: BaseApiController
    [HttpPut("{id}")]
    public async Task<ActionResult> UpdateEvent(string id, [FromBody] UpdateEventDto dto)
    {
-       await Mediator.Send(new EditEvent.Command { Id = id, EventData = dto });
+       var updated = await Mediator.Send(new EditEvent.Command { Id = id, EventData = dto });
+
+       if (!updated)
+       {
+           return NotFound();
+       }
 
        return NoContent();
    }
