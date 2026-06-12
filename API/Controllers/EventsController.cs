@@ -9,15 +9,15 @@ namespace API.Controllers;
 public class EventsController: BaseApiController
 {
     [HttpGet]
-    public async Task<ActionResult<List<Event>>> GetEvents()
+    public async Task<ActionResult<List<Event>>> GetEvents(CancellationToken cancellationToken)
     {
-        return await Mediator.Send(new GetEventsList.Query());
+        return await Mediator.Send(new GetEventsList.Query(), cancellationToken);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Event>> GetActivityById(string id)
+    public async Task<ActionResult<Event>> GetActivityById(string id, CancellationToken cancellationToken)
     {
-       var _event = await Mediator.Send(new GetEventDetailsById.Query{Id=id});
+       var _event = await Mediator.Send(new GetEventDetailsById.Query{Id=id}, cancellationToken);
 
         if (_event == null)
         {
@@ -28,9 +28,9 @@ public class EventsController: BaseApiController
     }
 
    [HttpPost]
-    public async Task<ActionResult<object>> CreateNewEvent([FromBody] Event _event)
+    public async Task<ActionResult<object>> CreateNewEvent([FromBody] Event _event, CancellationToken cancellationToken)
     {
-         var id = await Mediator.Send(new CreateEvent.Command { Event = _event });
+         var id = await Mediator.Send(new CreateEvent.Command { Event = _event }, cancellationToken);
 
          return Ok(new
             {
@@ -39,9 +39,9 @@ public class EventsController: BaseApiController
     }
 
    [HttpPut("{id}")]
-   public async Task<ActionResult> UpdateEvent(string id, [FromBody] UpdateEventDto dto)
+   public async Task<ActionResult> UpdateEvent(string id, [FromBody] UpdateEventDto dto, CancellationToken cancellationToken)
    {
-       var updated = await Mediator.Send(new EditEvent.Command { Id = id, EventData = dto });
+       var updated = await Mediator.Send(new EditEvent.Command { Id = id, EventData = dto }, cancellationToken);
 
        if (!updated)
        {
@@ -52,9 +52,9 @@ public class EventsController: BaseApiController
    }
 
    [HttpDelete("{id}")]
-   public async Task<ActionResult> DeleteEvent(string id)
+   public async Task<ActionResult> DeleteEvent(string id, CancellationToken cancellationToken)
     {
-        var itemDeleted = await Mediator.Send(new DeleteEvent.Command{Id=id});
+        var itemDeleted = await Mediator.Send(new DeleteEvent.Command{Id=id}, cancellationToken);
 
         if (!itemDeleted)
         {
