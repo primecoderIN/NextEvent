@@ -9,7 +9,7 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 ### Backend — ASP.NET Core Web API
 | Layer | Technology |
 |---|---|
-| API | ASP.NET Core 8 (Minimal hosting model) |
+| API | ASP.NET Core 10 |
 | Architecture | Clean Architecture — Domain / Application / Persistence / API |
 | CQRS | MediatR |
 | ORM | Entity Framework Core |
