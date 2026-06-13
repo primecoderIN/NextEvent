@@ -26,7 +26,7 @@ function getThumb(category: string, index: number): string {
   return `https://picsum.photos/seed/${category}-${index}/120/120`
 }
 
-export function RightSidebar({ events }: { events: Event[] }) {
+export function RightSidebar({ events=[] }: { events: Event[] }) {
   const navigate = useNavigate()
   const upcomingEvents = [...events]
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
