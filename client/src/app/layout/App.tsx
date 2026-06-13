@@ -1,6 +1,6 @@
 import { Navbar } from "./Navbar"
 import { DesktopSidebar } from "./DesktopSidebar"
-import { MobileBottomNav } from "./MobileBottomNav"
+
 import { RightSidebar } from "./RightSidebar"
 import { HomePage } from "@/features/home/HomePage"
 import { useEvents } from "@/hooks/useEvents"
@@ -23,13 +23,12 @@ function App() {
           <Navbar />
         </div>
 
-        <main className="flex-1 pb-20 lg:pb-0">
+        <main className="flex-1">
           <HomePage events={events} loading={loading} />
         </main>
       </div>
 
-      {/* Mobile bottom navigation — fixed */}
-      <MobileBottomNav />
+
     </div>
   )
 }
