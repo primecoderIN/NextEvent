@@ -16,5 +16,5 @@ export function useEvents() {
     queryFn: fetchEvents,
   });
 
-  return {events,loading: isPending, error: isError}
+  return {events: events || [],loading: isPending, error: isError}
 }
