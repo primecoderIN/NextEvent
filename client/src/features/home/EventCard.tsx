@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Heart, Calendar, MapPin } from "lucide-react"
 import type { Event } from "@/Types/Event"
 import { formatDate, getEventImage, getCategoryBadgeClass } from "./helpers"
@@ -13,9 +14,13 @@ interface EventCardProps {
 
 export function EventCard({ event, index }: EventCardProps) {
   const [liked, setLiked] = useState(false)
+  const navigate = useNavigate()
 
   return (
-    <div className="flex-shrink-0 w-44 md:w-52 rounded-2xl overflow-hidden border border-border/50 bg-card shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
+    <div
+      onClick={() => navigate(`/events/${event.id}`)}
+      className="flex-shrink-0 w-44 md:w-52 rounded-2xl overflow-hidden border border-border/50 bg-card shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group"
+    >
       {/* Image */}
       <div className="relative overflow-hidden">
         <img

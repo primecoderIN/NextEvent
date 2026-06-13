@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { Heart, Calendar, MapPin, Play, ChevronLeft, ChevronRight } from "lucide-react"
 import type { Event } from "@/Types/Event"
 import { formatDate, getEventImage } from "./helpers"
@@ -10,6 +11,7 @@ interface FeaturedCarouselProps {
 
 export function FeaturedCarousel({ events }: FeaturedCarouselProps) {
   const [current, setCurrent] = useState(0)
+  const navigate = useNavigate()
   const featured = events.slice(0, 4)
 
   // Auto-advance every 4.5 s
@@ -73,7 +75,10 @@ export function FeaturedCarousel({ events }: FeaturedCarouselProps) {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <button className="bg-primary text-primary-foreground px-5 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors shadow-lg">
+              <button
+                onClick={() => navigate(`/events/${event.id}`)}
+                className="bg-primary text-primary-foreground px-5 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors shadow-lg"
+              >
                 Book Tickets
               </button>
               <button className="flex items-center gap-2 text-white text-sm font-semibold hover:opacity-80 transition-opacity">
