@@ -5,11 +5,12 @@ import { DesktopSidebar } from "@/app/layout/DesktopSidebar"
 import { RightSidebar } from "@/app/layout/RightSidebar"
 import { useEvents } from "@/hooks/useEvents"
 
-import { EventDetailPage } from "@/features/event-detail/index"
-
 // ─── Lazy-loaded page bundles ─────────────────────────────────────────────────
 const HomePage = lazy(() =>
   import("@/features/home/index").then((m) => ({ default: m.HomePage }))
+)
+const EventDetailPage = lazy(() =>
+  import("@/features/event-detail/index").then((m) => ({ default: m.EventDetailPage }))
 )
 const CreateEventPage = lazy(() =>
   import("@/features/create-event/index").then((m) => ({ default: m.CreateEventPage }))
