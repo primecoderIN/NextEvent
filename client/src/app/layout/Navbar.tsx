@@ -42,7 +42,7 @@ export const Navbar = () => {
 
           {/* Desktop nav links */}
           <nav className="hidden md:flex items-center gap-6 flex-1">
-            {navItems.map(({ icon: Icon, label, href }) => (
+            {navItems.map(({ label, href }) => (
               <a
                 key={label}
                 href={href}
