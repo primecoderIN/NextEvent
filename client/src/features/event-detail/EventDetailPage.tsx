@@ -1,18 +1,34 @@
+import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useEventDetail } from "@/hooks/useEventDetail"
+import { useDeleteEvent } from "@/hooks/useDeleteEvent"
 import { EventDetailHero } from "./EventDetailHero"
 import { EventDetailTabs } from "./EventDetailTabs"
 import { TicketPanel } from "./TicketPanel"
 import { OrganizerCard } from "./OrganizerCard"
 import { LocationCard } from "./LocationCard"
 import { EventDetailSkeleton } from "./EventDetailSkeleton"
-import { ArrowLeft, Share2, Heart } from "lucide-react"
+import { DeleteEventDialog } from "./DeleteEventDialog"
+import { ArrowLeft, Share2, Heart, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function EventDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { event, loading, error } = useEventDetail(id)
+  const { deleteEvent, loading: deleting, error: deleteError } = useDeleteEvent()
+
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  async function handleDelete() {
+    if (!id) return
+    const result = await deleteEvent(id)
+    if (result === true) {
+      setShowDeleteDialog(false)
+      navigate("/", { replace: true })
+    }
+    // result === false (404) or null (error) — dialog stays open, error shown inside it
+  }
 
   if (loading) return <EventDetailSkeleton />
 
@@ -34,7 +50,17 @@ export function EventDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* ── Top bar (mobile + desktop) ── */}
+      {/* ── Delete confirmation dialog ── */}
+      <DeleteEventDialog
+        open={showDeleteDialog}
+        eventTitle={event.title}
+        loading={deleting}
+        error={deleteError}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteDialog(false)}
+      />
+
+      {/* ── Top bar (mobile) ── */}
       <div className="flex items-center justify-between px-4 md:px-6 py-4 lg:hidden">
         <Button
           variant="ghost"
@@ -51,6 +77,15 @@ export function EventDetailPage() {
           </Button>
           <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
             <Share2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full h-9 w-9 border-destructive/40 text-destructive hover:bg-destructive/10"
+            onClick={() => setShowDeleteDialog(true)}
+            title="Delete event"
+          >
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -74,6 +109,15 @@ export function EventDetailPage() {
           <Button variant="outline" size="sm" className="gap-2">
             <Share2 className="h-4 w-4" />
             Share
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 border-destructive/40 text-destructive hover:bg-destructive/10 hover:border-destructive/60"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete Event
           </Button>
         </div>
       </div>
