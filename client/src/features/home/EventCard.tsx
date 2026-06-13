@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Heart, Calendar, MapPin } from "lucide-react"
 import type { Event } from "@/Types/Event"
-import { formatDate, getEventImage, getCategoryBadgeClass } from "./helpers"
+import { formatDate, getEventImage, getCategoryBadgeClass } from "@/features/home/helpers"
 import { Button } from "@/components/ui/button"
 
 // ─── EventCard ────────────────────────────────────────

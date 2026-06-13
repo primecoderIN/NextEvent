@@ -1,6 +1,6 @@
 import type { Event } from "@/Types/Event"
-import { SectionHeader } from "./SectionHeader"
-import { EventCard, EventCardSkeleton } from "./EventCard"
+import { SectionHeader } from "@/features/home/SectionHeader"
+import { EventCard, EventCardSkeleton } from "@/features/home/EventCard"
 
 interface RecommendedSectionProps {
   events: Event[]

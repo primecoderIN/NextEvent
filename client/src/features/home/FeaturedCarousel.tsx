@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Heart, Calendar, MapPin, Play, ChevronLeft, ChevronRight } from "lucide-react"
 import type { Event } from "@/Types/Event"
-import { formatDate, getEventImage } from "./helpers"
+import { formatDate, getEventImage } from "@/features/home/helpers"
 import { Button } from "@/components/ui/button"
 
 interface FeaturedCarouselProps {

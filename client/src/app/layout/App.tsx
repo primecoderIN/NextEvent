@@ -1,12 +1,31 @@
+import { lazy, Suspense } from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
-import { Navbar } from "./Navbar"
-import { DesktopSidebar } from "./DesktopSidebar"
-import { RightSidebar } from "./RightSidebar"
-import { HomePage } from "@/features/home/HomePage"
-import { EventDetailPage } from "@/features/event-detail/EventDetailPage"
-import { CreateEventPage } from "@/features/create-event/CreateEventPage"
+import { Navbar } from "@/app/layout/Navbar"
+import { DesktopSidebar } from "@/app/layout/DesktopSidebar"
+import { RightSidebar } from "@/app/layout/RightSidebar"
 import { useEvents } from "@/hooks/useEvents"
 
+// ─── Lazy-loaded page bundles ─────────────────────────────────────────────────
+const HomePage = lazy(() =>
+  import("@/features/home/index").then((m) => ({ default: m.HomePage }))
+)
+const EventDetailPage = lazy(() =>
+  import("@/features/event-detail/index").then((m) => ({ default: m.EventDetailPage }))
+)
+const CreateEventPage = lazy(() =>
+  import("@/features/create-event/index").then((m) => ({ default: m.CreateEventPage }))
+)
+
+// ─── Fallback ─────────────────────────────────────────────────────────────────
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+    </div>
+  )
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
 function App() {
   const { events, loading } = useEvents()
 
@@ -27,14 +46,16 @@ function App() {
           </div>
 
           <main className="flex-1">
-            <Routes>
-              <Route
-                path="/"
-                element={<HomePage events={events} loading={loading} />}
-              />
-              <Route path="/events/new" element={<CreateEventPage />} />
-              <Route path="/events/:id" element={<EventDetailPage />} />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route
+                  path="/"
+                  element={<HomePage events={events} loading={loading} />}
+                />
+                <Route path="/events/new" element={<CreateEventPage />} />
+                <Route path="/events/:id" element={<EventDetailPage />} />
+              </Routes>
+            </Suspense>
           </main>
         </div>
       </div>

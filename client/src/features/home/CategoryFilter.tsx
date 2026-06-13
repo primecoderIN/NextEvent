@@ -1,4 +1,4 @@
-import { CATEGORIES } from "./helpers"
+import { CATEGORIES } from "@/features/home/helpers"
 
 interface CategoryFilterProps {
   active: string

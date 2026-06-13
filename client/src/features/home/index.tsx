@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react"
 import type { Event } from "@/Types/Event"
-import { GreetingHeader } from "./GreetingHeader"
-import { CategoryFilter } from "./CategoryFilter"
-import { FeaturedCarousel } from "./FeaturedCarousel"
-import { RecommendedSection } from "./RecommendedSection"
-import { TrendingSection } from "./TrendingSection"
+import { GreetingHeader } from "@/features/home/GreetingHeader"
+import { CategoryFilter } from "@/features/home/CategoryFilter"
+import { FeaturedCarousel } from "@/features/home/FeaturedCarousel"
+import { RecommendedSection } from "@/features/home/RecommendedSection"
+import { TrendingSection } from "@/features/home/TrendingSection"
 
 interface HomePageProps {
   events: Event[]

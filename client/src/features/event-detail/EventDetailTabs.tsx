@@ -1,8 +1,8 @@
 import { useState } from "react"
 import type { Event } from "@/Types/Event"
-import { AboutTab } from "./tabs/AboutTab"
-import { ScheduleTab } from "./tabs/ScheduleTab"
-import { VenueTab } from "./tabs/VenueTab"
+import { AboutTab } from "@/features/event-detail/tabs/AboutTab"
+import { ScheduleTab } from "@/features/event-detail/tabs/ScheduleTab"
+import { VenueTab } from "@/features/event-detail/tabs/VenueTab"
 
 interface EventDetailTabsProps {
   event: Event

@@ -1,5 +1,5 @@
 import { Bell } from "lucide-react"
-import { getGreeting } from "./helpers"
+import { getGreeting } from "@/features/home/helpers"
 
 interface GreetingHeaderProps {
   username: string
