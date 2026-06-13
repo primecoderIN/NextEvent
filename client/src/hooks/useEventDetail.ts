@@ -1,28 +1,20 @@
-import { useState, useEffect } from "react"
 import axios from "axios"
 import type { Event } from "@/Types/Event"
+import { useQuery } from "@tanstack/react-query"
+
+export const fetchEventDetail = async (id: string): Promise<Event> => {
+  const response = await axios.get<Event>(
+    `https://localhost:5001/api/events/${id}`
+  )
+  return response.data
+}
 
 export function useEventDetail(id: string | undefined) {
-  const [event, setEvent] = useState<Event | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { isPending, data: event, isError } = useQuery<Event, Error>({
+    queryKey: ["events", id],
+    queryFn: () => fetchEventDetail(id!),
+    enabled: !!id,
+  })
 
-  useEffect(() => {
-    if (!id) return
-    setLoading(true)
-    setError(null)
-    axios
-      .get<Event>(`https://localhost:5001/api/events/${id}`)
-      .then((res) => {
-        setEvent(res.data)
-        setLoading(false)
-      })
-      .catch((err: unknown) => {
-        console.error("Error fetching event:", err)
-        setError(err instanceof Error ? err.message : "Event not found")
-        setLoading(false)
-      })
-  }, [id])
-
-  return { event, loading, error }
+  return { event: event ?? null, loading: isPending, error: isError }
 }

@@ -1,5 +1,5 @@
-import { useState } from "react"
 import axios, { type AxiosError } from "axios"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 export interface CreateEventPayload {
   title: string
@@ -18,37 +18,44 @@ interface CreateEventResult {
   Id?: string
 }
 
+const postEvent = async (payload: CreateEventPayload): Promise<string> => {
+  const res = await axios.post<CreateEventResult>(
+    "https://localhost:5001/api/events",
+    payload
+  )
+  const id = res.data.id ?? res.data.Id
+  if (!id) throw new Error("Server returned an invalid response. Please try again.")
+  return id
+}
+
 export function useCreateEvent() {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation<string, AxiosError<{ title?: string; errors?: Record<string, string[]> }>, CreateEventPayload>({
+    mutationFn: postEvent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["events"] })
+    },
+    onError: (err) => {
+      console.error("Error creating event:", err.response?.data ?? err)
+    },
+  })
 
   async function createEvent(payload: CreateEventPayload): Promise<string | null> {
-    setLoading(true)
-    setError(null)
     try {
-      const res = await axios.post<CreateEventResult>(
-        "https://localhost:5001/api/events",
-        payload
-      )
-      // Accept both camelCase and PascalCase Id from the API
-      const id = res.data.id ?? res.data.Id
-      if (!id) {
-        setError("Server returned an invalid response. Please try again.")
-        return null
-      }
-      return id
-    } catch (err: unknown) {
-      const axiosErr = err as AxiosError<{ title?: string; errors?: Record<string, string[]> }>
-      const serverMsg =
-        axiosErr.response?.data?.title ??
-        (err instanceof Error ? err.message : "Failed to create event")
-      console.error("Error creating event:", axiosErr.response?.data ?? err)
-      setError(serverMsg)
+      return await mutation.mutateAsync(payload)
+    } catch {
       return null
-    } finally {
-      setLoading(false)
     }
   }
 
-  return { createEvent, loading, error }
+  const errorMsg =
+    mutation.error?.response?.data?.title ??
+    (mutation.error instanceof Error ? mutation.error.message : null)
+
+  return {
+    createEvent,
+    loading: mutation.isPending,
+    error: errorMsg ?? null,
+  }
 }
