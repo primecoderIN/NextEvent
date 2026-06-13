@@ -9,9 +9,11 @@ export const fetchEventDetail = async (id: string): Promise<Event> => {
   return response.data
 }
 
+export const eventDetailQueryKey = (id: string) => ["events", id] as const
+
 export function useEventDetail(id: string | undefined) {
   const { isPending, data: event, isError } = useQuery<Event, Error>({
-    queryKey: ["events", id],
+    queryKey: eventDetailQueryKey(id!),
     queryFn: () => fetchEventDetail(id!),
     enabled: !!id,
   })

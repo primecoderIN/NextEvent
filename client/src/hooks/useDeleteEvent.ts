@@ -1,5 +1,6 @@
 import axios, { type AxiosError } from "axios"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { EVENTS_QUERY_KEY } from "@/hooks/useEvents"
 
 const deleteEventRequest = async (id: string): Promise<boolean> => {
   await axios.delete(`https://localhost:5001/api/events/${id}`)
@@ -12,7 +13,7 @@ export function useDeleteEvent() {
   const mutation = useMutation<boolean, AxiosError, string>({
     mutationFn: deleteEventRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["events"] })
+      queryClient.invalidateQueries({ queryKey: EVENTS_QUERY_KEY })
     },
     onError: (err) => {
       console.error("Error deleting event:", err)

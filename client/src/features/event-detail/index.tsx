@@ -9,7 +9,7 @@ import { OrganizerCard } from "@/features/event-detail/OrganizerCard"
 import { LocationCard } from "@/features/event-detail/LocationCard"
 import { EventDetailSkeleton } from "@/features/event-detail/EventDetailSkeleton"
 import { DeleteEventDialog } from "@/features/event-detail/DeleteEventDialog"
-import { ArrowLeft, Share2, Heart, Trash2 } from "lucide-react"
+import { ArrowLeft, Share2, Heart, Trash2, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function EventDetailPage() {
@@ -81,6 +81,15 @@ export function EventDetailPage() {
           <Button
             variant="outline"
             size="icon"
+            className="rounded-full h-9 w-9 border-primary/40 text-primary hover:bg-primary/10"
+            onClick={() => navigate(`/events/${id}/edit`)}
+            title="Edit event"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
             className="rounded-full h-9 w-9 border-destructive/40 text-destructive hover:bg-destructive/10"
             onClick={() => setShowDeleteDialog(true)}
             title="Delete event"
@@ -109,6 +118,15 @@ export function EventDetailPage() {
           <Button variant="outline" size="sm" className="gap-2">
             <Share2 className="h-4 w-4" />
             Share
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 border-primary/40 text-primary hover:bg-primary/10 hover:border-primary/60"
+            onClick={() => navigate(`/events/${id}/edit`)}
+          >
+            <Pencil className="h-4 w-4" />
+            Edit Event
           </Button>
           <Button
             variant="outline"

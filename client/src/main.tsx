@@ -4,7 +4,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import App from "@/app/layout/App";
 import "./app/layout/style.css";
 
-const queryCient = new QueryClient();
+export const queryCient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryCient}>

@@ -10,11 +10,13 @@ export const fetchEvents = async (): Promise<Event[]> => {
   return response.data;
 };
 
+export const EVENTS_QUERY_KEY = ["events"] as const
+
 export function useEvents() {
-  const {isPending,data:events,isError}=  useQuery<Event[], Error>({
-    queryKey: ["events"],
+  const { isPending, data: events, isError } = useQuery<Event[], Error>({
+    queryKey: EVENTS_QUERY_KEY,
     queryFn: fetchEvents,
-  });
+  })
 
   return {events: events || [],loading: isPending, error: isError}
 }

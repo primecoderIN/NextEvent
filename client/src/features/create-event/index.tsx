@@ -202,7 +202,7 @@ export function CreateEventPage() {
             variant="outline"
             onClick={() => navigate(-1)}
             disabled={loading}
-            className="px-8"
+            className="px-8 py-6"
           >
             Cancel
           </Button>

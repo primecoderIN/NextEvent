@@ -1,5 +1,6 @@
 import axios, { type AxiosError } from "axios"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { EVENTS_QUERY_KEY } from "@/hooks/useEvents"
 
 export interface CreateEventPayload {
   title: string
@@ -34,7 +35,7 @@ export function useCreateEvent() {
   const mutation = useMutation<string, AxiosError<{ title?: string; errors?: Record<string, string[]> }>, CreateEventPayload>({
     mutationFn: postEvent,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["events"] })
+      queryClient.invalidateQueries({ queryKey: EVENTS_QUERY_KEY })
     },
     onError: (err) => {
       console.error("Error creating event:", err.response?.data ?? err)

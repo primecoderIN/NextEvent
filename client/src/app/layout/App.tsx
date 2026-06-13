@@ -4,6 +4,7 @@ import { Navbar } from "@/app/layout/Navbar"
 import { DesktopSidebar } from "@/app/layout/DesktopSidebar"
 import { RightSidebar } from "@/app/layout/RightSidebar"
 import { useEvents } from "@/hooks/useEvents"
+import { Toaster } from "@/components/ui/sonner"
 
 // ─── Lazy-loaded page bundles ─────────────────────────────────────────────────
 const HomePage = lazy(() =>
@@ -14,6 +15,9 @@ const EventDetailPage = lazy(() =>
 )
 const CreateEventPage = lazy(() =>
   import("@/features/create-event/index").then((m) => ({ default: m.CreateEventPage }))
+)
+const UpdateEventPage = lazy(() =>
+  import("@/features/update-event/index").then((m) => ({ default: m.UpdateEventPage }))
 )
 
 // ─── Fallback ─────────────────────────────────────────────────────────────────
@@ -32,6 +36,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-background">
+        <Toaster />
         {/* Desktop left sidebar — fixed */}
         <DesktopSidebar />
 
@@ -53,6 +58,7 @@ function App() {
                   element={<HomePage events={events} loading={loading} />}
                 />
                 <Route path="/events/new" element={<CreateEventPage />} />
+                <Route path="/events/:id/edit" element={<UpdateEventPage />} />
                 <Route path="/events/:id" element={<EventDetailPage />} />
               </Routes>
             </Suspense>
