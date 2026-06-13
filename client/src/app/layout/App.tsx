@@ -1,36 +1,37 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import type { Event } from "../../Types/Event";
-import { Navbar } from "./Navbar";
+import { Navbar } from "./Navbar"
+import { DesktopSidebar } from "./DesktopSidebar"
+import { MobileBottomNav } from "./MobileBottomNav"
+import { RightSidebar } from "./RightSidebar"
+import { HomePage } from "@/features/home/HomePage"
+import { useEvents } from "@/hooks/useEvents"
 
 function App() {
-  const [events, setEvents] = useState<Event[] | null>([]);
-
-  useEffect(() => {
-    axios
-      .get<Event[]>("https://localhost:5001/api/events")
-      .then((response) => setEvents(response.data))
-      .catch((error) => console.error("Error fetching events:", error));
-  }, []);
+  const { events, loading } = useEvents()
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="container mx-auto max-w-screen-xl px-4 py-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-6">Events</h1>
-        <ul className="space-y-3">
-          {events?.map((event: Event) => (
-            <li
-              key={event.id}
-              className="rounded-lg border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <h2 className="text-lg font-semibold">{event.title}</h2>
-            </li>
-          ))}
-        </ul>
-      </main>
+      {/* Desktop left sidebar — fixed */}
+      <DesktopSidebar />
+
+      {/* Desktop right sidebar — fixed */}
+      <RightSidebar events={events} />
+
+      {/* Main content area */}
+      <div className="lg:ml-56 xl:mr-80 flex flex-col min-h-screen">
+        {/* Mobile top navbar */}
+        <div className="lg:hidden sticky top-0 z-40">
+          <Navbar />
+        </div>
+
+        <main className="flex-1 pb-20 lg:pb-0">
+          <HomePage events={events} loading={loading} />
+        </main>
+      </div>
+
+      {/* Mobile bottom navigation — fixed */}
+      <MobileBottomNav />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
