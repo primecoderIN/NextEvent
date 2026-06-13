@@ -7,6 +7,7 @@ import { OrganizerCard } from "./OrganizerCard"
 import { LocationCard } from "./LocationCard"
 import { EventDetailSkeleton } from "./EventDetailSkeleton"
 import { ArrowLeft, Share2, Heart } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function EventDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -24,12 +25,9 @@ export function EventDetailPage() {
           We couldn't find this event. It may have been removed or the link is
           invalid.
         </p>
-        <button
-          onClick={() => navigate("/")}
-          className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
-        >
+        <Button onClick={() => navigate("/")} className="mt-2">
           Back to Home
-        </button>
+        </Button>
       </div>
     )
   }
@@ -38,41 +36,45 @@ export function EventDetailPage() {
     <div className="max-w-7xl mx-auto">
       {/* ── Top bar (mobile + desktop) ── */}
       <div className="flex items-center justify-between px-4 md:px-6 py-4 lg:hidden">
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="gap-2 text-muted-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to events
-        </button>
+        </Button>
         <div className="flex items-center gap-2">
-          <button className="h-9 w-9 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors">
+          <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
             <Heart className="h-4 w-4" />
-          </button>
-          <button className="h-9 w-9 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors">
+          </Button>
+          <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
             <Share2 className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* ── Desktop back bar ── */}
       <div className="hidden lg:flex items-center justify-between px-6 py-4 border-b border-border/40">
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="gap-2 text-muted-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to events
-        </button>
+        </Button>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors">
+          <Button variant="outline" size="sm" className="gap-2">
             <Heart className="h-4 w-4" />
             Save
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors">
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2">
             <Share2 className="h-4 w-4" />
             Share
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -103,9 +105,9 @@ export function EventDetailPage() {
           <p className="text-xs text-muted-foreground">Starting from</p>
           <p className="text-lg font-bold text-primary">₹999</p>
         </div>
-        <button className="flex-1 bg-primary text-primary-foreground py-3 rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors shadow-lg">
+        <Button className="flex-1 shadow-lg">
           Book Tickets
-        </button>
+        </Button>
       </div>
 
       {/* Bottom padding for mobile sticky bar */}

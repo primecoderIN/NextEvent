@@ -14,6 +14,7 @@ import {
   User,
   ChevronDown,
 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 const navItems = [
   { icon: Home, label: "Home", href: "#", active: true },
@@ -32,6 +33,7 @@ const secondaryItems = [
 ]
 
 export function DesktopSidebar() {
+  const navigate = useNavigate()
   return (
     <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-56 border-r border-border/40 bg-background z-40">
       {/* Logo */}
@@ -63,6 +65,7 @@ export function DesktopSidebar() {
       {/* Create Event CTA */}
       <div className="px-3 mb-3 flex-shrink-0">
         <button
+          onClick={() => navigate("/events/new")}
           className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
           style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
         >

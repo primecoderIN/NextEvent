@@ -1,6 +1,7 @@
 import { useState } from "react"
 import type { Event } from "@/Types/Event"
 import { Check, Plus, Minus, Shield } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface TicketPanelProps {
   event: Event
@@ -107,9 +108,9 @@ export function TicketPanel({ event }: TicketPanelProps) {
 
       {/* CTA */}
       <div className="p-4 border-t border-border/40">
-        <button className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+        <Button className="w-full py-5 font-bold shadow-lg shadow-primary/20">
           Book Now
-        </button>
+        </Button>
         <p className="flex items-center justify-center gap-1.5 mt-2 text-[11px] text-muted-foreground">
           <Shield className="h-3 w-3" />
           Secure checkout. Your data is protected.

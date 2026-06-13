@@ -4,6 +4,7 @@ import { DesktopSidebar } from "./DesktopSidebar"
 import { RightSidebar } from "./RightSidebar"
 import { HomePage } from "@/features/home/HomePage"
 import { EventDetailPage } from "@/features/event-detail/EventDetailPage"
+import { CreateEventPage } from "@/features/create-event/CreateEventPage"
 import { useEvents } from "@/hooks/useEvents"
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
                 path="/"
                 element={<HomePage events={events} loading={loading} />}
               />
+              <Route path="/events/new" element={<CreateEventPage />} />
               <Route path="/events/:id" element={<EventDetailPage />} />
             </Routes>
           </main>

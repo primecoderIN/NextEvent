@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Heart, Calendar, MapPin, Play, ChevronLeft, ChevronRight } from "lucide-react"
 import type { Event } from "@/Types/Event"
 import { formatDate, getEventImage } from "./helpers"
+import { Button } from "@/components/ui/button"
 
 interface FeaturedCarouselProps {
   /** The full event list — component slices the first 4 as featured */
@@ -75,12 +76,12 @@ export function FeaturedCarousel({ events }: FeaturedCarouselProps) {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <button
+              <Button
                 onClick={() => navigate(`/events/${event.id}`)}
-                className="bg-primary text-primary-foreground px-5 py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors shadow-lg"
+                className="shadow-lg"
               >
                 Book Tickets
-              </button>
+              </Button>
               <button className="flex items-center gap-2 text-white text-sm font-semibold hover:opacity-80 transition-opacity">
                 <span className="h-8 w-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                   <Play className="h-3.5 w-3.5 ml-0.5" />

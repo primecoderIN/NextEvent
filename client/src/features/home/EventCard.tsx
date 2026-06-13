@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Heart, Calendar, MapPin } from "lucide-react"
 import type { Event } from "@/Types/Event"
 import { formatDate, getEventImage, getCategoryBadgeClass } from "./helpers"
+import { Button } from "@/components/ui/button"
 
 // ─── EventCard ────────────────────────────────────────
 
@@ -59,9 +60,13 @@ export function EventCard({ event, index }: EventCardProps) {
           <MapPin className="h-3 w-3 flex-shrink-0" />
           <span className="truncate">{event.venue}</span>
         </p>
-        <button className="mt-3 w-full border border-primary text-primary text-xs font-semibold py-1.5 rounded-lg hover:bg-primary hover:text-primary-foreground transition-colors duration-200">
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-3 w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground text-xs"
+        >
           Book Now
-        </button>
+        </Button>
       </div>
     </div>
   )

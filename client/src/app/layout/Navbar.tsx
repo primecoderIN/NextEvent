@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   Menu,
   CalendarDays,
@@ -27,6 +28,7 @@ const navItems = [
 
 export const Navbar = () => {
   const [sheetOpen, setSheetOpen] = useState(false)
+  const navigate = useNavigate()
 
   return (
     <>
@@ -131,7 +133,7 @@ export const Navbar = () => {
               style={{
                 background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
               }}
-              onClick={() => setSheetOpen(false)}
+              onClick={() => { setSheetOpen(false); navigate("/events/new") }}
             >
               <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
                 <Plus className="h-4 w-4" />

@@ -6,7 +6,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers(); //Make controller functionality available to the application.
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Serialize all JSON responses in camelCase to match TypeScript client expectations
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
 
 builder.Services.AddDbContext<AppDBContext>(options =>
 {

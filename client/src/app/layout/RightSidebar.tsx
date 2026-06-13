@@ -1,5 +1,7 @@
 import { Calendar, MapPin } from "lucide-react"
 import type { Event } from "@/Types/Event"
+import { Button } from "@/components/ui/button"
+import { useNavigate } from "react-router-dom"
 
 const TOP_ORGANIZERS = [
   { name: "BookMyShow Live", followers: "12.4K", initials: "BL", color: "bg-red-500" },
@@ -25,6 +27,7 @@ function getThumb(category: string, index: number): string {
 }
 
 export function RightSidebar({ events }: { events: Event[] }) {
+  const navigate = useNavigate()
   const upcomingEvents = [...events]
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 4)
@@ -101,9 +104,9 @@ export function RightSidebar({ events }: { events: Event[] }) {
                   <p className="text-sm font-medium leading-tight truncate">{org.name}</p>
                   <p className="text-xs text-muted-foreground">{org.followers} Followers</p>
                 </div>
-                <button className="flex-shrink-0 text-xs text-primary font-semibold border border-primary/50 px-3 py-1 rounded-lg hover:bg-primary/5 transition-colors">
+                <Button variant="outline" size="sm" className="shrink-0 text-primary border-primary/50 hover:bg-primary/5">
                   Follow
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -120,9 +123,13 @@ export function RightSidebar({ events }: { events: Event[] }) {
             </div>
             <span className="text-2xl ml-2 flex-shrink-0">🎪</span>
           </div>
-          <button className="mt-3 w-full border border-primary text-primary text-sm font-semibold py-2 rounded-xl hover:bg-primary hover:text-primary-foreground transition-colors">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/events/new")}
+            className="mt-3 w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+          >
             Create Event
-          </button>
+          </Button>
         </section>
       </div>
     </aside>

@@ -1,6 +1,7 @@
 import type { Event } from "@/Types/Event"
 import { BadgeCheck, Globe, Link2, X } from "lucide-react"
 import { getEventImage } from "@/features/home/helpers"
+import { Button } from "@/components/ui/button"
 
 interface OrganizerCardProps {
   event: Event
@@ -27,9 +28,9 @@ export function OrganizerCard({ event }: OrganizerCardProps) {
           </div>
           <p className="text-xs text-muted-foreground">1.2M Followers</p>
         </div>
-        <button className="flex-shrink-0 px-3 py-1.5 rounded-xl border border-primary text-primary text-xs font-semibold hover:bg-primary hover:text-primary-foreground transition-colors">
+        <Button variant="outline" size="sm" className="shrink-0">
           Follow
-        </button>
+        </Button>
       </div>
 
       <p className="text-xs text-muted-foreground leading-relaxed">
