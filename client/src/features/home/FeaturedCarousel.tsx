@@ -67,11 +67,11 @@ export function FeaturedCarousel({ events }: FeaturedCarouselProps) {
             </h2>
             <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 text-white/80 text-xs md:text-sm mb-4">
               <span className="flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+                <Calendar className="h-3.5 w-3.5 shrink-0" />
                 {formatDate(event.date)}
               </span>
               <span className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
                 {event.venue}, {event.city}
               </span>
             </div>

@@ -55,7 +55,7 @@ export function ScheduleTab({ event }: ScheduleTabProps) {
             className="flex gap-4 p-4 rounded-2xl border border-border/50 bg-card hover:border-primary/20 hover:bg-primary/5 transition-all duration-200"
           >
             {/* Left: date icon */}
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <span className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <CalendarDays className="h-5 w-5 text-primary" />
               </span>

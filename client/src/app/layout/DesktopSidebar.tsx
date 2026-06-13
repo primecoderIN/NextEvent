@@ -37,7 +37,7 @@ export function DesktopSidebar() {
   return (
     <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-56 border-r border-border/40 bg-background z-40">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 h-16 px-4 border-b border-border/40 flex-shrink-0">
+      <div className="flex items-center gap-2.5 h-16 px-4 border-b border-border/40 shrink-0">
         <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center">
           <CalendarDays className="h-4 w-4 text-primary-foreground" />
         </div>
@@ -56,14 +56,14 @@ export function DesktopSidebar() {
                 : "text-muted-foreground hover:text-foreground hover:bg-muted"
             }`}
           >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
+            <item.icon className="h-5 w-5 shrink-0" />
             {item.label}
           </a>
         ))}
       </nav>
 
       {/* Create Event CTA */}
-      <div className="px-3 mb-3 flex-shrink-0">
+      <div className="px-3 mb-3 shrink-0">
         <button
           onClick={() => navigate("/events/new")}
           className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
@@ -75,14 +75,14 @@ export function DesktopSidebar() {
       </div>
 
       {/* Secondary nav */}
-      <div className="px-3 py-3 border-t border-border/40 space-y-0.5 flex-shrink-0">
+      <div className="px-3 py-3 border-t border-border/40 space-y-0.5 shrink-0">
         {secondaryItems.map((item) => (
           <a
             key={item.label}
             href={item.href}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
-            <item.icon className="h-5 w-5 flex-shrink-0" />
+            <item.icon className="h-5 w-5 shrink-0" />
             <span className="flex-1">{item.label}</span>
             {item.badge > 0 && (
               <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
@@ -94,16 +94,16 @@ export function DesktopSidebar() {
       </div>
 
       {/* User profile */}
-      <div className="px-3 py-3 border-t border-border/40 flex-shrink-0">
+      <div className="px-3 py-3 border-t border-border/40 shrink-0">
         <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted cursor-pointer transition-colors">
-          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
             <User className="h-4 w-4 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold leading-tight truncate">Sanjeev Kumar</p>
             <p className="text-xs text-muted-foreground">View Profile →</p>
           </div>
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
         </div>
       </div>
     </aside>

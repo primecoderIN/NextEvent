@@ -72,7 +72,7 @@ export function TicketPanel({ event }: TicketPanelProps) {
                 <ul className="mt-1 space-y-0.5">
                   {tier.perks.map((p) => (
                     <li key={p} className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <Check className="h-3 w-3 text-green-500 flex-shrink-0" />
+                      <Check className="h-3 w-3 text-green-500 shrink-0" />
                       {p}
                     </li>
                   ))}
@@ -82,7 +82,7 @@ export function TicketPanel({ event }: TicketPanelProps) {
                 )}
               </div>
 
-              <div className="flex-shrink-0 text-right">
+              <div className="shrink-0 text-right">
                 <p className="font-bold text-sm">₹{tier.price.toLocaleString("en-IN")}</p>
                 <div className="flex items-center gap-1.5 mt-2">
                   <button

@@ -22,7 +22,7 @@ export function EventDetailTabs({ event }: EventDetailTabsProps) {
           <button
             key={tab}
             onClick={() => setActive(tab)}
-            className={`flex-shrink-0 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
+            className={`shrink-0 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
               active === tab
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"

@@ -18,12 +18,12 @@ export function VenueTab({ event }: VenueTabProps) {
         <img
           src={`https://picsum.photos/seed/venue-${event.id}/80/80`}
           alt={event.venue}
-          className="h-16 w-16 rounded-xl object-cover flex-shrink-0"
+          className="h-16 w-16 rounded-xl object-cover shrink-0"
         />
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-sm">{event.venue}</h3>
           <p className="text-xs text-muted-foreground mt-0.5 flex items-start gap-1">
-            <MapPin className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+            <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
             {event.venue}, {event.city}
           </p>
           <a
@@ -40,7 +40,7 @@ export function VenueTab({ event }: VenueTabProps) {
           href={mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-shrink-0 h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
+          className="shrink-0 h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
           aria-label="Get Directions"
         >
           <Navigation className="h-5 w-5 text-primary" />

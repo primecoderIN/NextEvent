@@ -20,7 +20,7 @@ export function EventCard({ event, index }: EventCardProps) {
   return (
     <div
       onClick={() => navigate(`/events/${event.id}`)}
-      className="flex-shrink-0 w-44 md:w-52 rounded-2xl overflow-hidden border border-border/50 bg-card shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group"
+      className="shrink-0 w-44 md:w-52 rounded-2xl overflow-hidden border border-border/50 bg-card shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group"
     >
       {/* Image */}
       <div className="relative overflow-hidden">
@@ -53,11 +53,11 @@ export function EventCard({ event, index }: EventCardProps) {
       <div className="p-3">
         <h3 className="font-semibold text-sm leading-tight line-clamp-1">{event.title}</h3>
         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1.5">
-          <Calendar className="h-3 w-3 flex-shrink-0" />
+          <Calendar className="h-3 w-3 shrink-0" />
           {formatDate(event.date)}
         </p>
         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-          <MapPin className="h-3 w-3 flex-shrink-0" />
+          <MapPin className="h-3 w-3 shrink-0" />
           <span className="truncate">{event.venue}</span>
         </p>
         <Button
@@ -76,7 +76,7 @@ export function EventCard({ event, index }: EventCardProps) {
 
 export function EventCardSkeleton() {
   return (
-    <div className="flex-shrink-0 w-44 md:w-52 rounded-2xl overflow-hidden border border-border/50 bg-card animate-pulse">
+    <div className="shrink-0 w-44 md:w-52 rounded-2xl overflow-hidden border border-border/50 bg-card animate-pulse">
       <div className="h-28 md:h-32 bg-muted" />
       <div className="p-3 space-y-2">
         <div className="h-3 bg-muted rounded w-3/4" />

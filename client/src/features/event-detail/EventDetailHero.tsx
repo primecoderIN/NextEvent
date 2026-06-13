@@ -34,7 +34,7 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
       <div className="absolute bottom-0 inset-x-0 p-4 md:p-6">
         <div className="flex items-end gap-4">
           {/* Date badge */}
-          <div className="flex-shrink-0 bg-white/15 backdrop-blur-md border border-white/20 rounded-xl px-3 py-2 text-center text-white min-w-[52px]">
+          <div className="shrink-0 bg-white/15 backdrop-blur-md border border-white/20 rounded-xl px-3 py-2 text-center text-white min-w-[52px]">
             <p className="text-[10px] font-bold tracking-widest">{month}</p>
             <p className="text-2xl font-black leading-none">{day}</p>
             <p className="text-[10px] font-bold tracking-widest">{weekday}</p>
@@ -52,11 +52,11 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
             </h1>
             <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-white/75 text-xs md:text-sm">
               <span className="flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+                <Calendar className="h-3.5 w-3.5 shrink-0" />
                 {formatDate(event.date)}
               </span>
               <span className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
                 {event.venue}, {event.city}
               </span>
               <span className="flex items-center gap-1.5 text-yellow-400">

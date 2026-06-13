@@ -48,7 +48,7 @@ export function RightSidebar({ events }: { events: Event[] }) {
             {upcomingEvents.length === 0
               ? Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="flex gap-3 p-2 animate-pulse">
-                    <div className="h-14 w-14 rounded-xl bg-muted flex-shrink-0" />
+                    <div className="h-14 w-14 rounded-xl bg-muted shrink-0" />
                     <div className="flex-1 space-y-2 py-1">
                       <div className="h-3 bg-muted rounded w-3/4" />
                       <div className="h-2.5 bg-muted rounded w-1/2" />
@@ -64,18 +64,18 @@ export function RightSidebar({ events }: { events: Event[] }) {
                     <img
                       src={getThumb(event.category, i)}
                       alt={event.title}
-                      className="h-14 w-14 rounded-xl object-cover flex-shrink-0"
+                      className="h-14 w-14 rounded-xl object-cover shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium leading-tight line-clamp-2">
                         {event.title}
                       </p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                        <Calendar className="h-3 w-3 flex-shrink-0" />
+                        <Calendar className="h-3 w-3 shrink-0" />
                         {formatDate(event.date)}
                       </p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                        <MapPin className="h-3 w-3 flex-shrink-0" />
+                        <MapPin className="h-3 w-3 shrink-0" />
                         {event.city}
                       </p>
                     </div>
@@ -96,7 +96,7 @@ export function RightSidebar({ events }: { events: Event[] }) {
             {TOP_ORGANIZERS.map((org) => (
               <div key={org.name} className="flex items-center gap-3">
                 <div
-                  className={`h-10 w-10 rounded-full ${org.color} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}
+                  className={`h-10 w-10 rounded-full ${org.color} flex items-center justify-center text-white text-xs font-bold shrink-0`}
                 >
                   {org.initials}
                 </div>
@@ -121,7 +121,7 @@ export function RightSidebar({ events }: { events: Event[] }) {
                 Share your ideas and bring people together.
               </p>
             </div>
-            <span className="text-2xl ml-2 flex-shrink-0">🎪</span>
+            <span className="text-2xl ml-2 shrink-0">🎪</span>
           </div>
           <Button
             variant="outline"

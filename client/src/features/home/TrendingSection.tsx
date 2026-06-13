@@ -19,7 +19,7 @@ export function TrendingSection({ events, loading }: TrendingSectionProps) {
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <EventCardSkeleton key={i} />)
           : events.map((event, i) => (
-              <div key={event.id} className="relative flex-shrink-0">
+              <div key={event.id} className="relative shrink-0">
                 <EventCard event={event} index={i + 20} />
                 {/* "Trending" badge overlay for top 2 */}
                 {i < 2 && (

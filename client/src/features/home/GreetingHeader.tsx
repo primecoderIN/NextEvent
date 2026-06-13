@@ -23,7 +23,7 @@ export function GreetingHeader({
         </h1>
       </div>
 
-      <div className="relative flex-shrink-0 ml-4">
+      <div className="relative shrink-0 ml-4">
         <button className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors">
           <Bell className="h-5 w-5" />
         </button>
