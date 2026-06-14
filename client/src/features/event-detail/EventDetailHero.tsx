@@ -34,7 +34,7 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
       <div className="absolute bottom-0 inset-x-0 p-4 md:p-6">
         <div className="flex items-end gap-4">
           {/* Date badge */}
-          <div className="shrink-0 bg-white/15 backdrop-blur-md border border-white/20 rounded-xl px-3 py-2 text-center text-white min-w-[52px]">
+          <div className="shrink-0 bg-white/15 backdrop-blur-md border border-white/20 rounded-xl px-3 py-2 text-center text-white min-w-13">
             <p className="text-[10px] font-bold tracking-widest">{month}</p>
             <p className="text-2xl font-black leading-none">{day}</p>
             <p className="text-[10px] font-bold tracking-widest">{weekday}</p>
