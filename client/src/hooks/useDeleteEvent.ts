@@ -1,9 +1,10 @@
-import axios, { type AxiosError } from "axios"
+import { type AxiosError } from "axios"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { EVENTS_QUERY_KEY } from "@/hooks/useEvents"
+import { axiosHttpAgent } from "@/lib/axios"
 
 const deleteEventRequest = async (id: string): Promise<boolean> => {
-  await axios.delete(`https://localhost:5001/api/events/${id}`)
+  await axiosHttpAgent.delete(`/events/${id}`)
   return true
 }
 

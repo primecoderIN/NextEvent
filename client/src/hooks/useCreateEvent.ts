@@ -1,6 +1,7 @@
-import axios, { type AxiosError } from "axios"
+import { type AxiosError } from "axios"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { EVENTS_QUERY_KEY } from "@/hooks/useEvents"
+import { axiosHttpAgent } from "@/lib/axios"
 
 export interface CreateEventPayload {
   title: string
@@ -20,8 +21,8 @@ interface CreateEventResult {
 }
 
 const postEvent = async (payload: CreateEventPayload): Promise<string> => {
-  const res = await axios.post<CreateEventResult>(
-    "https://localhost:5001/api/events",
+  const res = await axiosHttpAgent.post<CreateEventResult>(
+    "/events",
     payload
   )
   const id = res.data.id ?? res.data.Id

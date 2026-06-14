@@ -1,10 +1,10 @@
-import axios from "axios"
 import type { Event } from "@/Types/Event"
 import { useQuery } from "@tanstack/react-query"
+import { axiosHttpAgent } from "@/lib/axios";
 
 export const fetchEvents = async (): Promise<Event[]> => {
-  const response = await axios.get<Event[]>(
-    "https://localhost:5001/api/events"
+  const response = await axiosHttpAgent.get<Event[]>(
+    "/events"
   );
 
   return response.data;

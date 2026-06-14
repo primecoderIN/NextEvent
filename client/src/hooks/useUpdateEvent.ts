@@ -1,6 +1,7 @@
 import axios, { type AxiosError } from "axios"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { EVENTS_QUERY_KEY } from "@/hooks/useEvents"
+import { axiosHttpAgent } from "@/lib/axios"
 
 /** Partial payload — only include fields that changed */
 export interface UpdateEventPayload {
@@ -21,7 +22,7 @@ interface UpdateEventArgs {
 }
 
 const putEvent = async ({ id, data }: UpdateEventArgs): Promise<void> => {
-  await axios.put(`https://localhost:5001/api/events/${id}`, data)
+  await axiosHttpAgent.put(`/events/${id}`, data)
 }
 
 export function useUpdateEvent() {
