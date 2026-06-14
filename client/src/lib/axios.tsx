@@ -7,7 +7,7 @@ const sleep = (delay: number) => {
 };
 
 export const axiosHttpAgent = axios.create({
-  baseURL: "https://localhost:5001/api",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 axiosHttpAgent.interceptors.response.use(async (response) => {

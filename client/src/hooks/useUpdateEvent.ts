@@ -1,4 +1,4 @@
-import axios, { type AxiosError } from "axios"
+import  { type AxiosError } from "axios"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { EVENTS_QUERY_KEY } from "@/hooks/useEvents"
 import { axiosHttpAgent } from "@/lib/axios"
