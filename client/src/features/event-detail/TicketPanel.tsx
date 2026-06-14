@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { subDays, parseISO } from "date-fns"
 import type { Event } from "@/Types/Event"
 import { Check, Plus, Minus, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -42,8 +43,8 @@ export function TicketPanel({ event }: TicketPanelProps) {
     )
   }
 
-  const earlyBirdEnds = new Date(event.date)
-  earlyBirdEnds.setDate(earlyBirdEnds.getDate() - 7)
+  // 7 days before the event: subDays is immutable and handles month boundaries.
+  const earlyBirdEnds = subDays(parseISO(event.date), 7)
 
   return (
     <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">

@@ -12,7 +12,10 @@ builder.Services.AddControllers()
         // Serialize all JSON responses in camelCase to match TypeScript client expectations
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        // Always serialize DateTime as UTC ISO-8601 with Z suffix (Zulu format)
+        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeJsonConverter());
     });
+
 
 builder.Services.AddDbContext<AppDBContext>(options =>
 {

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react"
+import { format, parseISO } from "date-fns"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
@@ -14,22 +15,31 @@ import type { Event } from "@/Types/Event"
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Convert ISO datetime string → "YYYY-MM-DD" */
+/**
+ * Extract the UTC date portion of an ISO string as "yyyy-MM-dd".
+ * Uses date-fns parseISO + format so parsing is always strict and consistent.
+ */
 function toDateInput(iso: string): string {
   try {
-    return new Date(iso).toISOString().split("T")[0]
+    // parseISO respects the Z suffix and returns a Date in UTC.
+    // format(..., "yyyy-MM-dd") uses the LOCAL representation, but since
+    // the API always sends Z-suffixed strings, toDateInput is only used to
+    // round-trip the value back into the <input type="date"> which expects
+    // the same format we'll reattach Z to on submit — so we format as UTC.
+    const d = parseISO(iso)
+    return format(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())), "yyyy-MM-dd")
   } catch {
     return ""
   }
 }
 
-/** Convert ISO datetime string → "HH:MM" (local time) */
+/**
+ * Extract the UTC time portion of an ISO string as "HH:mm".
+ */
 function toTimeInput(iso: string): string {
   try {
-    const d = new Date(iso)
-    const hh = String(d.getHours()).padStart(2, "0")
-    const mm = String(d.getMinutes()).padStart(2, "0")
-    return `${hh}:${mm}`
+    const d = parseISO(iso)
+    return format(new Date(Date.UTC(1970, 0, 1, d.getUTCHours(), d.getUTCMinutes())), "HH:mm")
   } catch {
     return ""
   }
@@ -124,7 +134,10 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
     const originalDate = event.date ? toDateInput(event.date) : ""
     const originalTime = event.date ? toTimeInput(event.date) : ""
     if (form.date !== originalDate || form.time !== originalTime) {
-      payload.date = new Date(`${form.date}T${form.time}:00`).toISOString()
+      // The date/time inputs display UTC values.
+      // Re-attach Z so parseISO treats the combined string as UTC,
+      // then toISOString() gives us the canonical Zulu format for the API.
+      payload.date = parseISO(`${form.date}T${form.time}:00Z`).toISOString()
     }
 
     // Compare GPS — treat empty string as "no value"

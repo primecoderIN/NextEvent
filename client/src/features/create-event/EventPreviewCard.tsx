@@ -1,3 +1,4 @@
+import { format, parseISO } from "date-fns"
 import { Calendar, MapPin, AlignLeft } from "lucide-react"
 import type { FormState } from "@/features/create-event/types"
 import { SectionTitle } from "@/features/create-event/components"
@@ -40,14 +41,10 @@ export function EventPreviewCard({ form }: EventPreviewCardProps) {
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
                 {form.date
-                  ? new Date(
-                      `${form.date}T${form.time || "00:00"}`
-                    ).toLocaleDateString("en-IN", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })
+                  ? format(
+                      parseISO(`${form.date}T${form.time || "00:00"}:00Z`),
+                      "EEE, d MMM yyyy"
+                    )
                   : "—"}
                 {form.time && ` • ${form.time}`}
               </span>

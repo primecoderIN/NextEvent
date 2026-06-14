@@ -1,3 +1,4 @@
+import { addDays, format, parseISO } from "date-fns"
 import type { Event } from "@/Types/Event"
 import { CalendarDays } from "lucide-react"
 
@@ -7,7 +8,6 @@ interface ScheduleTabProps {
 
 /** Generate mock schedule items derived from the single event date */
 function buildSchedule(event: Event) {
-  const base = new Date(event.date)
 
   const slots = [
     {
@@ -32,12 +32,12 @@ function buildSchedule(event: Event) {
     },
   ]
 
+  // Parse the event's UTC date once; addDays handles month/year boundaries correctly.
+  const base = parseISO(event.date)
+
   return slots.map((slot, i) => ({
     ...slot,
-    date: new Date(base.getTime() + i * 24 * 60 * 60 * 1000).toLocaleDateString(
-      "en-IN",
-      { day: "numeric", month: "long", year: "numeric" }
-    ),
+    date: format(addDays(base, i), "d MMMM yyyy"),
   }))
 }
 

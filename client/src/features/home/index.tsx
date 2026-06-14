@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react"
+import { compareDesc, parseISO } from "date-fns"
 import type { Event } from "@/Types/Event"
 import { GreetingHeader } from "@/features/home/GreetingHeader"
 import { CategoryFilter } from "@/features/home/CategoryFilter"
@@ -24,7 +25,7 @@ export function HomePage({ events, loading }: HomePageProps) {
   const trendingEvents = useMemo(
     () =>
       [...events]
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .sort((a, b) => compareDesc(parseISO(a.date), parseISO(b.date)))
         .slice(0, 6),
     [events]
   )

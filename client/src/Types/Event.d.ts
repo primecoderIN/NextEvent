@@ -3,7 +3,7 @@ export type Event = {
   title: string;
   description: string;
   category: string;
-  date: string; // ISO date string from API
+  date: string; // UTC ISO-8601 datetime string with Z suffix, e.g. "2026-06-29T10:30:00.000Z"
   city: string;
   venue: string;
   isCancelled: boolean;

@@ -1,4 +1,5 @@
 import { Calendar, MapPin, Star } from "lucide-react"
+import { format, parseISO } from "date-fns"
 import type { Event } from "@/Types/Event"
 import { formatDate, getEventImage, getCategoryBadgeClass } from "@/features/home/helpers"
 
@@ -7,9 +8,11 @@ interface EventDetailHeroProps {
 }
 
 export function EventDetailHero({ event }: EventDetailHeroProps) {
-  const month = new Date(event.date).toLocaleString("en-IN", { month: "short" }).toUpperCase()
-  const day = new Date(event.date).getDate()
-  const weekday = new Date(event.date).toLocaleString("en-IN", { weekday: "short" }).toUpperCase()
+  const d = parseISO(event.date)
+  // Use UTC accessors so the displayed day/month matches the stored UTC date
+  const month = format(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())), "MMM").toUpperCase()
+  const day = d.getUTCDate()
+  const weekday = format(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())), "EEE").toUpperCase()
 
   return (
     <div className="relative w-full" style={{ aspectRatio: "16/7" }}>

@@ -1,5 +1,7 @@
 import { Calendar, MapPin } from "lucide-react"
+import { compareAsc, parseISO } from "date-fns"
 import type { Event } from "@/Types/Event"
+import { formatDate } from "@/features/home/helpers"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 
@@ -10,17 +12,6 @@ const TOP_ORGANIZERS = [
   { name: "District by Zomato", followers: "5.3K", initials: "DZ", color: "bg-red-700" },
 ]
 
-function formatDate(dateStr: string): string {
-  try {
-    return new Date(dateStr).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    })
-  } catch {
-    return dateStr
-  }
-}
 
 function getThumb(category: string, index: number): string {
   return `https://picsum.photos/seed/${category}-${index}/120/120`
@@ -29,7 +20,7 @@ function getThumb(category: string, index: number): string {
 export function RightSidebar({ events=[] }: { events: Event[] }) {
   const navigate = useNavigate()
   const upcomingEvents = [...events]
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .sort((a, b) => compareAsc(parseISO(a.date), parseISO(b.date)))
     .slice(0, 4)
 
   return (

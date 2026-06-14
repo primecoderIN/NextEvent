@@ -1,3 +1,4 @@
+import { format } from "date-fns"
 import { Calendar } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,7 +27,7 @@ export function DateTimeSection({ form, errors, onFieldChange }: DateTimeSection
             type="date"
             value={form.date}
             onChange={onFieldChange("date")}
-            min={new Date().toISOString().split("T")[0]}
+            min={format(new Date(), "yyyy-MM-dd")}
             aria-invalid={!!errors.date}
           />
           <FieldError msg={errors.date} />

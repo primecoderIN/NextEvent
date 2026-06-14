@@ -1,5 +1,6 @@
 import { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
+import { parseISO } from "date-fns"
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react"
 import { useCreateEvent } from "@/hooks/useCreateEvent"
 import { Button } from "@/components/ui/button"
@@ -71,7 +72,8 @@ export function CreateEventPage() {
     e.preventDefault()
     if (!validate()) return
 
-    const isoDate = new Date(`${form.date}T${form.time}:00`).toISOString()
+    // Combine date + time as UTC using date-fns parseISO (Z suffix = UTC)
+    const isoDate = parseISO(`${form.date}T${form.time}:00Z`).toISOString()
     const id = await createEvent({
       title: form.title.trim(),
       description: form.description.trim(),

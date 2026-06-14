@@ -7,15 +7,14 @@ import {
   Briefcase,
   MoreHorizontal,
 } from "lucide-react"
+import { format, parseISO, getHours } from "date-fns"
 
 // ─── Date formatting ───────────────────────────────────
+// Formats a UTC ISO-8601 string (with Z suffix) as a human-readable date.
+// Uses date-fns format() with parseISO() for safe, consistent parsing.
 export function formatDate(dateStr: string): string {
   try {
-    return new Date(dateStr).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    })
+    return format(parseISO(dateStr), "d MMM yyyy")
   } catch {
     return dateStr
   }
@@ -50,7 +49,7 @@ export function getCategoryBadgeClass(category: string): string {
 
 // ─── Time-based greeting ───────────────────────────────
 export function getGreeting(): string {
-  const h = new Date().getHours()
+  const h = getHours(new Date())
   if (h < 12) return "Good Morning"
   if (h < 17) return "Good Afternoon"
   return "Good Evening"
