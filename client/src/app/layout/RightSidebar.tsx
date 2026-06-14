@@ -60,6 +60,7 @@ export function RightSidebar({ events=[] }: { events: Event[] }) {
                   <div
                     key={event.id}
                     className="flex gap-3 p-2 -mx-2 rounded-xl hover:bg-muted/60 cursor-pointer transition-colors"
+                    onClick={()=> navigate(`events/${event.id}`)}
                   >
                     <img
                       src={getThumb(event.category, i)}
