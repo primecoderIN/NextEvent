@@ -1,5 +1,7 @@
+using Application.Events.DTOs;
 using MediatR;
 using Persistence;
+
 
 namespace Application.Events.Commands;
 

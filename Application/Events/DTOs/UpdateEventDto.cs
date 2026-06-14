@@ -1,4 +1,4 @@
-namespace Application.Events.Commands;
+namespace Application.Events.DTOs;
 
 /// <summary>
 /// Data sent by the client for a PATCH-like update.

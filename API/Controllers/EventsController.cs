@@ -1,4 +1,5 @@
 using Application.Events.Commands;
+using Application.Events.DTOs;
 using Application.Events.Quaries;
 using Domain;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,7 @@ public class EventsController: BaseApiController
     }
 
    [HttpPost]
-    public async Task<ActionResult<object>> CreateNewEvent([FromBody] Event _event, CancellationToken cancellationToken)
+    public async Task<ActionResult<object>> CreateNewEvent([FromBody] CreateEventDto _event, CancellationToken cancellationToken)
     {
          var id = await Mediator.Send(new CreateEvent.Command { Event = _event }, cancellationToken);
 
