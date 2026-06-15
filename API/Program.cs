@@ -6,6 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -40,10 +43,19 @@ builder.Services.AddMediatR(x=>
 
 var app = builder.Build();
 
+// Enable Swagger only in Development environment
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseCors("CorsPolicy"); //Enable CORS with the defined policy.
 
 // Configure the HTTP request pipeline.
 app.MapControllers(); //When an HTTP request arrives, route it to controller actions.
+
+
 
 //There is no scope before app.Run(), so manually creating scope to do migrations
 using var scope = app.Services.CreateScope();
