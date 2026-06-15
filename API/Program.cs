@@ -1,6 +1,9 @@
 using Application.Events.Quaries;
+using Application.Events.Validators;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,8 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new UtcDateTimeJsonConverter());
     });
 
+// Register all validators in the assembly
+builder.Services.AddValidatorsFromAssemblyContaining<CreateEventValidator>();
 
 builder.Services.AddDbContext<AppDBContext>(options =>
 {
@@ -49,6 +54,35 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Global exception handling middleware — must be registered before other middleware
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next(context);
+    }
+    catch (ValidationException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        context.Response.ContentType = "application/json";
+
+        var errors = ex.Errors
+            .GroupBy(e => e.PropertyName)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(e => e.ErrorMessage).ToArray()
+            );
+
+        await context.Response.WriteAsJsonAsync(new { errors });
+    }
+    catch (Exception ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+    }
+});
 
 app.UseCors("CorsPolicy"); //Enable CORS with the defined policy.
 

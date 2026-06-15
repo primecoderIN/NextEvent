@@ -1,6 +1,7 @@
 using MediatR;
 using Persistence;
 using Application.Events.DTOs;
+using FluentValidation;
 
 
 namespace Application.Events.Commands;
@@ -12,12 +13,15 @@ public class CreateEvent
         public required CreateEventDto Event { get; set; }
     }
 
-    public class Handler(AppDBContext context) : IRequestHandler<Command, string>
+    public class Handler(AppDBContext context,IValidator<Command> validator) : IRequestHandler<Command, string>
     {
         public async Task<string> Handle(
             Command request,
             CancellationToken cancellationToken)
         {
+
+            await validator.ValidateAndThrowAsync(request, cancellationToken);
+
             var eventEntity = new Domain.Event
             {
                 Id = Guid.NewGuid().ToString(),
