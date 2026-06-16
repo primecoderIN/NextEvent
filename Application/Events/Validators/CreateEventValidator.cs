@@ -1,4 +1,5 @@
 using Application.Events.Commands;
+using Application.Events.Constants;
 using FluentValidation;
 
 namespace Application.Events.Validators;
@@ -9,35 +10,35 @@ public class CreateEventValidator : AbstractValidator<CreateEvent.Command>
     {
             RuleFor(x => x.Event.Title)
             .NotEmpty()
-            .WithMessage("Title is required");
+            .WithMessage(ValidationErrors.TitleRequired);
 
         RuleFor(x => x.Event.Description)
             .NotEmpty()
-            .WithMessage("Description is required");
+            .WithMessage(ValidationErrors.DescriptionRequired);
 
         RuleFor(x => x.Event.Category)
             .NotEmpty()
-            .WithMessage("Category is required");
+            .WithMessage(ValidationErrors.CategoryRequired);
 
         RuleFor(x => x.Event.Date)
             .NotEmpty()
-            .WithMessage("Date is required");
+            .WithMessage(ValidationErrors.DateRequired);
 
         RuleFor(x => x.Event.City)
             .NotEmpty()
-            .WithMessage("City is required");
+            .WithMessage(ValidationErrors.CityRequired);
 
         RuleFor(x => x.Event.Venue)
             .NotEmpty()
-            .WithMessage("Venue is required");
+            .WithMessage(ValidationErrors.VenueRequired);
 
         RuleFor(x => x.Event.Latitude)
             .InclusiveBetween(-90, 90)
-            .WithMessage("Latitude must be between -90 and 90");
+            .WithMessage(ValidationErrors.LatitudeOutOfRange);
 
         RuleFor(x => x.Event.Longitude)
             .InclusiveBetween(-180, 180)
-            .WithMessage("Longitude must be between -180 and 180");
+            .WithMessage(ValidationErrors.LongitudeOutOfRange);
 
     }
 }
