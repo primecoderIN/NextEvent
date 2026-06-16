@@ -98,7 +98,7 @@ All responses use **camelCase** JSON property names.
 ## Getting Started
 
 ### Prerequisites
-- [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - [Node.js 20+](https://nodejs.org/)
 
 ### 1. Run the API
