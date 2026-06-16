@@ -1,3 +1,4 @@
+using API.Middleware;
 using Application.Core;
 using Application.Events.Quaries;
 using Application.Events.Validators;
@@ -72,34 +73,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Global exception handling middleware — must be registered before other middleware
-app.Use(async (context, next) =>
-{
-    try
-    {
-        await next(context);
-    }
-    catch (ValidationException ex)
-    {
-        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-        context.Response.ContentType = "application/json";
-
-        var errors = ex.Errors
-            .GroupBy(e => e.PropertyName)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(e => e.ErrorMessage).ToArray()
-            );
-
-        await context.Response.WriteAsJsonAsync(new { errors });
-    }
-    catch (Exception ex)
-    {
-        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(new { error = ex.Message });
-    }
-});
+// -----------------------------------------------------------------------
+// Global exception handling middleware
+// Must be the FIRST middleware registered so it wraps the entire pipeline.
+// Replaces the previous inline app.Use(async (context, next) => …) lambda.
+// Handles: ValidationException → 400, NotFoundException → 404,
+//          BusinessRuleException → 409, Exception → 500
+// All responses use the ApiResponse<T> envelope.
+// -----------------------------------------------------------------------
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseCors("CorsPolicy"); //Enable CORS with the defined policy.
 

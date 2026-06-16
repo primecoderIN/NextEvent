@@ -1,28 +1,32 @@
+using Application.Core.Exceptions;
 using Application.Events.DTOs;
+using Domain;
 using MediatR;
 using Persistence;
-
 
 namespace Application.Events.Commands;
 
 public class EditEvent
 {
-    public class Command : IRequest<bool>
+    /// <summary>
+    /// Returns <see cref="Unit"/> (void equivalent) on success.
+    /// Throws <see cref="NotFoundException"/> when the event does not exist,
+    /// allowing the middleware to produce a 404 ApiResponse automatically.
+    /// </summary>
+    public class Command : IRequest<Unit>
     {
         public required string Id { get; set; }
         public required UpdateEventDto EventData { get; set; }
     }
 
-    public class Handler(AppDBContext context) : IRequestHandler<Command, bool>
+    public class Handler(AppDBContext context) : IRequestHandler<Command, Unit>
     {
-        public async Task<bool> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
             var eventEntity = await context.Events.FindAsync([request.Id], cancellationToken);
 
             if (eventEntity is null)
-            {
-                return false;
-            }
+                throw new NotFoundException(nameof(Event), request.Id);
 
             var dto = request.EventData;
 
@@ -38,7 +42,7 @@ public class EditEvent
 
             await context.SaveChangesAsync(cancellationToken);
 
-            return true;
+            return Unit.Value;
         }
     }
 }

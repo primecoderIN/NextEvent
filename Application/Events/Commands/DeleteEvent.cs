@@ -1,3 +1,5 @@
+using Application.Core.Exceptions;
+using Domain;
 using MediatR;
 using Persistence;
 
@@ -5,29 +7,30 @@ namespace Application.Events.Commands;
 
 public class DeleteEvent
 {
-    public class Command : IRequest<bool>
+    /// <summary>
+    /// Returns <see cref="Unit"/> (void equivalent) on success.
+    /// Throws <see cref="NotFoundException"/> when the event does not exist,
+    /// allowing the middleware to produce a 404 ApiResponse automatically.
+    /// </summary>
+    public class Command : IRequest<Unit>
     {
-        public required string Id {get;set;}
+        public required string Id { get; set; }
     }
 
-    public class Handler(AppDBContext context) : IRequestHandler<Command,bool>
+    public class Handler(AppDBContext context) : IRequestHandler<Command, Unit>
     {
-        public async Task<bool> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
-             var eventEntity = await context.Events.FindAsync([request.Id], cancellationToken);
+            var eventEntity = await context.Events.FindAsync([request.Id], cancellationToken);
 
-               if (eventEntity is null)
-            {
-                return false;
-            }
+            if (eventEntity is null)
+                throw new NotFoundException(nameof(Event), request.Id);
 
             context.Remove(eventEntity);
 
             await context.SaveChangesAsync(cancellationToken);
 
-            return true;
+            return Unit.Value;
         }
-
-
     }
 }
