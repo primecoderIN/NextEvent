@@ -1,6 +1,8 @@
+using Application.Core;
 using Application.Events.Quaries;
 using Application.Events.Validators;
 using FluentValidation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
 
@@ -43,6 +45,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddMediatR(x=>
 {
     x.RegisterServicesFromAssemblyContaining<GetEventsList.Handler>();
+    // Automatically run FluentValidation for every command/query in the pipeline
+    x.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 });
 
 
