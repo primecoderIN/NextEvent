@@ -53,8 +53,13 @@ builder.Services.AddCors(options =>
 builder.Services.AddMediatR(x=>
 {
     x.RegisterServicesFromAssemblyContaining<GetEventsList.Handler>();
-    // Automatically run FluentValidation for every command/query in the pipeline
-    x.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+// Closed registration: explicitly maps IPipelineBehavior<,> to ValidationBehavior<,>
+// x.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+// Open generic registration: MediatR automatically applies ValidationBehavior<TRequest,TResponse>
+// to every request/response pair
+x.AddOpenBehavior(typeof(ValidationBehavior<,>));
 });
 
 
