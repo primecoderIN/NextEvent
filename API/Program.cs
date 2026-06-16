@@ -14,6 +14,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+/* =======================
+   Routing
+   ======================= */
+builder.Services.AddRouting(options =>
+{
+    options.LowercaseUrls = true;
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
