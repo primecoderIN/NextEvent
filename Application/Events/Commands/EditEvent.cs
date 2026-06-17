@@ -23,10 +23,7 @@ public class EditEvent
     {
         public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
         {
-            var eventEntity = await context.Events.FindAsync([request.Id], cancellationToken);
-
-            if (eventEntity is null)
-                throw new NotFoundException(nameof(Event), request.Id);
+            var eventEntity = await context.Events.FindAsync([request.Id], cancellationToken) ?? throw new NotFoundException(nameof(Event), request.Id);
 
             var dto = request.EventData;
 
