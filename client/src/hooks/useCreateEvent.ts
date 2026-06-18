@@ -2,6 +2,7 @@ import { type AxiosError } from "axios"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { EVENTS_QUERY_KEY } from "@/hooks/useEvents"
 import { axiosHttpAgent } from "@/lib/axios"
+import type { ApiResponse } from "@/Types/ApiResponse"
 
 export interface CreateEventPayload {
   title: string
@@ -14,26 +15,21 @@ export interface CreateEventPayload {
   longitude: number
 }
 
-// API may return camelCase (id) or PascalCase (Id) depending on serializer config
-interface CreateEventResult {
-  id?: string
-  Id?: string
+interface CreateEventData {
+  id: string
 }
 
 const postEvent = async (payload: CreateEventPayload): Promise<string> => {
-  const res = await axiosHttpAgent.post<CreateEventResult>(
-    "/events",
-    payload
-  )
-  const id = res.data.id ?? res.data.Id
-  if (!id) throw new Error("Server returned an invalid response. Please try again.")
+  const res = await axiosHttpAgent.post<ApiResponse<CreateEventData>>("/events", payload)
+  const id = res.data.data?.id
+  if (!id) throw new Error(res.data.message || "Server returned an invalid response. Please try again.")
   return id
 }
 
 export function useCreateEvent() {
   const queryClient = useQueryClient()
 
-  const mutation = useMutation<string, AxiosError<{ title?: string; errors?: Record<string, string[]> }>, CreateEventPayload>({
+  const mutation = useMutation<string, AxiosError<ApiResponse<null>>, CreateEventPayload>({
     mutationFn: postEvent,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: EVENTS_QUERY_KEY })
@@ -51,13 +47,25 @@ export function useCreateEvent() {
     }
   }
 
-  const errorMsg =
-    mutation.error?.response?.data?.title ??
-    (mutation.error instanceof Error ? mutation.error.message : null)
+  /**
+   * Prefer the server's envelope message; fall back to the first validation
+   * error value if the message is the generic "Validation failed" string.
+   */
+  const errorMsg = (() => {
+    if (!mutation.error) return null
+    const body = mutation.error.response?.data
+    if (body) {
+      const firstFieldError = Object.values(body.errors ?? {})[0]?.[0]
+      return firstFieldError ?? body.message ?? null
+    }
+    return mutation.error instanceof Error ? mutation.error.message : null
+  })()
 
   return {
     createEvent,
     loading: mutation.isPending,
     error: errorMsg ?? null,
+    /** Full server validation errors map, keyed by field name */
+    fieldErrors: mutation.error?.response?.data?.errors ?? {},
   }
 }

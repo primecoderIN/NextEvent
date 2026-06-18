@@ -1,7 +1,8 @@
-import  { type AxiosError } from "axios"
+import { type AxiosError } from "axios"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { EVENTS_QUERY_KEY } from "@/hooks/useEvents"
 import { axiosHttpAgent } from "@/lib/axios"
+import type { ApiResponse } from "@/Types/ApiResponse"
 
 /** Partial payload — only include fields that changed */
 export interface UpdateEventPayload {
@@ -22,7 +23,7 @@ interface UpdateEventArgs {
 }
 
 const putEvent = async ({ id, data }: UpdateEventArgs): Promise<void> => {
-  await axiosHttpAgent.put(`/events/${id}`, data)
+  await axiosHttpAgent.put<ApiResponse<null>>(`/events/${id}`, data)
 }
 
 export function useUpdateEvent() {
@@ -30,7 +31,7 @@ export function useUpdateEvent() {
 
   const mutation = useMutation<
     void,
-    AxiosError<{ title?: string; errors?: Record<string, string[]> }>,
+    AxiosError<ApiResponse<null>>,
     UpdateEventArgs
   >({
     mutationFn: putEvent,
@@ -47,14 +48,14 @@ export function useUpdateEvent() {
 
   /**
    * PUT /api/events/{id}
-   * Returns true on success (204), false if not found (404), null on network/other error.
+   * Returns true on success (200 with envelope), false if not found (404), null on network/other error.
    */
   async function updateEvent(id: string, data: UpdateEventPayload): Promise<boolean | null> {
     try {
       await mutation.mutateAsync({ id, data })
       return true
     } catch (err: unknown) {
-      const axiosErr = err as AxiosError
+      const axiosErr = err as AxiosError<ApiResponse<null>>
       if (axiosErr.response?.status === 404) return false
       return null
     }
@@ -62,11 +63,20 @@ export function useUpdateEvent() {
 
   const errorMsg = (() => {
     if (!mutation.error) return null
-    const data = mutation.error.response?.data
-    if (data?.title) return data.title
+    const body = mutation.error.response?.data
+    if (body) {
+      const firstFieldError = Object.values(body.errors ?? {})[0]?.[0]
+      return firstFieldError ?? body.message ?? null
+    }
     if (mutation.error.response?.status === 404) return "Event not found."
     return mutation.error instanceof Error ? mutation.error.message : "Failed to update event"
   })()
 
-  return { updateEvent, loading: mutation.isPending, error: errorMsg ?? null }
+  return {
+    updateEvent,
+    loading: mutation.isPending,
+    error: errorMsg ?? null,
+    /** Full server validation errors map, keyed by field name */
+    fieldErrors: mutation.error?.response?.data?.errors ?? {},
+  }
 }

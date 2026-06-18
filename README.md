@@ -12,9 +12,11 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 | API | ASP.NET Core 10 |
 | Architecture | Clean Architecture — Domain / Application / Persistence / API |
 | CQRS | MediatR |
+| Validation | FluentValidation + MediatR pipeline behavior |
 | ORM | Entity Framework Core |
 | Database | SQLite (file: `API/nextevents.db`) |
 | Serialisation | `System.Text.Json` with camelCase naming policy |
+| URL style | Lowercase route generation |
 
 ### Frontend — React SPA
 | Concern | Technology |
@@ -36,19 +38,34 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 ```
 NextEvent/
 ├── API/                        # ASP.NET Core Web API host
-│   ├── Controllers/            # HTTP controllers (EventsController)
+│   ├── Common/
+│   │   └── ApiResponse.cs      # Generic response envelope + static factory
+│   ├── Controllers/
+│   │   ├── BaseApiController.cs  # OkResponse<T> / CreatedResponse<T> helpers
+│   │   └── EventsController.cs
+│   ├── Middleware/
+│   │   └── ExceptionMiddleware.cs  # Centralised exception → ApiResponse mapping
 │   ├── Program.cs              # DI setup, middleware, DB migration on startup
 │   └── nextevents.db           # SQLite database (auto-created)
 │
 ├── Application/                # Business logic (CQRS with MediatR)
+│   ├── Core/
+│   │   ├── Exceptions/
+│   │   │   ├── NotFoundException.cs       # → HTTP 404
+│   │   │   └── BusinessRuleException.cs   # → HTTP 409
+│   │   └── ValidationBehavior.cs          # MediatR pipeline: runs FluentValidation
 │   └── Events/
 │       ├── Commands/
 │       │   ├── CreateEvent.cs
 │       │   ├── DeleteEvent.cs
 │       │   └── EditEvent.cs
-│       └── Queries/
-│           ├── GetEventsList.cs
-│           └── GetEventDetailsById.cs
+│       ├── Constants/
+│       │   └── ValidationErrors.cs        # Centralised validation error codes
+│       ├── Queries/
+│       │   ├── GetEventsList.cs
+│       │   └── GetEventDetailsById.cs
+│       └── Validators/
+│           └── CreateEventValidator.cs
 │
 ├── Domain/                     # Core domain entity
 │   └── Event.cs                # Event entity with PATCH-friendly update methods
@@ -79,19 +96,58 @@ NextEvent/
 
 ---
 
+## API Response Envelope
+
+Every endpoint returns the same JSON shape regardless of outcome:
+
+```json
+{
+  "success": true,
+  "message": "Request completed successfully",
+  "data": { ... },
+  "errors": {}
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `success` | `bool` | `true` for 2xx responses, `false` for all errors |
+| `message` | `string` | Human-readable summary |
+| `data` | `T \| null` | Response payload (null on error) |
+| `errors` | `{ [field]: string[] }` | Validation errors keyed by property name |
+
+### Error HTTP Status Codes
+
+| Exception | HTTP Status | Scenario |
+|---|---|---|
+| `ValidationException` | `400 Bad Request` | FluentValidation failures |
+| `NotFoundException` | `404 Not Found` | Resource does not exist |
+| `BusinessRuleException` | `409 Conflict` | Domain rule violated |
+| Unhandled `Exception` | `500 Internal Server Error` | Unexpected server error |
+
+---
+
 ## API Endpoints
 
 Base URL: `https://localhost:5001/api`
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/events` | List all events |
-| `GET` | `/events/{id}` | Get event by ID |
-| `POST` | `/events` | Create a new event |
-| `PUT` | `/events/{id}` | Edit an existing event (partial update supported) |
-| `DELETE` | `/events/{id}` | Delete an event |
+| Method | Endpoint | Status | Description |
+|---|---|---|---|
+| `GET` | `/events` | `200 OK` | List all events |
+| `GET` | `/events/{id}` | `200 OK` | Get event by ID |
+| `POST` | `/events` | `201 Created` | Create a new event |
+| `PUT` | `/events/{id}` | `200 OK` | Edit an existing event (partial update supported) |
+| `DELETE` | `/events/{id}` | `200 OK` | Delete an event |
 
-All responses use **camelCase** JSON property names.
+All URLs are **lowercase**. All responses use **camelCase** JSON property names and the `ApiResponse<T>` envelope.
+
+---
+
+## Validation
+
+Validation is handled automatically via a **MediatR pipeline behavior** (`ValidationBehavior<TRequest, TResponse>`). Every command/query is validated against its registered FluentValidation validator before reaching the handler — no manual wiring needed in individual handlers.
+
+Validation error codes are centralised in `Application/Events/Constants/ValidationErrors.cs` as constants (e.g. `TITLE_REQUIRED`, `LATITUDE_OUT_OF_RANGE`) so the frontend can rely on stable, localisation-friendly keys rather than free-form messages.
 
 ---
 
@@ -141,10 +197,10 @@ The React app starts at `http://localhost:3001`.
 - **Location card** with coordinates
 - **Delete Event** — confirmation dialog with title, warning, Cancel and "Yes, Delete Event" buttons; navigates home on success
 
-### ✏️ Create Event Page
+### ✏️ Create / Edit Event Page
 - Multi-section form: **Basic Info**, **Date & Time**, **Location**, **GPS Coordinates**
 - Live preview card updates as you type
-- Client-side validation with inline field errors
+- Client-side validation with inline field errors; server-side validation errors surfaced from the `ApiResponse.errors` map
 - **Publish Event** button POSTs to the API; shows success screen on completion
 
 ### 📱 Responsive Layout
