@@ -33,6 +33,11 @@ export function CreateEventPage() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [newEventId, setNewEventId] = useState<string | null>(null)
 
+  function handleDescriptionGenerated(description: string) {
+    setForm((prev) => ({ ...prev, description }))
+    setErrors((prev) => ({ ...prev, description: undefined }))
+  }
+
   // ── Field handlers ─────────────────────────────────────────────────────────
 
   function setField(field: keyof FormState) {
@@ -159,6 +164,7 @@ export function CreateEventPage() {
           errors={errors}
           onFieldChange={setField}
           onCategoryChange={setCategory}
+          onDescriptionGenerated={handleDescriptionGenerated}
         />
 
         <Divider />

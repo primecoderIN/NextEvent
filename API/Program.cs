@@ -1,4 +1,5 @@
 using API.Middleware;
+using API.Services;
 using Application.Core;
 using Application.Events.Quaries;
 using Application.Events.Validators;
@@ -50,6 +51,11 @@ builder.Services.AddCors(options =>
                 .WithOrigins("http://localhost:3001");
     });
 });
+
+/* =======================
+   AI Services
+   ======================= */
+builder.Services.AddScoped<IOpenAiService, OpenAiService>();
 
 builder.Services.AddMediatR(x=>
 {
