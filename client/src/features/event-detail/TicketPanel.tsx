@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { subDays, parseISO } from "date-fns"
+import { useTranslation } from "react-i18next"
 import type { Event } from "@/Types/Event"
 import { Check, Plus, Minus, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -9,33 +10,34 @@ interface TicketPanelProps {
 }
 
 interface TicketTier {
-  name: string
+  tierKey: string
   price: number
-  badge?: string
+  badgeKey?: string
   perks: string[]
 }
 
 const TIERS: TicketTier[] = [
   {
-    name: "Early Bird",
+    tierKey: "earlyBird",
     price: 999,
-    badge: "Best Price",
-    perks: ["Entry to the event", "Access to general zone"],
+    badgeKey: "bestPrice",
+    perks: ["entry", "generalZone"],
   },
   {
-    name: "General Admission",
+    tierKey: "generalAdmission",
     price: 1499,
-    perks: ["Entry to the event", "Access to general zone"],
+    perks: ["entry", "generalZone"],
   },
   {
-    name: "VIP Pass",
+    tierKey: "vipPass",
     price: 2499,
-    perks: ["Entry to the event", "VIP lounge access", "Food & beverage coupons"],
+    perks: ["entry", "vipLounge", "foodCoupons"],
   },
 ]
 
 export function TicketPanel({ event }: TicketPanelProps) {
   const [quantities, setQuantities] = useState<number[]>([1, 0, 0])
+  const { t } = useTranslation("eventDetail")
 
   const update = (i: number, delta: number) => {
     setQuantities((prev) =>
@@ -50,23 +52,23 @@ export function TicketPanel({ event }: TicketPanelProps) {
     <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border/40">
-        <h3 className="font-bold text-sm">Book Tickets</h3>
+        <h3 className="font-bold text-sm">{t("ticket.bookTickets")}</h3>
         <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-2 py-1 rounded-lg">
-          Early bird ends in 02d : 14h : 36m : 48s
+          {t("ticket.earlyBirdEnds", { countdown: "02d : 14h : 36m : 48s" })}
         </span>
       </div>
 
       {/* Tiers */}
       <div className="divide-y divide-border/40">
         {TIERS.map((tier, i) => (
-          <div key={tier.name} className="p-4">
+          <div key={tier.tierKey} className="p-4">
             <div className="flex items-start justify-between gap-3 mb-2">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold">{tier.name}</span>
-                  {tier.badge && (
+                  <span className="text-sm font-semibold">{t(`ticket.tiers.${tier.tierKey}`)}</span>
+                  {tier.badgeKey && (
                     <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800">
-                      {tier.badge}
+                      {t(`ticket.tiers.${tier.badgeKey}`)}
                     </span>
                   )}
                 </div>
@@ -74,12 +76,14 @@ export function TicketPanel({ event }: TicketPanelProps) {
                   {tier.perks.map((p) => (
                     <li key={p} className="flex items-center gap-1 text-[11px] text-muted-foreground">
                       <Check className="h-3 w-3 text-green-500 shrink-0" />
-                      {p}
+                      {t(`ticket.perks.${p}`)}
                     </li>
                   ))}
                 </ul>
                 {i === 0 && (
-                  <p className="text-[10px] text-red-500 font-medium mt-1">Only 120 tickets left!</p>
+                  <p className="text-[10px] text-red-500 font-medium mt-1">
+                    {t("ticket.ticketsLeft", { count: 120 })}
+                  </p>
                 )}
               </div>
 
@@ -110,11 +114,11 @@ export function TicketPanel({ event }: TicketPanelProps) {
       {/* CTA */}
       <div className="p-4 border-t border-border/40">
         <Button className="w-full py-5 font-bold shadow-lg shadow-primary/20">
-          Book Now
+          {t("ticket.bookNow")}
         </Button>
         <p className="flex items-center justify-center gap-1.5 mt-2 text-[11px] text-muted-foreground">
           <Shield className="h-3 w-3" />
-          Secure checkout. Your data is protected.
+          {t("ticket.secureCheckout")}
         </p>
       </div>
     </div>

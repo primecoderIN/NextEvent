@@ -1,12 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-// ── Step 1: Import useForm and FormProvider ───────────────────────────────────
-// useForm  — creates the form instance (state, validation, submission handling)
-// FormProvider — React context wrapper that shares the form instance with all
-//   child components so they can call useFormContext() without prop drilling.
+import { useTranslation } from "react-i18next"
 import { useForm, FormProvider } from "react-hook-form"
-// zodResolver bridges RHF and Zod: it runs the Zod schema on every validation
-// trigger and maps errors back to the RHF errors object.
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react"
 import { useCreateEvent } from "@/hooks/useCreateEvent"
@@ -17,23 +12,22 @@ import { DateTimeSection } from "@/features/create-event/DateTimeSection"
 import { LocationSection } from "@/features/create-event/LocationSection"
 import { EventPreviewCard } from "@/features/create-event/EventPreviewCard"
 import { CreateEventSuccess } from "@/features/create-event/CreateEventSuccess"
-import { eventFormSchema, type EventFormValues } from "@/features/create-event/types"
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
+import { getEventFormSchema, type EventFormValues } from "@/features/create-event/types"
 
 export function CreateEventPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation(["createEvent", "common"])
   const { createEvent, loading: apiLoading, error: apiError } = useCreateEvent()
   const [newEventId, setNewEventId] = useState<string | null>(null)
 
-  // ── Step 2: Initialise the form ─────────────────────────────────────────────
+  // ── Step 1: Initialise React Hook Form ──────────────────────────────────────
   //
   // useForm returns the "methods" object which holds the entire form API.
   // We spread it onto <FormProvider> so every child section can access it
   // via useFormContext() without receiving control/errors as props.
   const methods = useForm<EventFormValues>({
     // Wire up Zod schema validation — RHF will call this on every trigger.
-    resolver: zodResolver(eventFormSchema),
+    resolver: zodResolver(getEventFormSchema(t)),
 
     // Provide initial values for every field. RHF uses these to detect dirtiness
     // (changed vs. original) and to reset the form back to a clean state.
@@ -70,7 +64,7 @@ export function CreateEventPage() {
   // so buttons are disabled even before the network call begins.
   const isBusy = isSubmitting || apiLoading
 
-  // ── Step 3: Programmatically set a field value ───────────────────────────────
+  // ── Step 2: Programmatically set a field value ───────────────────────────────
   //
   // setValue() is the RHF way to update a field outside of a Controller/register.
   // shouldValidate: true   → re-run Zod for this field immediately
@@ -79,7 +73,7 @@ export function CreateEventPage() {
     setValue("description", description, { shouldValidate: true, shouldDirty: true })
   }
 
-  // ── Step 4: Handle form submission ──────────────────────────────────────────
+  // ── Step 3: Handle form submission ──────────────────────────────────────────
   //
   // onSubmit only runs if Zod validation passes — RHF won't call it if there
   // are validation errors. The `values` parameter is fully typed as EventFormValues.
@@ -111,8 +105,6 @@ export function CreateEventPage() {
     if (id) setNewEventId(id)
   }
 
-  // ── Success screen ─────────────────────────────────────────────────────────
-
   if (newEventId) {
     return (
       <CreateEventSuccess
@@ -123,7 +115,7 @@ export function CreateEventPage() {
     )
   }
 
-  // ── Step 5: Render — wrap everything in FormProvider ────────────────────────
+  // ── Step 4: Render — wrap everything in FormProvider ────────────────────────
   //
   // <FormProvider {...methods}> passes the entire form instance through React
   // context. Any descendant can call useFormContext<EventFormValues>() to get
@@ -131,7 +123,6 @@ export function CreateEventPage() {
   return (
     <FormProvider {...methods}>
       <div className="max-w-4xl mx-auto">
-        {/* ── Top bar ── */}
         <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border/40 sticky top-0 bg-background/95 backdrop-blur z-10">
           <Button
             variant="ghost"
@@ -140,10 +131,10 @@ export function CreateEventPage() {
             className="gap-2 text-muted-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Back</span>
+            <span className="hidden sm:inline">{t("back", { ns: "common" })}</span>
           </Button>
 
-          <h1 className="text-lg font-bold tracking-tight">Create Event</h1>
+          <h1 className="text-lg font-bold tracking-tight">{t("pageTitle.create")}</h1>
 
           {/* Calling handleSubmit() manually triggers the same validation + onSubmit
               flow as the <form onSubmit> handler — useful for toolbar action buttons. */}
@@ -156,19 +147,17 @@ export function CreateEventPage() {
             className="border-primary text-primary hover:bg-primary/10 gap-1.5"
           >
             {isBusy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            Save Draft
+            {t("actions.saveDraft")}
           </Button>
         </div>
 
-        {/* ── Desktop heading ── */}
         <div className="hidden lg:block px-6 pt-6 pb-2">
-          <h2 className="text-3xl font-bold tracking-tight">Create New Event</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t("headings.create")}</h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            Fields marked with <span className="text-destructive font-semibold">*</span> are required.
+            {t("headings.createSub")}
           </p>
         </div>
 
-        {/* ── API error banner ── */}
         {apiError && (
           <div className="mx-4 md:mx-6 mt-4 p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 flex items-start gap-2.5">
             <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
@@ -203,7 +192,6 @@ export function CreateEventPage() {
 
           <EventPreviewCard />
 
-          {/* ── Actions ── */}
           <div className="flex flex-col sm:flex-row gap-3 pt-2 pb-8">
             <Button
               type="submit"
@@ -215,10 +203,10 @@ export function CreateEventPage() {
               {isBusy ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating Event…
+                  {t("actions.creatingEvent")}
                 </>
               ) : (
-                "Publish Event →"
+                t("actions.publishEvent")
               )}
             </Button>
             <Button
@@ -228,7 +216,7 @@ export function CreateEventPage() {
               disabled={isBusy}
               className="px-8 py-6"
             >
-              Cancel
+              {t("cancel", { ns: "common" })}
             </Button>
           </div>
         </form>

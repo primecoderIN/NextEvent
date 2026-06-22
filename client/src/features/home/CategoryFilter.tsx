@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import { CATEGORIES } from "@/features/home/helpers"
 
 interface CategoryFilterProps {
@@ -6,6 +7,8 @@ interface CategoryFilterProps {
 }
 
 export function CategoryFilter({ active, onChange }: CategoryFilterProps) {
+  const { t } = useTranslation("home")
+
   return (
     <div className="flex gap-1 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
       {CATEGORIES.map((cat) => {
@@ -21,7 +24,7 @@ export function CategoryFilter({ active, onChange }: CategoryFilterProps) {
             }`}
           >
             <cat.icon className="h-5 w-5" />
-            <span className="text-xs font-medium whitespace-nowrap">{cat.label}</span>
+            <span className="text-xs font-medium whitespace-nowrap">{t(`categories.${cat.id}`)}</span>
           </button>
         )
       })}

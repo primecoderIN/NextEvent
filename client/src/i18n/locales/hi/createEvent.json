@@ -1,0 +1,98 @@
+{
+  "pageTitle": {
+    "create": "इवेंट बनाएं",
+    "edit": "इवेंट संपादित करें"
+  },
+  "headings": {
+    "create": "नया इवेंट बनाएं",
+    "edit": "इवेंट संपादित करें",
+    "createSub": "* से चिह्नित फ़ील्ड आवश्यक हैं।",
+    "editSub": "नीचे दिए गए विवरण अपडेट करें। * से चिह्नित फ़ील्ड आवश्यक हैं।"
+  },
+  "actions": {
+    "saveDraft": "ड्राफ्ट सहेजें",
+    "saveChanges": "बदलाव सहेजें",
+    "publishEvent": "इवेंट प्रकाशित करें →",
+    "savingChanges": "बदलाव सहेजा जा रहा है…",
+    "creatingEvent": "इवेंट बनाया जा रहा है…"
+  },
+  "sections": {
+    "basicInfo": "बुनियादी जानकारी",
+    "dateTime": "तारीख और समय",
+    "location": "स्थान",
+    "preview": "पूर्वावलोकन",
+    "gpsCoordinates": "जीपीएस निर्देशांक"
+  },
+  "fields": {
+    "title": {
+      "label": "इवेंट का नाम",
+      "placeholder": "एक आकर्षक इवेंट नाम दर्ज करें",
+      "counter": "{{count}}/100"
+    },
+    "description": {
+      "label": "विवरण",
+      "placeholder": "बताएं कि प्रतिभागी क्या उम्मीद कर सकते हैं…",
+      "counter": "{{count}}/1000"
+    },
+    "category": {
+      "label": "श्रेणी",
+      "placeholder": "श्रेणी चुनें"
+    },
+    "date": {
+      "label": "इवेंट की तारीख",
+      "placeholder": "तारीख चुनें"
+    },
+    "time": {
+      "label": "शुरू होने का समय"
+    },
+    "city": {
+      "label": "शहर",
+      "placeholder": "जैसे मुंबई"
+    },
+    "venue": {
+      "label": "स्थल",
+      "placeholder": "जैसे NSCI डोम"
+    },
+    "latitude": {
+      "label": "अक्षांश",
+      "placeholder": "जैसे 19.0760"
+    },
+    "longitude": {
+      "label": "देशांतर",
+      "placeholder": "जैसे 72.8777"
+    }
+  },
+  "ai": {
+    "generate": "AI से बनाएं",
+    "generating": "बनाया जा रहा है…",
+    "generateTitle": "विवरण बनाने के लिए पहले शीर्षक दर्ज करें",
+    "generateHint": "AI से विवरण बनाएं",
+    "thinking": "AI सोच रहा है…",
+    "suggestion": "AI सुझाव: {{category}} — स्वीकार करने के लिए क्लिक करें"
+  },
+  "validation": {
+    "titleRequired": "इवेंट का नाम आवश्यक है",
+    "titleMin": "नाम कम से कम 3 अक्षर का होना चाहिए",
+    "titleMax": "नाम अधिकतम 100 अक्षर का होना चाहिए",
+    "descriptionRequired": "विवरण आवश्यक है",
+    "descriptionMin": "कम से कम 10 अक्षर होने चाहिए",
+    "descriptionMax": "अधिकतम 1000 अक्षर होने चाहिए",
+    "categoryRequired": "कृपया एक श्रेणी चुनें",
+    "dateRequired": "इवेंट की तारीख आवश्यक है",
+    "timeRequired": "इवेंट का समय आवश्यक है",
+    "timeFormat": "समय का प्रारूप अमान्य है",
+    "cityRequired": "शहर आवश्यक है",
+    "venueRequired": "स्थल आवश्यक है"
+  },
+  "preview": {
+    "titlePlaceholder": "इवेंट का नाम यहाँ दिखेगा",
+    "descriptionPlaceholder": "विवरण पूर्वावलोकन…"
+  },
+  "success": {
+    "title": "इवेंट बनाया गया! 🎉",
+    "description": "आपका इवेंट सफलतापूर्वक प्रकाशित हो गया है।",
+    "viewEvent": "इवेंट देखें",
+    "updated": "इवेंट अपडेट हुआ!",
+    "updatedDesc": "\"{{title}}\" सफलतापूर्वक सहेजा गया।"
+  }
+}

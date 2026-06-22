@@ -1,0 +1,18 @@
+{
+  "back": "Back",
+  "cancel": "Cancel",
+  "save": "Save",
+  "login": "Login",
+  "signUp": "Sign Up",
+  "createEvent": "Create Event",
+  "logout": "Logout",
+  "viewProfile": "View your profile",
+  "editProfile": "Edit profile",
+  "loading": "Loading…",
+  "backToHome": "Back to Home",
+  "backToEvents": "Back to events",
+  "required": "required",
+  "optional": "optional",
+  "noChanges": "No changes detected",
+  "noChangesDesc": "You haven't modified anything yet."
+}

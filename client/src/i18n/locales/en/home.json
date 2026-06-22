@@ -1,0 +1,26 @@
+{
+  "greeting": {
+    "morning": "Good Morning",
+    "afternoon": "Good Afternoon",
+    "evening": "Good Evening"
+  },
+  "hero": {
+    "line1": "Discover amazing events",
+    "line2": "happening around you."
+  },
+  "sections": {
+    "recommended": "Recommended For You",
+    "trending": "Trending This Week",
+    "trendingBadge": "Trending"
+  },
+  "categories": {
+    "all": "All Events",
+    "music": "Music",
+    "nightlife": "Nightlife",
+    "workshop": "Workshops",
+    "sports": "Sports",
+    "business": "Business",
+    "more": "More"
+  },
+  "empty": "No events found in this category yet."
+}

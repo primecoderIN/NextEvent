@@ -1,9 +1,7 @@
 import { useEffect } from "react"
 import { parseISO } from "date-fns"
 import { useNavigate } from "react-router-dom"
-// ── Step 1: Import useForm and FormProvider ───────────────────────────────────
-// Same pattern as CreateEventPage — useForm initialises the form instance,
-// FormProvider shares it through context so child sections need zero props.
+import { useTranslation } from "react-i18next"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react"
@@ -15,18 +13,14 @@ import { BasicInfoSection } from "@/features/create-event/BasicInfoSection"
 import { DateTimeSection } from "@/features/create-event/DateTimeSection"
 import { LocationSection } from "@/features/create-event/LocationSection"
 import { EventPreviewCard } from "@/features/create-event/EventPreviewCard"
-import { eventFormSchema, type EventFormValues } from "@/features/create-event/types"
+import { getEventFormSchema, type EventFormValues } from "@/features/create-event/types"
 import type { Event } from "@/Types/Event"
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Parse UTC ISO string → Date (midnight UTC) — the shape the Calendar picker expects */
 function isoToDate(iso: string): Date {
   const d = parseISO(iso)
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
 }
 
-/** Extract HH:mm from a UTC ISO string — matches the <input type="time"> format */
 function isoToTime(iso: string): string {
   const d = parseISO(iso)
   const h = String(d.getUTCHours()).padStart(2, "0")
@@ -34,7 +28,6 @@ function isoToTime(iso: string): string {
   return `${h}:${m}`
 }
 
-/** Convert an existing Event into the shape RHF's defaultValues / reset() expects */
 function eventToDefaults(event: Event): EventFormValues {
   return {
     title: event.title ?? "",
@@ -49,28 +42,19 @@ function eventToDefaults(event: Event): EventFormValues {
   }
 }
 
-// ─── Props ────────────────────────────────────────────────────────────────────
-
 interface UpdateEventFormProps {
   id: string
   event: Event
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation(["createEvent", "common"])
   const { updateEvent, loading: apiLoading, error: apiError } = useUpdateEvent()
 
-  // ── Step 2: Initialise the form with existing event data ────────────────────
-  //
-  // defaultValues pre-populates every field from the server-fetched event so
-  // the user sees the current values immediately when the edit page opens.
-  // RHF stores these as the "original" values and uses them to compute isDirty.
   const methods = useForm<EventFormValues>({
-    resolver: zodResolver(eventFormSchema),
+    resolver: zodResolver(getEventFormSchema(t)),
     defaultValues: eventToDefaults(event),
-    // "onTouched": validate on blur first, then on change after first submit.
     mode: "onTouched",
   })
 
@@ -81,20 +65,8 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
     formState: { errors, isSubmitting },
   } = methods
 
-  // Combine RHF's isSubmitting with the external API loading flag so the UI
-  // is locked from the moment handleSubmit fires, not only during the fetch.
   const isBusy = isSubmitting || apiLoading
 
-  // ── Step 3: Re-sync the form when the event prop changes ────────────────────
-  //
-  // React Query may refetch in the background and pass a new `event` object.
-  // reset() replaces all field values AND resets the dirty/touched state so
-  // the user doesn't see stale change indicators after a background refresh.
-  //
-  // Dependency array uses stable primitive values (event.id, event.date) rather
-  // than the `event` object reference itself. An object reference changes on
-  // every parent render even if the data is identical, which would trigger an
-  // unnecessary reset() and lose any unsaved edits the user has made.
   useEffect(() => {
     reset(eventToDefaults(event))
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -157,8 +129,8 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
 
     // Guard: nothing changed — inform the user and skip the network call
     if (Object.keys(payload).length === 0) {
-      toast.info("No changes detected", {
-        description: "You haven't modified anything yet.",
+      toast.info(t("noChanges", { ns: "common" }), {
+        description: t("noChangesDesc", { ns: "common" }),
       })
       return
     }
@@ -166,8 +138,8 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
     const result = await updateEvent(id, payload)
 
     if (result === true) {
-      toast.success("Event updated!", {
-        description: `"${values.title}" has been saved successfully.`,
+      toast.success(t("success.updated"), {
+        description: t("success.updatedDesc", { title: values.title }),
       })
       navigate(`/events/${id}`, { replace: true })
     }
@@ -190,10 +162,10 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
             className="gap-2 text-muted-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Back</span>
+            <span className="hidden sm:inline">{t("back", { ns: "common" })}</span>
           </Button>
 
-          <h1 className="text-lg font-bold tracking-tight">Edit Event</h1>
+          <h1 className="text-lg font-bold tracking-tight">{t("pageTitle.edit")}</h1>
 
           {/* Calling handleSubmit() manually triggers validation + onSubmit,
               identical to the native form submit — used for toolbar shortcuts. */}
@@ -206,20 +178,17 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
             className="border-primary text-primary hover:bg-primary/10 gap-1.5"
           >
             {isBusy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            Save Changes
+            {t("actions.saveChanges")}
           </Button>
         </div>
 
-        {/* ── Desktop heading ── */}
         <div className="hidden lg:block px-6 pt-6 pb-2">
-          <h2 className="text-3xl font-bold tracking-tight">Edit Event</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t("headings.edit")}</h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            Update the details below. Fields marked with{" "}
-            <span className="text-destructive font-semibold">*</span> are required.
+            {t("headings.editSub")}
           </p>
         </div>
 
-        {/* ── API error banner ── */}
         {apiError && (
           <div className="mx-4 md:mx-6 mt-4 p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 flex items-start gap-2.5">
             <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
@@ -250,7 +219,6 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
 
           <EventPreviewCard />
 
-          {/* ── Actions ── */}
           <div className="flex flex-col sm:flex-row gap-3 pt-2 pb-8">
             <Button
               type="submit"
@@ -262,10 +230,10 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
               {isBusy ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Saving Changes…
+                  {t("actions.savingChanges")}
                 </>
               ) : (
-                "Save Changes →"
+                t("actions.saveChanges") + " →"
               )}
             </Button>
             <Button
@@ -275,7 +243,7 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
               disabled={isBusy}
               className="px-8 py-6"
             >
-              Cancel
+              {t("cancel", { ns: "common" })}
             </Button>
           </div>
         </form>

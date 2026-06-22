@@ -50,9 +50,9 @@ export function getCategoryBadgeClass(category: string): string {
 // ─── Time-based greeting ───────────────────────────────
 export function getGreeting(): string {
   const h = getHours(new Date())
-  if (h < 12) return "Good Morning"
-  if (h < 17) return "Good Afternoon"
-  return "Good Evening"
+  if (h < 12) return "greeting.morning"
+  if (h < 17) return "greeting.afternoon"
+  return "greeting.evening"
 }
 
 // ─── Category list ─────────────────────────────────────

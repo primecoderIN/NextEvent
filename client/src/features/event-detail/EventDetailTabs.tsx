@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import type { Event } from "@/Types/Event"
 import { AboutTab } from "@/features/event-detail/tabs/AboutTab"
 import { ScheduleTab } from "@/features/event-detail/tabs/ScheduleTab"
@@ -13,6 +14,7 @@ type Tab = (typeof TABS)[number]
 
 export function EventDetailTabs({ event }: EventDetailTabsProps) {
   const [active, setActive] = useState<Tab>("About")
+  const { t } = useTranslation("eventDetail")
 
   return (
     <div>
@@ -28,7 +30,7 @@ export function EventDetailTabs({ event }: EventDetailTabsProps) {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            {tab}
+            {t(`tabs.${tab.toLowerCase()}`)}
           </button>
         ))}
       </div>

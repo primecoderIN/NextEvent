@@ -1,4 +1,5 @@
 import { CheckCircle2 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 
 interface CreateEventSuccessProps {
@@ -11,6 +12,8 @@ export function CreateEventSuccess({
   onViewEvent,
   onBackHome,
 }: CreateEventSuccessProps) {
+  const { t } = useTranslation(["createEvent", "common"])
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center gap-5">
       <div
@@ -21,9 +24,9 @@ export function CreateEventSuccess({
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold">Event Created! 🎉</h2>
+        <h2 className="text-2xl font-bold">{t("success.title")}</h2>
         <p className="text-muted-foreground text-sm max-w-xs">
-          Your event has been successfully published and is now live.
+          {t("success.description")}
         </p>
       </div>
 
@@ -33,10 +36,10 @@ export function CreateEventSuccess({
           className="px-6"
           style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
         >
-          View Event
+          {t("success.viewEvent")}
         </Button>
         <Button variant="outline" onClick={onBackHome}>
-          Back to Home
+          {t("backToHome", { ns: "common" })}
         </Button>
       </div>
     </div>

@@ -1,0 +1,18 @@
+{
+  "back": "वापस",
+  "cancel": "रद्द करें",
+  "save": "सहेजें",
+  "login": "लॉग इन",
+  "signUp": "साइन अप",
+  "createEvent": "इवेंट बनाएं",
+  "logout": "लॉग आउट",
+  "viewProfile": "अपनी प्रोफ़ाइल देखें",
+  "editProfile": "प्रोफ़ाइल संपादित करें",
+  "loading": "लोड हो रहा है…",
+  "backToHome": "होम पर वापस",
+  "backToEvents": "इवेंट्स पर वापस",
+  "required": "आवश्यक",
+  "optional": "वैकल्पिक",
+  "noChanges": "कोई बदलाव नहीं",
+  "noChangesDesc": "आपने अभी तक कुछ भी संशोधित नहीं किया है।"
+}

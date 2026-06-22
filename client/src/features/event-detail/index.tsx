@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { useEventDetail } from "@/hooks/useEventDetail"
 import { useDeleteEvent } from "@/hooks/useDeleteEvent"
 import { EventDetailHero } from "@/features/event-detail/EventDetailHero"
@@ -17,6 +18,7 @@ export function EventDetailPage() {
   const navigate = useNavigate()
   const { event, loading, error } = useEventDetail(id)
   const { deleteEvent, loading: deleting, error: deleteError } = useDeleteEvent()
+  const { t } = useTranslation(["eventDetail", "common"])
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
@@ -27,7 +29,6 @@ export function EventDetailPage() {
       setShowDeleteDialog(false)
       navigate("/", { replace: true })
     }
-    // result === false (404) or null (error) — dialog stays open, error shown inside it
   }
 
   if (loading) return <EventDetailSkeleton />
@@ -36,13 +37,12 @@ export function EventDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6">
         <div className="text-6xl">😕</div>
-        <h2 className="text-xl font-bold">Event not found</h2>
+        <h2 className="text-xl font-bold">{t("notFound.title")}</h2>
         <p className="text-muted-foreground text-sm text-center">
-          We couldn't find this event. It may have been removed or the link is
-          invalid.
+          {t("notFound.description")}
         </p>
         <Button onClick={() => navigate("/")} className="mt-2">
-          Back to Home
+          {t("backToHome", { ns: "common" })}
         </Button>
       </div>
     )
@@ -50,7 +50,6 @@ export function EventDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* ── Delete confirmation dialog ── */}
       <DeleteEventDialog
         open={showDeleteDialog}
         eventTitle={event.title}
@@ -69,7 +68,7 @@ export function EventDetailPage() {
           className="gap-2 text-muted-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to events
+          {t("backToEvents", { ns: "common" })}
         </Button>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
@@ -83,7 +82,7 @@ export function EventDetailPage() {
             size="icon"
             className="rounded-full h-9 w-9 border-primary/40 text-primary hover:bg-primary/10"
             onClick={() => navigate(`/events/${id}/edit`)}
-            title="Edit event"
+            title={t("actions.editEvent")}
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -92,7 +91,7 @@ export function EventDetailPage() {
             size="icon"
             className="rounded-full h-9 w-9 border-destructive/40 text-destructive hover:bg-destructive/10"
             onClick={() => setShowDeleteDialog(true)}
-            title="Delete event"
+            title={t("actions.deleteEvent")}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -108,16 +107,16 @@ export function EventDetailPage() {
           className="gap-2 text-muted-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to events
+          {t("backToEvents", { ns: "common" })}
         </Button>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm" className="gap-2">
             <Heart className="h-4 w-4" />
-            Save
+            {t("actions.save")}
           </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <Share2 className="h-4 w-4" />
-            Share
+            {t("actions.share")}
           </Button>
           <Button
             variant="outline"
@@ -126,7 +125,7 @@ export function EventDetailPage() {
             onClick={() => navigate(`/events/${id}/edit`)}
           >
             <Pencil className="h-4 w-4" />
-            Edit Event
+            {t("actions.editEvent")}
           </Button>
           <Button
             variant="outline"
@@ -135,25 +134,20 @@ export function EventDetailPage() {
             onClick={() => setShowDeleteDialog(true)}
           >
             <Trash2 className="h-4 w-4" />
-            Delete Event
+            {t("actions.deleteEvent")}
           </Button>
         </div>
       </div>
 
       {/* ── Main content grid ── */}
       <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-0">
-        {/* Left column */}
         <div className="lg:border-r lg:border-border/40">
-          {/* Hero banner */}
           <EventDetailHero event={event} />
-
-          {/* Tabs + content */}
           <div className="px-4 md:px-6">
             <EventDetailTabs event={event} />
           </div>
         </div>
 
-        {/* Right column — desktop sidebar */}
         <div className="hidden lg:block px-6 py-6 space-y-6">
           <TicketPanel event={event} />
           <OrganizerCard event={event} />
@@ -164,15 +158,14 @@ export function EventDetailPage() {
       {/* ── Mobile bottom sticky ── */}
       <div className="lg:hidden fixed bottom-0 inset-x-0 bg-background/95 backdrop-blur border-t border-border/40 px-4 py-3 flex items-center gap-3 z-30">
         <div className="flex-1">
-          <p className="text-xs text-muted-foreground">Starting from</p>
+          <p className="text-xs text-muted-foreground">{t("actions.startingFrom")}</p>
           <p className="text-lg font-bold text-primary">₹999</p>
         </div>
         <Button className="flex-1 shadow-lg">
-          Book Tickets
+          {t("actions.bookTickets")}
         </Button>
       </div>
 
-      {/* Bottom padding for mobile sticky bar */}
       <div className="h-24 lg:hidden" />
     </div>
   )

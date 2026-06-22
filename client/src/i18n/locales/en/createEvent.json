@@ -1,0 +1,98 @@
+{
+  "pageTitle": {
+    "create": "Create Event",
+    "edit": "Edit Event"
+  },
+  "headings": {
+    "create": "Create New Event",
+    "edit": "Edit Event",
+    "createSub": "Fields marked with * are required.",
+    "editSub": "Update the details below. Fields marked with * are required."
+  },
+  "actions": {
+    "saveDraft": "Save Draft",
+    "saveChanges": "Save Changes",
+    "publishEvent": "Publish Event →",
+    "savingChanges": "Saving Changes…",
+    "creatingEvent": "Creating Event…"
+  },
+  "sections": {
+    "basicInfo": "Basic Info",
+    "dateTime": "Date & Time",
+    "location": "Location",
+    "preview": "Preview",
+    "gpsCoordinates": "GPS Coordinates"
+  },
+  "fields": {
+    "title": {
+      "label": "Event Title",
+      "placeholder": "Enter a catchy event title",
+      "counter": "{{count}}/100"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Describe what attendees can expect at your event…",
+      "counter": "{{count}}/1000"
+    },
+    "category": {
+      "label": "Category",
+      "placeholder": "Select a category"
+    },
+    "date": {
+      "label": "Event Date",
+      "placeholder": "Pick a date"
+    },
+    "time": {
+      "label": "Start Time"
+    },
+    "city": {
+      "label": "City",
+      "placeholder": "e.g. Mumbai"
+    },
+    "venue": {
+      "label": "Venue",
+      "placeholder": "e.g. NSCI Dome"
+    },
+    "latitude": {
+      "label": "Latitude",
+      "placeholder": "e.g. 19.0760"
+    },
+    "longitude": {
+      "label": "Longitude",
+      "placeholder": "e.g. 72.8777"
+    }
+  },
+  "ai": {
+    "generate": "Generate with AI",
+    "generating": "Generating…",
+    "generateTitle": "Enter a title first to generate a description",
+    "generateHint": "Generate description with AI",
+    "thinking": "AI is thinking…",
+    "suggestion": "AI suggests: {{category}} — click to apply"
+  },
+  "validation": {
+    "titleRequired": "Event title is required",
+    "titleMin": "Title must be at least 3 characters",
+    "titleMax": "Title must be at most 100 characters",
+    "descriptionRequired": "Description is required",
+    "descriptionMin": "Must be at least 10 characters",
+    "descriptionMax": "Must be at most 1000 characters",
+    "categoryRequired": "Please select a category",
+    "dateRequired": "Event date is required",
+    "timeRequired": "Event time is required",
+    "timeFormat": "Invalid time format",
+    "cityRequired": "City is required",
+    "venueRequired": "Venue is required"
+  },
+  "preview": {
+    "titlePlaceholder": "Event title will appear here",
+    "descriptionPlaceholder": "Description preview…"
+  },
+  "success": {
+    "title": "Event Created! 🎉",
+    "description": "Your event has been successfully published and is now live.",
+    "viewEvent": "View Event",
+    "updated": "Event updated!",
+    "updatedDesc": "\"{{title}}\" has been saved successfully."
+  }
+}

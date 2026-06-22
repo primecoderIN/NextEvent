@@ -1,8 +1,5 @@
 import { MapPin, Building2, Globe } from "lucide-react"
-// ── RHF imports ───────────────────────────────────────────────────────────────
-// Controller    — connects native inputs to RHF so their values are tracked.
-// useFormContext — reads the form instance from the nearest <FormProvider>.
-//   No props for control/errors are needed — they come from context.
+import { useTranslation } from "react-i18next"
 import { Controller, useFormContext } from "react-hook-form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,25 +7,17 @@ import type { EventFormValues } from "@/features/create-event/types"
 import { FieldError, SectionTitle } from "@/features/create-event/components"
 
 export function LocationSection() {
-  // ── Step 1: Access form state from context ────────────────────────────────
+  const { t } = useTranslation(["createEvent", "common"])
   const { control, formState: { errors } } = useFormContext<EventFormValues>()
 
   return (
     <section className="space-y-5">
-      <SectionTitle icon={<MapPin className="h-4 w-4" />} title="Location" />
+      <SectionTitle icon={<MapPin className="h-4 w-4" />} title={t("sections.location")} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-        {/* ── City field ──────────────────────────────────────────────────────
-            Controller wraps the Input and injects `field` via render prop.
-            Spreading {...field} onto the Input connects:
-              field.value    → controlled input value managed by RHF
-              field.onChange → updates RHF state on every keystroke
-              field.onBlur   → triggers "onTouched" validation when focus leaves
-              field.ref      → allows RHF to focus the field on validation error */}
         <div className="space-y-1.5">
           <Label htmlFor="event-city">
-            City <span className="text-destructive">*</span>
+            {t("fields.city.label")} <span className="text-destructive">*</span>
           </Label>
           <div className="relative">
             <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -38,7 +27,7 @@ export function LocationSection() {
               render={({ field }) => (
                 <Input
                   id="event-city"
-                  placeholder="e.g. Mumbai"
+                  placeholder={t("fields.city.placeholder")}
                   aria-invalid={!!errors.city}
                   className="pl-10"
                   {...field}
@@ -46,14 +35,12 @@ export function LocationSection() {
               )}
             />
           </div>
-          {/* errors.city?.message is set by zodResolver when z.string().min(1) fails */}
           <FieldError msg={errors.city?.message} />
         </div>
 
-        {/* ── Venue field ─────────────────────────────────────────────────── */}
         <div className="space-y-1.5">
           <Label htmlFor="event-venue">
-            Venue <span className="text-destructive">*</span>
+            {t("fields.venue.label")} <span className="text-destructive">*</span>
           </Label>
           <div className="relative">
             <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -63,7 +50,7 @@ export function LocationSection() {
               render={({ field }) => (
                 <Input
                   id="event-venue"
-                  placeholder="e.g. NSCI Dome"
+                  placeholder={t("fields.venue.placeholder")}
                   aria-invalid={!!errors.venue}
                   className="pl-10"
                   {...field}
@@ -73,21 +60,16 @@ export function LocationSection() {
           </div>
           <FieldError msg={errors.venue?.message} />
         </div>
-
       </div>
 
-      {/* ── GPS Coordinates — optional fields ──────────────────────────────────
-          These fields are marked optional in the Zod schema (z.string().optional()),
-          so RHF won't produce a validation error if they are left empty.
-          On submit, the parent converts them from string → number via parseFloat(). */}
       <div className="rounded-xl border border-border/60 bg-muted/30 p-4 space-y-3">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          GPS Coordinates{" "}
-          <span className="font-normal normal-case">(optional)</span>
+          {t("sections.gpsCoordinates")}{" "}
+          <span className="font-normal normal-case">({t("optional", { ns: "common" })})</span>
         </p>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="event-latitude">Latitude</Label>
+            <Label htmlFor="event-latitude">{t("fields.latitude.label")}</Label>
             <Controller
               name="latitude"
               control={control}
@@ -96,14 +78,14 @@ export function LocationSection() {
                   id="event-latitude"
                   type="number"
                   step="any"
-                  placeholder="e.g. 19.0760"
+                  placeholder={t("fields.latitude.placeholder")}
                   {...field}
                 />
               )}
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="event-longitude">Longitude</Label>
+            <Label htmlFor="event-longitude">{t("fields.longitude.label")}</Label>
             <Controller
               name="longitude"
               control={control}
@@ -112,7 +94,7 @@ export function LocationSection() {
                   id="event-longitude"
                   type="number"
                   step="any"
-                  placeholder="e.g. 72.8777"
+                  placeholder={t("fields.longitude.placeholder")}
                   {...field}
                 />
               )}

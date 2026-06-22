@@ -1,5 +1,6 @@
 // ─── Shared form types, constants & Zod schema for Create/Edit Event ──────────
 import { z } from "zod"
+import { TFunction } from "i18next"
 
 export const CATEGORIES = [
   "Music",
@@ -19,42 +20,40 @@ export const CATEGORIES = [
   "Other",
 ] as const
 
-// ── Step 1: Define the Zod validation schema ──────────────────────────────────
-//
-// This schema serves as the single source of truth for:
-//   - Field shapes (string, Date, optional)
-//   - Validation rules (min length, regex, required)
-//   - TypeScript types (inferred via z.infer below)
-//
-// It is passed to zodResolver() inside useForm() so RHF delegates all
-// validation logic to Zod instead of writing validate functions manually.
-export const eventFormSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Event title is required")
-    .min(3, "Title must be at least 3 characters")
-    .max(100, "Title must be at most 100 characters"),
-  description: z
-    .string()
-    .min(1, "Description is required")
-    .min(10, "Must be at least 10 characters")
-    .max(1000, "Must be at most 1000 characters"),
-  category: z.string().min(1, "Please select a category"),
-  // date is a JS Date object, not a string — the shadcn Calendar picker returns
-  // a Date, so we validate it as z.date(). On submit we convert it to ISO string.
-  date: z.date({ required_error: "Event date is required" }),
-  time: z.string().min(1, "Event time is required").regex(/^\d{2}:\d{2}$/, "Invalid time format"),
-  city: z.string().min(1, "City is required"),
-  venue: z.string().min(1, "Venue is required"),
-  // Latitude and longitude are optional strings from the input; we parse them
-  // to floats on submit rather than storing numbers in the form state.
+// We define the base schema without messages to infer the type safely
+export const baseEventFormSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  category: z.string(),
+  date: z.date(),
+  time: z.string(),
+  city: z.string(),
+  venue: z.string(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
 })
 
-// ── Step 2: Infer the TypeScript type from the schema ────────────────────────
-//
-// z.infer<> derives the TypeScript type automatically from the Zod schema.
-// This means the type and the validation rules can never drift apart —
-// updating the schema updates the type automatically.
-export type EventFormValues = z.infer<typeof eventFormSchema>
+export type EventFormValues = z.infer<typeof baseEventFormSchema>
+
+// ── Step 1: Define the Zod validation schema via a factory function ───────────
+// We use a factory function to inject `t` so error messages update when language changes.
+export const getEventFormSchema = (t: TFunction<"createEvent">) =>
+  z.object({
+    title: z
+      .string()
+      .min(1, t("validation.titleRequired"))
+      .min(3, t("validation.titleMin"))
+      .max(100, t("validation.titleMax")),
+    description: z
+      .string()
+      .min(1, t("validation.descriptionRequired"))
+      .min(10, t("validation.descriptionMin"))
+      .max(1000, t("validation.descriptionMax")),
+    category: z.string().min(1, t("validation.categoryRequired")),
+    date: z.date({ required_error: t("validation.dateRequired") }),
+    time: z.string().min(1, t("validation.timeRequired")).regex(/^\d{2}:\d{2}$/, t("validation.timeFormat")),
+    city: z.string().min(1, t("validation.cityRequired")),
+    venue: z.string().min(1, t("validation.venueRequired")),
+    latitude: z.string().optional(),
+    longitude: z.string().optional(),
+  })

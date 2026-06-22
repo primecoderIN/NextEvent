@@ -1,0 +1,57 @@
+{
+  "hero": {
+    "cancelled": "Cancelled"
+  },
+  "tabs": {
+    "about": "About",
+    "schedule": "Schedule",
+    "venue": "Venue"
+  },
+  "about": {
+    "title": "About This Event",
+    "cancelledNotice": "⚠️ This event has been cancelled. Please contact the organizer for refund information.",
+    "highlights": {
+      "livePerformances": "Live Performances",
+      "worldClassProduction": "World Class Production",
+      "foodAndBeverages": "Food & Beverages",
+      "secureEntry": "Secure Entry"
+    }
+  },
+  "actions": {
+    "save": "Save",
+    "share": "Share",
+    "editEvent": "Edit Event",
+    "deleteEvent": "Delete Event",
+    "bookTickets": "Book Tickets",
+    "startingFrom": "Starting from"
+  },
+  "notFound": {
+    "title": "Event not found",
+    "description": "We couldn't find this event. It may have been removed or the link is invalid."
+  },
+  "delete": {
+    "title": "Delete Event",
+    "description": "You are about to permanently delete <strong>\"{{title}}\"</strong>. This action <destructive>cannot be undone</destructive> and will remove the event for all attendees.",
+    "confirm": "Yes, Delete Event",
+    "deleting": "Deleting…"
+  },
+  "ticket": {
+    "bookTickets": "Book Tickets",
+    "earlyBirdEnds": "Early bird ends in {{countdown}}",
+    "bookNow": "Book Now",
+    "secureCheckout": "Secure checkout. Your data is protected.",
+    "ticketsLeft": "Only {{count}} tickets left!",
+    "tiers": {
+      "earlyBird": "Early Bird",
+      "generalAdmission": "General Admission",
+      "vipPass": "VIP Pass",
+      "bestPrice": "Best Price"
+    },
+    "perks": {
+      "entry": "Entry to the event",
+      "generalZone": "Access to general zone",
+      "vipLounge": "VIP lounge access",
+      "foodCoupons": "Food & beverage coupons"
+    }
+  }
+}

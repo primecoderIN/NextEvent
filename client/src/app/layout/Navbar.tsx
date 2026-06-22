@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import {
   Menu,
   CalendarDays,
@@ -15,20 +16,20 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { BottomSheet } from "@/components/ui/sheet"
+import { LanguageSwitcher } from "@/components/LanguageSwitcher"
 
 const navItems = [
-  { icon: Home, label: "Home", href: "#" },
-  { icon: Search, label: "Explore Events", href: "#" },
-  { icon: Ticket, label: "My Tickets", href: "#" },
-  { icon: Heart, label: "Following", href: "#" },
-  { icon: CalendarDays, label: "My Events", href: "#" },
+  { icon: Home, labelKey: "home", href: "#" },
+  { icon: Search, labelKey: "exploreEvents", href: "#" },
+  { icon: Ticket, labelKey: "myTickets", href: "#" },
+  { icon: Heart, labelKey: "following", href: "#" },
+  { icon: CalendarDays, labelKey: "myEvents", href: "#" },
 ]
-
-
 
 export const Navbar = () => {
   const [sheetOpen, setSheetOpen] = useState(false)
   const navigate = useNavigate()
+  const { t } = useTranslation(["nav", "common"])
 
   return (
     <>
@@ -42,29 +43,31 @@ export const Navbar = () => {
 
           {/* Desktop nav links */}
           <nav className="hidden md:flex items-center gap-6 flex-1">
-            {navItems.map(({ label, href }) => (
+            {navItems.map(({ labelKey, href }) => (
               <a
-                key={label}
+                key={labelKey}
                 href={href}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                {label}
+                {t(labelKey, { ns: "nav" })}
               </a>
             ))}
           </nav>
 
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-2 ml-auto">
-            <Button variant="ghost" size="sm">Login</Button>
-            <Button size="sm">Sign Up</Button>
+            <LanguageSwitcher className="mr-2" />
+            <Button variant="ghost" size="sm">{t("login", { ns: "common" })}</Button>
+            <Button size="sm">{t("signUp", { ns: "common" })}</Button>
           </div>
 
           {/* Mobile hamburger */}
-          <div className="flex md:hidden ml-auto">
+          <div className="flex md:hidden ml-auto items-center gap-3">
+            <LanguageSwitcher />
             <Button
               variant="ghost"
               size="icon"
-              aria-label="Toggle menu"
+              aria-label={t("toggleMenu", { ns: "nav" })}
               onClick={() => setSheetOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -93,14 +96,14 @@ export const Navbar = () => {
                   href="#"
                   className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5"
                 >
-                  View your profile
+                  {t("viewProfile", { ns: "common" })}
                   <ChevronRight className="h-3 w-3" />
                 </a>
               </div>
             </div>
             <button
               className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              aria-label="Edit profile"
+              aria-label={t("editProfile", { ns: "common" })}
             >
               <Pencil className="h-4 w-4" />
             </button>
@@ -108,9 +111,9 @@ export const Navbar = () => {
 
           {/* Primary nav */}
           <nav className="mt-2 flex flex-col">
-            {navItems.map(({ icon: Icon, label, href }) => (
+            {navItems.map(({ icon: Icon, labelKey, href }) => (
               <a
-                key={label}
+                key={labelKey}
                 href={href}
                 onClick={() => setSheetOpen(false)}
                 className="flex items-center justify-between px-2 py-3.5 rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors group"
@@ -119,7 +122,7 @@ export const Navbar = () => {
                   <div className="h-9 w-9 rounded-xl bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
                     <Icon className="h-4.5 w-4.5 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
-                  {label}
+                  {t(labelKey, { ns: "nav" })}
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
               </a>
@@ -138,7 +141,7 @@ export const Navbar = () => {
               <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
                 <Plus className="h-4 w-4" />
               </div>
-              Create Event
+              {t("createEvent", { ns: "common" })}
             </button>
           </div>
 
@@ -151,7 +154,7 @@ export const Navbar = () => {
               <div className="h-9 w-9 rounded-xl bg-destructive/10 flex items-center justify-center">
                 <LogOut className="h-4.5 w-4.5 text-destructive" />
               </div>
-              Logout
+              {t("logout", { ns: "common" })}
             </button>
           </div>
         </div>

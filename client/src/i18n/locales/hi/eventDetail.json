@@ -1,0 +1,57 @@
+{
+  "hero": {
+    "cancelled": "रद्द"
+  },
+  "tabs": {
+    "about": "के बारे में",
+    "schedule": "शेड्यूल",
+    "venue": "स्थान"
+  },
+  "about": {
+    "title": "इस इवेंट के बारे में",
+    "cancelledNotice": "⚠️ यह इवेंट रद्द कर दिया गया है। रिफंड के लिए आयोजक से संपर्क करें।",
+    "highlights": {
+      "livePerformances": "लाइव परफॉर्मेंस",
+      "worldClassProduction": "विश्वस्तरीय प्रस्तुति",
+      "foodAndBeverages": "खाना-पीना",
+      "secureEntry": "सुरक्षित प्रवेश"
+    }
+  },
+  "actions": {
+    "save": "सहेजें",
+    "share": "साझा करें",
+    "editEvent": "इवेंट संपादित करें",
+    "deleteEvent": "इवेंट हटाएं",
+    "bookTickets": "टिकट बुक करें",
+    "startingFrom": "शुरू से"
+  },
+  "notFound": {
+    "title": "इवेंट नहीं मिला",
+    "description": "यह इवेंट नहीं मिल सका। इसे हटाया जा सकता है या लिंक अमान्य हो सकता है।"
+  },
+  "delete": {
+    "title": "इवेंट हटाएं",
+    "description": "<strong>\"{{title}}\"</strong> को स्थायी रूप से हटाने वाले हैं। यह क्रिया <destructive>पूर्ववत नहीं की जा सकती</destructive> और सभी प्रतिभागियों के लिए इवेंट हट जाएगा।",
+    "confirm": "हाँ, इवेंट हटाएं",
+    "deleting": "हटाया जा रहा है…"
+  },
+  "ticket": {
+    "bookTickets": "टिकट बुक करें",
+    "earlyBirdEnds": "अर्ली बर्ड समाप्त: {{countdown}}",
+    "bookNow": "अभी बुक करें",
+    "secureCheckout": "सुरक्षित चेकआउट। आपका डेटा सुरक्षित है।",
+    "ticketsLeft": "केवल {{count}} टिकट बचे हैं!",
+    "tiers": {
+      "earlyBird": "अर्ली बर्ड",
+      "generalAdmission": "सामान्य प्रवेश",
+      "vipPass": "वीआईपी पास",
+      "bestPrice": "सर्वोत्तम मूल्य"
+    },
+    "perks": {
+      "entry": "इवेंट में प्रवेश",
+      "generalZone": "सामान्य क्षेत्र में प्रवेश",
+      "vipLounge": "वीआईपी लाउंज प्रवेश",
+      "foodCoupons": "खाना-पीना कूपन"
+    }
+  }
+}

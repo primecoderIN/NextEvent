@@ -1,4 +1,5 @@
 import { Bell } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { getGreeting } from "@/features/home/helpers"
 
 interface GreetingHeaderProps {
@@ -10,16 +11,18 @@ export function GreetingHeader({
   username,
   notificationCount,
 }: GreetingHeaderProps) {
+  const { t } = useTranslation("home")
+
   return (
     <div className="flex items-start justify-between">
       <div>
         <p className="text-muted-foreground text-sm font-medium">
-          {getGreeting()}, {username} 👋
+          {t(getGreeting())}, {username} 👋
         </p>
         <h1 className="text-2xl md:text-3xl font-bold leading-tight mt-0.5">
-          Discover amazing events
+          {t("hero.line1")}
           <br className="hidden sm:block" />
-          happening around you.
+          {t("hero.line2")}
         </h1>
       </div>
 

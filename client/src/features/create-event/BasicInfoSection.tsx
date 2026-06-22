@@ -1,12 +1,5 @@
 import { Loader2, Sparkles, Tag, Type } from "lucide-react"
-// ── Step 1: Read form context and watch values ────────────────────────────────
-// useFormContext() — retrieves the form instance created by useForm() in the
-//   parent page and shared via <FormProvider>. No props needed.
-// Controller  — the RHF component for wrapping uncontrolled/third-party inputs.
-//   It injects { field, fieldState } into the render prop.
-// useWatch    — subscribes to field values and re-renders when they change.
-//   Used here instead of getValues() because we need reactive, live values
-//   (e.g. for the character counter, AI button enable state, and suggestion chip).
+import { useTranslation } from "react-i18next"
 import { Controller, useFormContext, useWatch } from "react-hook-form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -26,6 +19,15 @@ import { FieldError, SectionTitle } from "@/features/create-event/components"
 import { useGenerateDescription } from "@/hooks/useGenerateDescription"
 import { useSuggestCategory } from "@/hooks/useSuggestCategory"
 
+// ── Step 1: Read form context and watch values ────────────────────────────────
+// useFormContext() — retrieves the form instance created by useForm() in the
+//   parent page and shared via <FormProvider>. No props needed.
+// Controller  — the RHF component for wrapping uncontrolled/third-party inputs.
+//   It injects { field, fieldState } into the render prop.
+// useWatch    — subscribes to field values and re-renders when they change.
+//   Used here instead of getValues() because we need reactive, live values
+//   (e.g. for the character counter, AI button enable state, and suggestion chip).
+
 interface BasicInfoSectionProps {
   // Only the AI description callback is passed as a prop — everything else
   // (control, errors, setValue) comes from the form context.
@@ -33,6 +35,8 @@ interface BasicInfoSectionProps {
 }
 
 export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionProps) {
+  const { t } = useTranslation(["createEvent", "common"])
+
   // ── Step 2: Access the form instance from context ─────────────────────────
   //
   // useFormContext<EventFormValues>() returns the same object that useForm()
@@ -89,17 +93,11 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
 
   return (
     <section className="space-y-5">
-      <SectionTitle icon={<Type className="h-4 w-4" />} title="Basic Info" />
+      <SectionTitle icon={<Type className="h-4 w-4" />} title={t("sections.basicInfo")} />
 
-      {/* ── Title field ──────────────────────────────────────────────────────────
-          Controller wraps the shadcn Input and bridges it to RHF.
-          The render prop receives `field` which contains:
-            value, onChange, onBlur, name, ref
-          Spreading {...field} onto the input wires all of these up automatically.
-          aria-invalid uses the errors object from context to set the ARIA state. */}
       <div className="space-y-1.5">
         <Label htmlFor="event-title">
-          Event Title <span className="text-destructive">*</span>
+          {t("fields.title.label")} <span className="text-destructive">*</span>
         </Label>
         <Controller
           name="title"
@@ -109,31 +107,27 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
               <Input
                 id="event-title"
                 maxLength={100}
-                placeholder="Enter a catchy event title"
+                placeholder={t("fields.title.placeholder")}
                 aria-invalid={!!errors.title}
                 className="pr-14"
                 // Spread field last so RHF's value/onChange/onBlur/ref take effect
                 {...field}
               />
-              {/* field.value is live — same value tracked by useWatch above */}
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground tabular-nums pointer-events-none">
-                {(field.value ?? "").length}/100
+                {t("fields.title.counter", { count: (field.value ?? "").length })}
               </span>
             </div>
           )}
         />
-        {/* FieldError reads errors.title.message — populated by zodResolver */}
         <FieldError msg={errors.title?.message} />
       </div>
 
-      {/* ── Description field ────────────────────────────────────────────────── */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between gap-2">
           <Label htmlFor="event-description">
-            Description <span className="text-destructive">*</span>
+            {t("fields.description.label")} <span className="text-destructive">*</span>
           </Label>
 
-          {/* ✨ Generate with AI — disabled until title has ≥ 3 chars (from useWatch) */}
           <Button
             type="button"
             variant="outline"
@@ -147,8 +141,8 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
             )}
             title={
               !canGenerate
-                ? "Enter a title first to generate a description"
-                : "Generate description with AI"
+                ? t("ai.generateTitle")
+                : t("ai.generateHint")
             }
           >
             {generating ? (
@@ -156,7 +150,7 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
             ) : (
               <Sparkles className="h-3 w-3" />
             )}
-            {generating ? "Generating…" : "Generate with AI"}
+            {generating ? t("ai.generating") : t("ai.generate")}
           </Button>
         </div>
 
@@ -169,13 +163,13 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
                 id="event-description"
                 maxLength={1000}
                 rows={4}
-                placeholder="Describe what attendees can expect at your event…"
+                placeholder={t("fields.description.placeholder")}
                 aria-invalid={!!errors.description}
                 className={cn("pb-7", generating && "opacity-60 pointer-events-none")}
                 {...field}
               />
               <span className="absolute right-3 bottom-2.5 text-xs text-muted-foreground tabular-nums pointer-events-none">
-                {(field.value ?? "").length}/1000
+                {t("fields.description.counter", { count: (field.value ?? "").length })}
               </span>
             </div>
           )}
@@ -185,13 +179,9 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
         <FieldError msg={errors.description?.message} />
       </div>
 
-      {/* ── Category field — shadcn Select wrapped in Controller ────────────────
-          Select is a third-party component that doesn't expose a native input ref.
-          Controller's render prop gives us `field.onChange` and `field.value`
-          which we wire to Select's `onValueChange` and `value` props. */}
       <div className="space-y-1.5">
         <Label htmlFor="event-category">
-          Category <span className="text-destructive">*</span>
+          {t("fields.category.label")} <span className="text-destructive">*</span>
         </Label>
         <Controller
           name="category"
@@ -204,7 +194,7 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
                 className={cn(errors.category && "border-destructive/60 bg-destructive/5")}
               >
                 <Tag className="h-4 w-4 text-muted-foreground shrink-0" />
-                <SelectValue placeholder="Select a category" />
+                <SelectValue placeholder={t("fields.category.placeholder")} />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map((cat) => (
@@ -217,16 +207,12 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
           )}
         />
 
-        {/* AI suggestion chip — only visible when category is empty (from useWatch).
-            Uses setValue() to update the field — NOT a nested Controller.
-            Nesting a Controller inside another Controller's render prop creates a
-            duplicate field registration and is an explicit RHF anti-pattern. */}
         {(suggestion || suggesting) && !category && (
           <div className="flex items-center gap-2 mt-1.5">
             {suggesting ? (
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                AI is thinking…
+                {t("ai.thinking")}
               </span>
             ) : suggestion ? (
               <button
@@ -240,7 +226,7 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
                 )}
               >
                 <Sparkles className="h-3 w-3" />
-                AI suggests: {suggestion} — click to apply
+                {t("ai.suggestion", { category: suggestion })}
               </button>
             ) : null}
           </div>
