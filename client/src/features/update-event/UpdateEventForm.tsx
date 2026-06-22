@@ -1,6 +1,11 @@
-import { useState, useRef, useEffect } from "react"
-import { format, parseISO } from "date-fns"
+import { useEffect } from "react"
+import { parseISO } from "date-fns"
 import { useNavigate } from "react-router-dom"
+// ── Step 1: Import useForm and FormProvider ───────────────────────────────────
+// Same pattern as CreateEventPage — useForm initialises the form instance,
+// FormProvider shares it through context so child sections need zero props.
+import { useForm, FormProvider } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
 import { useUpdateEvent } from "@/hooks/useUpdateEvent"
@@ -10,49 +15,33 @@ import { BasicInfoSection } from "@/features/create-event/BasicInfoSection"
 import { DateTimeSection } from "@/features/create-event/DateTimeSection"
 import { LocationSection } from "@/features/create-event/LocationSection"
 import { EventPreviewCard } from "@/features/create-event/EventPreviewCard"
-import type { FormState, FormErrors } from "@/features/create-event/types"
+import { eventFormSchema, type EventFormValues } from "@/features/create-event/types"
 import type { Event } from "@/Types/Event"
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/**
- * Extract the UTC date portion of an ISO string as "yyyy-MM-dd".
- * Uses date-fns parseISO + format so parsing is always strict and consistent.
- */
-function toDateInput(iso: string): string {
-  try {
-    // parseISO respects the Z suffix and returns a Date in UTC.
-    // format(..., "yyyy-MM-dd") uses the LOCAL representation, but since
-    // the API always sends Z-suffixed strings, toDateInput is only used to
-    // round-trip the value back into the <input type="date"> which expects
-    // the same format we'll reattach Z to on submit — so we format as UTC.
-    const d = parseISO(iso)
-    return format(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())), "yyyy-MM-dd")
-  } catch {
-    return ""
-  }
+/** Parse UTC ISO string → Date (midnight UTC) — the shape the Calendar picker expects */
+function isoToDate(iso: string): Date {
+  const d = parseISO(iso)
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
 }
 
-/**
- * Extract the UTC time portion of an ISO string as "HH:mm".
- */
-function toTimeInput(iso: string): string {
-  try {
-    const d = parseISO(iso)
-    return format(new Date(Date.UTC(1970, 0, 1, d.getUTCHours(), d.getUTCMinutes())), "HH:mm")
-  } catch {
-    return ""
-  }
+/** Extract HH:mm from a UTC ISO string — matches the <input type="time"> format */
+function isoToTime(iso: string): string {
+  const d = parseISO(iso)
+  const h = String(d.getUTCHours()).padStart(2, "0")
+  const m = String(d.getUTCMinutes()).padStart(2, "0")
+  return `${h}:${m}`
 }
 
-/** Build initial FormState from an existing Event */
-function eventToFormState(event: Event): FormState {
+/** Convert an existing Event into the shape RHF's defaultValues / reset() expects */
+function eventToDefaults(event: Event): EventFormValues {
   return {
     title: event.title ?? "",
     description: event.description ?? "",
     category: event.category ?? "",
-    date: event.date ? toDateInput(event.date) : "",
-    time: event.date ? toTimeInput(event.date) : "",
+    date: event.date ? isoToDate(event.date) : new Date(),
+    time: event.date ? isoToTime(event.date) : "",
     city: event.city ?? "",
     venue: event.venue ?? "",
     latitude: event.latitude != null ? String(event.latitude) : "",
@@ -71,82 +60,102 @@ interface UpdateEventFormProps {
 
 export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
   const navigate = useNavigate()
-  const { updateEvent, loading: saving, error: apiError } = useUpdateEvent()
-  const formRef = useRef<HTMLFormElement>(null)
+  const { updateEvent, loading: apiLoading, error: apiError } = useUpdateEvent()
 
-  const [form, setForm] = useState<FormState>(() => eventToFormState(event))
-  const [errors, setErrors] = useState<FormErrors>({})
+  // ── Step 2: Initialise the form with existing event data ────────────────────
+  //
+  // defaultValues pre-populates every field from the server-fetched event so
+  // the user sees the current values immediately when the edit page opens.
+  // RHF stores these as the "original" values and uses them to compute isDirty.
+  const methods = useForm<EventFormValues>({
+    resolver: zodResolver(eventFormSchema),
+    defaultValues: eventToDefaults(event),
+    // "onTouched": validate on blur first, then on change after first submit.
+    mode: "onTouched",
+  })
 
-  // Re-sync form if the event prop changes (e.g. React Query refetch)
+  const {
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = methods
+
+  // Combine RHF's isSubmitting with the external API loading flag so the UI
+  // is locked from the moment handleSubmit fires, not only during the fetch.
+  const isBusy = isSubmitting || apiLoading
+
+  // ── Step 3: Re-sync the form when the event prop changes ────────────────────
+  //
+  // React Query may refetch in the background and pass a new `event` object.
+  // reset() replaces all field values AND resets the dirty/touched state so
+  // the user doesn't see stale change indicators after a background refresh.
+  //
+  // Dependency array uses stable primitive values (event.id, event.date) rather
+  // than the `event` object reference itself. An object reference changes on
+  // every parent render even if the data is identical, which would trigger an
+  // unnecessary reset() and lose any unsaved edits the user has made.
   useEffect(() => {
-    setForm(eventToFormState(event))
-  }, [event])
+    reset(eventToDefaults(event))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event.id, event.date, reset])
 
-  // ── Field handlers ───────────────────────────────────────────────────────────
-
-  function setField(field: keyof FormState) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((prev) => ({ ...prev, [field]: e.target.value }))
-      if (errors[field as keyof FormErrors]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }))
-      }
-    }
+  // ── Step 4: Programmatic field update (AI description generator) ────────────
+  //
+  // setValue() is the RHF API for updating a field outside of a Controller.
+  // shouldValidate re-runs Zod for the field so an error clears immediately.
+  // shouldDirty marks the field as changed so the form knows it was modified.
+  function handleDescriptionGenerated(description: string) {
+    setValue("description", description, { shouldValidate: true, shouldDirty: true })
   }
 
-  function setCategory(value: string) {
-    setForm((prev) => ({ ...prev, category: value }))
-    if (errors.category) setErrors((prev) => ({ ...prev, category: undefined }))
-  }
-
-  // ── Validation ───────────────────────────────────────────────────────────────
-
-  function validate(): boolean {
-    const e: FormErrors = {}
-    if (!form.title.trim()) e.title = "Event title is required"
-    else if (form.title.length < 3) e.title = "Title must be at least 3 characters"
-    if (!form.description.trim()) e.description = "Description is required"
-    else if (form.description.length < 10) e.description = "Must be at least 10 characters"
-    if (!form.category) e.category = "Please select a category"
-    if (!form.date) e.date = "Event date is required"
-    if (!form.time) e.time = "Event time is required"
-    if (!form.city.trim()) e.city = "City is required"
-    if (!form.venue.trim()) e.venue = "Venue is required"
-    setErrors(e)
-    return Object.keys(e).length === 0
-  }
-
-  // ── Submit ───────────────────────────────────────────────────────────────────
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!validate()) return
-
-    // ── Build a partial payload: only include fields that actually changed ──
+  // ── Step 5: Submit handler ───────────────────────────────────────────────────
+  //
+  // RHF calls onSubmit only after Zod validation passes. The `values` parameter
+  // is fully typed — no casting needed. We build a partial payload containing
+  // only the fields that differ from the original event to minimise the PATCH.
+  async function onSubmit(values: EventFormValues) {
     const payload: Parameters<typeof updateEvent>[1] = {}
 
-    if (form.title.trim() !== event.title) payload.title = form.title.trim()
-    if (form.description.trim() !== event.description) payload.description = form.description.trim()
-    if (form.category !== event.category) payload.category = form.category
-    if (form.city.trim() !== event.city) payload.city = form.city.trim()
-    if (form.venue.trim() !== event.venue) payload.venue = form.venue.trim()
+    // String field diff — only include if the trimmed value actually changed
+    if (values.title.trim() !== event.title) payload.title = values.title.trim()
+    if (values.description.trim() !== event.description) payload.description = values.description.trim()
+    if (values.category !== event.category) payload.category = values.category
+    if (values.city.trim() !== event.city) payload.city = values.city.trim()
+    if (values.venue.trim() !== event.venue) payload.venue = values.venue.trim()
 
-    // Compare date & time against what was originally loaded from the event
-    const originalDate = event.date ? toDateInput(event.date) : ""
-    const originalTime = event.date ? toTimeInput(event.date) : ""
-    if (form.date !== originalDate || form.time !== originalTime) {
-      // The date/time inputs display UTC values.
-      // Re-attach Z so parseISO treats the combined string as UTC,
-      // then toISOString() gives us the canonical Zulu format for the API.
-      payload.date = parseISO(`${form.date}T${form.time}:00Z`).toISOString()
+    // Date diff — compare each UTC component separately to avoid timezone issues
+    const originalDate = event.date ? isoToDate(event.date) : null
+    const originalTime = event.date ? isoToTime(event.date) : ""
+
+    const dateChanged =
+      !originalDate ||
+      values.date.getUTCFullYear() !== originalDate.getUTCFullYear() ||
+      values.date.getUTCMonth() !== originalDate.getUTCMonth() ||
+      values.date.getUTCDate() !== originalDate.getUTCDate()
+
+    if (dateChanged || values.time !== originalTime) {
+      // Reconstruct a UTC ISO string from the Date object + time string
+      const [hours, minutes] = values.time.split(":").map(Number)
+      const utcDate = new Date(
+        Date.UTC(
+          values.date.getUTCFullYear(),
+          values.date.getUTCMonth(),
+          values.date.getUTCDate(),
+          hours,
+          minutes
+        )
+      )
+      payload.date = utcDate.toISOString()
     }
 
-    // Compare GPS — treat empty string as "no value"
-    const newLat = form.latitude ? parseFloat(form.latitude) : undefined
-    const newLng = form.longitude ? parseFloat(form.longitude) : undefined
+    // GPS diff — parse optional string fields to numbers for comparison
+    const newLat = values.latitude ? parseFloat(values.latitude) : undefined
+    const newLng = values.longitude ? parseFloat(values.longitude) : undefined
     if (newLat !== event.latitude) payload.latitude = newLat
     if (newLng !== event.longitude) payload.longitude = newLng
 
-    // Nothing changed — skip the network call
+    // Guard: nothing changed — inform the user and skip the network call
     if (Object.keys(payload).length === 0) {
       toast.info("No changes detected", {
         description: "You haven't modified anything yet.",
@@ -158,115 +167,119 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
 
     if (result === true) {
       toast.success("Event updated!", {
-        description: `"${form.title}" has been saved successfully.`,
+        description: `"${values.title}" has been saved successfully.`,
       })
       navigate(`/events/${id}`, { replace: true })
     }
   }
 
-  // ── Form ─────────────────────────────────────────────────────────────────────
-
+  // ── Step 6: Render — wrap in FormProvider ────────────────────────────────────
+  //
+  // Spreading `methods` onto FormProvider passes the full form API through
+  // React context. Child sections (BasicInfoSection, etc.) call useFormContext()
+  // to read control, errors, and setValue without receiving any props.
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* ── Top bar ── */}
-      <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border/40 sticky top-0 bg-background/95 backdrop-blur z-10">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(-1)}
-          className="gap-2 text-muted-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Back</span>
-        </Button>
-
-        <h1 className="text-lg font-bold tracking-tight">Edit Event</h1>
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => formRef.current?.requestSubmit()}
-          disabled={saving}
-          className="border-primary text-primary hover:bg-primary/10 gap-1.5"
-        >
-          {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          Save Changes
-        </Button>
-      </div>
-
-      {/* ── Desktop heading ── */}
-      <div className="hidden lg:block px-6 pt-6 pb-2">
-        <h2 className="text-3xl font-bold tracking-tight">Edit Event</h2>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Update the details below. Fields marked with{" "}
-          <span className="text-destructive font-semibold">*</span> are required.
-        </p>
-      </div>
-
-      {/* ── API error banner ── */}
-      {apiError && (
-        <div className="mx-4 md:mx-6 mt-4 p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 flex items-start gap-2.5">
-          <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
-          <p className="text-sm text-destructive">{apiError}</p>
-        </div>
-      )}
-
-      {/* ── Form ── */}
-      <form
-        ref={formRef}
-        onSubmit={handleSubmit}
-        noValidate
-        className="px-4 md:px-6 py-6 space-y-8"
-      >
-        <BasicInfoSection
-          form={form}
-          errors={errors}
-          onFieldChange={setField}
-          onCategoryChange={setCategory}
-        />
-
-        <Divider />
-
-        <DateTimeSection form={form} errors={errors} onFieldChange={setField} />
-
-        <Divider />
-
-        <LocationSection form={form} errors={errors} onFieldChange={setField} />
-
-        <Divider />
-
-        <EventPreviewCard form={form} />
-
-        {/* ── Actions ── */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-2 pb-8">
+    <FormProvider {...methods}>
+      <div className="max-w-4xl mx-auto">
+        {/* ── Top bar ── */}
+        <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-border/40 sticky top-0 bg-background/95 backdrop-blur z-10">
           <Button
-            type="submit"
-            id="update-event-submit"
-            disabled={saving}
-            className="flex-1 py-6 text-sm font-semibold gap-2 shadow-lg"
-            style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="gap-2 text-muted-foreground"
           >
-            {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Saving Changes…
-              </>
-            ) : (
-              "Save Changes →"
-            )}
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
+
+          <h1 className="text-lg font-bold tracking-tight">Edit Event</h1>
+
+          {/* Calling handleSubmit() manually triggers validation + onSubmit,
+              identical to the native form submit — used for toolbar shortcuts. */}
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate(-1)}
-            disabled={saving}
-            className="px-8 py-6"
+            size="sm"
+            onClick={() => handleSubmit(onSubmit)()}
+            disabled={isBusy}
+            className="border-primary text-primary hover:bg-primary/10 gap-1.5"
           >
-            Cancel
+            {isBusy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            Save Changes
           </Button>
         </div>
-      </form>
-    </div>
+
+        {/* ── Desktop heading ── */}
+        <div className="hidden lg:block px-6 pt-6 pb-2">
+          <h2 className="text-3xl font-bold tracking-tight">Edit Event</h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Update the details below. Fields marked with{" "}
+            <span className="text-destructive font-semibold">*</span> are required.
+          </p>
+        </div>
+
+        {/* ── API error banner ── */}
+        {apiError && (
+          <div className="mx-4 md:mx-6 mt-4 p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 flex items-start gap-2.5">
+            <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+            <p className="text-sm text-destructive">{apiError}</p>
+          </div>
+        )}
+
+        {/* ── Form ──
+            handleSubmit: runs Zod → calls onSubmit if valid, populates errors if not.
+            noValidate: suppresses the browser's built-in HTML5 validation UI. */}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="px-4 md:px-6 py-6 space-y-8"
+        >
+          {/* Each section reads control/errors from context — no props needed */}
+          <BasicInfoSection onDescriptionGenerated={handleDescriptionGenerated} />
+
+          <Divider />
+
+          <DateTimeSection />
+
+          <Divider />
+
+          <LocationSection />
+
+          <Divider />
+
+          <EventPreviewCard />
+
+          {/* ── Actions ── */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2 pb-8">
+            <Button
+              type="submit"
+              id="update-event-submit"
+              disabled={isBusy}
+              className="flex-1 py-6 text-sm font-semibold gap-2 shadow-lg"
+              style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
+            >
+              {isBusy ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving Changes…
+                </>
+              ) : (
+                "Save Changes →"
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate(-1)}
+              disabled={isBusy}
+              className="px-8 py-6"
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </div>
+    </FormProvider>
   )
 }
