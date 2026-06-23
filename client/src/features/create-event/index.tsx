@@ -56,7 +56,7 @@ export function CreateEventPage() {
   const {
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: {  isSubmitting },
   } = methods
 
   // Combine RHF's own submission state with the external API loading flag.

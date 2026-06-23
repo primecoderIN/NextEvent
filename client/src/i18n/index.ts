@@ -1,65 +1,56 @@
-import i18n from "i18next"
+import i18n, { type InitOptions } from "i18next"
 import { initReactI18next } from "react-i18next"
 import LanguageDetector from "i18next-browser-languagedetector"
+import HttpBackend, { type HttpBackendOptions } from "i18next-http-backend"
 
-// ── Namespace imports — English ───────────────────────────────────────────────
-// Static imports are bundled by Vite at build time (no runtime HTTP fetch).
-// Each file corresponds to one i18next namespace.
-import enCommon from "@/i18n/locales/en/common.json"
-import enNav from "@/i18n/locales/en/nav.json"
-import enHome from "@/i18n/locales/en/home.json"
-import enEventDetail from "@/i18n/locales/en/eventDetail.json"
-import enCreateEvent from "@/i18n/locales/en/createEvent.json"
-
-// ── Namespace imports — Hindi ─────────────────────────────────────────────────
-import hiCommon from "@/i18n/locales/hi/common.json"
-import hiNav from "@/i18n/locales/hi/nav.json"
-import hiHome from "@/i18n/locales/hi/home.json"
-import hiEventDetail from "@/i18n/locales/hi/eventDetail.json"
-import hiCreateEvent from "@/i18n/locales/hi/createEvent.json"
-
-// ── i18next namespace registry ────────────────────────────────────────────────
+// ── Namespace registry ────────────────────────────────────────────────────────
 // Type the namespace names so useTranslation('nav') is type-safe.
 export const NAMESPACES = ["common", "nav", "home", "eventDetail", "createEvent"] as const
 export type Namespace = (typeof NAMESPACES)[number]
 
-i18n
-  // LanguageDetector reads (in order): localStorage → navigator.language.
-  // It writes the user's choice back to localStorage so it persists across sessions.
-  .use(LanguageDetector)
-  // Wires i18n into React's context so useTranslation() works in any component.
-  .use(initReactI18next)
-  .init({
-    // ── Resources: structured as resources[lng][namespace] = translations ──
-    resources: {
-      en: {
-        common: enCommon,
-        nav: enNav,
-        home: enHome,
-        eventDetail: enEventDetail,
-        createEvent: enCreateEvent,
-      },
-      hi: {
-        common: hiCommon,
-        nav: hiNav,
-        home: hiHome,
-        eventDetail: hiEventDetail,
-        createEvent: hiCreateEvent,
-      },
+
+// ── initI18n ─────────────────────────────────────────────────────────────────
+// Called once in main.tsx before ReactDOM.render().
+// Returns a Promise that resolves only after EAGER_NAMESPACES are loaded,
+// so layout components always get real strings on the very first render.
+export async function initI18n(): Promise<void> {
+  // Determine which language to preload. We read the same localStorage key
+  // that LanguageDetector would write, falling back to "en".
+  const storedLang = localStorage.getItem("nextevent_lang") ?? "en"
+  const preloadLang = ["en", "hi"].includes(storedLang) ? storedLang : "en"
+
+  // Explicit type annotation resolves Vite's stricter generic overload check for
+  // i18n.init() when HttpBackend is registered via .use().
+  const options: InitOptions<HttpBackendOptions> = {
+    // ── Backend: serve translation files from /public/locales/ ──────────────
+    backend: {
+      // Vite copies everything in /public to the build root,
+      // so this URL resolves correctly in both dev and production.
+      loadPath: "/locales/{{lng}}/{{ns}}.json",
     },
 
     // Supported languages
     supportedLngs: ["en", "hi"],
 
-    // Fall back to English if a Hindi key is missing — no missing-key errors shown to user.
+    // Fall back to English if a Hindi key is missing.
     fallbackLng: "en",
 
-    // The default namespace used when useTranslation() is called without a namespace arg.
+    // The default namespace used when useTranslation() is called without an arg.
     // e.g. const { t } = useTranslation() → reads from 'common'
     defaultNS: "common",
 
-    // All registered namespaces — needed so i18next knows what to validate/preload.
+    // All registered namespaces — i18next uses this list to validate calls.
+    // Lazy namespaces (home, eventDetail, createEvent) are registered here but
+    // NOT preloaded; they'll be fetched when first requested by a component.
     ns: NAMESPACES,
+
+    // Only eagerly fetch common + nav for the detected language.
+    // The HttpBackend will handle all other namespaces on demand when their
+    // route is first visited (home, eventDetail, createEvent).
+    preload: [preloadLang],
+
+    // Allows mixing eagerly bundled and HTTP-fetched namespaces cleanly.
+    partialBundledLanguages: true,
 
     interpolation: {
       // React already escapes output — disable double-escaping.
@@ -74,6 +65,23 @@ i18n
       // The localStorage key used to store the chosen language.
       lookupLocalStorage: "nextevent_lang",
     },
-  })
+
+    // While a lazy namespace is loading, t("key") returns the key string
+    // rather than suspending the component. This keeps the UX seamless
+    // since page-level lazy loading (React.lazy) already shows a spinner.
+    react: {
+      useSuspense: false,
+    },
+  }
+
+  await i18n
+    // HttpBackend: fetches /locales/{lng}/{ns}.json on demand.
+    .use(HttpBackend)
+    // LanguageDetector: reads localStorage → navigator.language.
+    .use(LanguageDetector)
+    // Wires i18n into React's context so useTranslation() works in any component.
+    .use(initReactI18next)
+    .init(options)
+}
 
 export default i18n
