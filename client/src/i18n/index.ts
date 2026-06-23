@@ -3,6 +3,13 @@ import { initReactI18next } from "react-i18next"
 import LanguageDetector from "i18next-browser-languagedetector"
 import HttpBackend, { type HttpBackendOptions } from "i18next-http-backend"
 
+// Import English translations to bundle them directly into the app
+import enCommon from "../../public/locales/en/common.json"
+import enNav from "../../public/locales/en/nav.json"
+import enHome from "../../public/locales/en/home.json"
+import enEventDetail from "../../public/locales/en/eventDetail.json"
+import enCreateEvent from "../../public/locales/en/createEvent.json"
+
 // ── Namespace registry ────────────────────────────────────────────────────────
 // Type the namespace names so useTranslation('nav') is type-safe.
 export const NAMESPACES = ["common", "nav", "home", "eventDetail", "createEvent"] as const
@@ -51,6 +58,17 @@ export async function initI18n(): Promise<void> {
 
     // Allows mixing eagerly bundled and HTTP-fetched namespaces cleanly.
     partialBundledLanguages: true,
+
+    // Bundle English translations so the app can fallback to them without network requests
+    resources: {
+      en: {
+        common: enCommon,
+        nav: enNav,
+        home: enHome,
+        eventDetail: enEventDetail,
+        createEvent: enCreateEvent,
+      },
+    },
 
     interpolation: {
       // React already escapes output — disable double-escaping.
