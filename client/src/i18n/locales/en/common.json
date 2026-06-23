@@ -14,5 +14,12 @@
   "required": "required",
   "optional": "optional",
   "noChanges": "No changes detected",
-  "noChangesDesc": "You haven't modified anything yet."
+  "noChangesDesc": "You haven't modified anything yet.",
+  "viewAll": "View All",
+  "follow": "Follow",
+  "followers": "{{count}} Followers",
+  "upcomingEvents": "Upcoming Events",
+  "topOrganizers": "Top Organizers",
+  "createOwnEvent": "Create Your Own Event",
+  "createOwnEventDesc": "Share your ideas and bring people together."
 }

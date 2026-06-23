@@ -8,7 +8,10 @@ import { cn } from "@/lib/utils"
 //   3. All components using useTranslation() re-render automatically
 export function LanguageSwitcher({ className }: { className?: string }) {
   const { i18n } = useTranslation()
-  const current = i18n.language
+  // resolvedLanguage is always one of the supportedLngs ("en" | "hi").
+  // i18n.language can be a full BCP-47 tag like "en-US" from the browser
+  // navigator, which breaks the strict === "en" check.
+  const current = i18n.resolvedLanguage ?? "en"
 
   function toggle() {
     i18n.changeLanguage(current === "en" ? "hi" : "en")

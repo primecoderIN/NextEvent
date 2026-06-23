@@ -14,5 +14,12 @@
   "required": "आवश्यक",
   "optional": "वैकल्पिक",
   "noChanges": "कोई बदलाव नहीं",
-  "noChangesDesc": "आपने अभी तक कुछ भी संशोधित नहीं किया है।"
+  "noChangesDesc": "आपने अभी तक कुछ भी संशोधित नहीं किया है।",
+  "viewAll": "सभी देखें",
+  "follow": "फ़ॉलो करें",
+  "followers": "{{count}} फ़ॉलोअर",
+  "upcomingEvents": "आगामी इवेंट",
+  "topOrganizers": "शीर्ष आयोजक",
+  "createOwnEvent": "अपना इवेंट बनाएं",
+  "createOwnEventDesc": "अपने विचार साझा करें और लोगों को एक साथ लाएं।"
 }

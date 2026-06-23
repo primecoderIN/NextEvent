@@ -1,5 +1,6 @@
 import { Calendar, MapPin } from "lucide-react"
 import { compareAsc, parseISO } from "date-fns"
+import { useTranslation } from "react-i18next"
 import type { Event } from "@/Types/Event"
 import { formatDate } from "@/features/home/helpers"
 import { Button } from "@/components/ui/button"
@@ -12,13 +13,14 @@ const TOP_ORGANIZERS = [
   { name: "District by Zomato", followers: "5.3K", initials: "DZ", color: "bg-red-700" },
 ]
 
-
 function getThumb(category: string, index: number): string {
   return `https://picsum.photos/seed/${category}-${index}/120/120`
 }
 
-export function RightSidebar({ events=[] }: { events: Event[] }) {
+export function RightSidebar({ events = [] }: { events: Event[] }) {
   const navigate = useNavigate()
+  const { t } = useTranslation("common")
+
   const upcomingEvents = [...events]
     .sort((a, b) => compareAsc(parseISO(a.date), parseISO(b.date)))
     .slice(0, 4)
@@ -29,9 +31,9 @@ export function RightSidebar({ events=[] }: { events: Event[] }) {
         {/* ── Upcoming Events ── */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold">Upcoming Events</h3>
+            <h3 className="text-sm font-semibold">{t("upcomingEvents")}</h3>
             <a href="#" className="text-xs text-primary font-medium hover:underline">
-              View All
+              {t("viewAll")}
             </a>
           </div>
 
@@ -51,7 +53,7 @@ export function RightSidebar({ events=[] }: { events: Event[] }) {
                   <div
                     key={event.id}
                     className="flex gap-3 p-2 -mx-2 rounded-xl hover:bg-muted/60 cursor-pointer transition-colors"
-                    onClick={()=> navigate(`events/${event.id}`)}
+                    onClick={() => navigate(`events/${event.id}`)}
                   >
                     <img
                       src={getThumb(event.category, i)}
@@ -79,9 +81,9 @@ export function RightSidebar({ events=[] }: { events: Event[] }) {
         {/* ── Top Organizers ── */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold">Top Organizers</h3>
+            <h3 className="text-sm font-semibold">{t("topOrganizers")}</h3>
             <a href="#" className="text-xs text-primary font-medium hover:underline">
-              View All
+              {t("viewAll")}
             </a>
           </div>
           <div className="space-y-3">
@@ -94,10 +96,12 @@ export function RightSidebar({ events=[] }: { events: Event[] }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium leading-tight truncate">{org.name}</p>
-                  <p className="text-xs text-muted-foreground">{org.followers} Followers</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("followers", { count: org.followers })}
+                  </p>
                 </div>
                 <Button variant="outline" size="sm" className="shrink-0 text-primary border-primary/50 hover:bg-primary/5">
-                  Follow
+                  {t("follow")}
                 </Button>
               </div>
             ))}
@@ -108,9 +112,9 @@ export function RightSidebar({ events=[] }: { events: Event[] }) {
         <section className="rounded-2xl bg-primary/5 border border-primary/20 p-4">
           <div className="flex items-start justify-between mb-1">
             <div>
-              <h3 className="text-sm font-semibold">Create Your Own Event</h3>
+              <h3 className="text-sm font-semibold">{t("createOwnEvent")}</h3>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Share your ideas and bring people together.
+                {t("createOwnEventDesc")}
               </p>
             </div>
             <span className="text-2xl ml-2 shrink-0">🎪</span>
@@ -120,7 +124,7 @@ export function RightSidebar({ events=[] }: { events: Event[] }) {
             onClick={() => navigate("/events/new")}
             className="mt-3 w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
           >
-            Create Event
+            {t("createEvent")}
           </Button>
         </section>
       </div>
