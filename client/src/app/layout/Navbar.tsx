@@ -57,8 +57,12 @@ export const Navbar = () => {
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-2 ml-auto">
             <LanguageSwitcher className="mr-2" />
-            <Button variant="ghost" size="sm">{t("login", { ns: "common" })}</Button>
-            <Button size="sm">{t("signUp", { ns: "common" })}</Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
+              {t("login", { ns: "common" })}
+            </Button>
+            <Button size="sm" onClick={() => navigate("/register")}>
+              {t("signUp", { ns: "common" })}
+            </Button>
           </div>
 
           {/* Mobile hamburger */}
@@ -79,34 +83,61 @@ export const Navbar = () => {
       {/* Mobile bottom sheet */}
       <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
         <div className="px-4 pb-8 max-h-[85dvh] overflow-y-auto">
-          {/* User profile */}
-          <div className="flex items-center justify-between py-4 border-b border-border/40">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
-                  <User className="h-6 w-6 text-primary" />
+          {/* User Auth Section */}
+          <div className="py-4 border-b border-border/40">
+            {/* Mock auth state - set to false to show Login/Signup */}
+            {false ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
+                      <User className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-primary flex items-center justify-center">
+                      <Plus className="h-2.5 w-2.5 text-primary-foreground" />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-tight">Sanjeev Kumar</p>
+                    <a
+                      href="#"
+                      className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5"
+                    >
+                      {t("viewProfile", { ns: "common" })}
+                      <ChevronRight className="h-3 w-3" />
+                    </a>
+                  </div>
                 </div>
-                <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-primary flex items-center justify-center">
-                  <Plus className="h-2.5 w-2.5 text-primary-foreground" />
-                </div>
-              </div>
-              <div>
-                <p className="text-sm font-semibold leading-tight">Sanjeev Kumar</p>
-                <a
-                  href="#"
-                  className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5"
+                <button
+                  className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  aria-label={t("editProfile", { ns: "common" })}
                 >
-                  {t("viewProfile", { ns: "common" })}
-                  <ChevronRight className="h-3 w-3" />
-                </a>
+                  <Pencil className="h-4 w-4" />
+                </button>
               </div>
-            </div>
-            <button
-              className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              aria-label={t("editProfile", { ns: "common" })}
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setSheetOpen(false)
+                    navigate("/login")
+                  }}
+                >
+                  {t("login", { ns: "common" })}
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={() => {
+                    setSheetOpen(false)
+                    navigate("/register")
+                  }}
+                >
+                  {t("signUp", { ns: "common" })}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Primary nav */}
@@ -146,17 +177,19 @@ export const Navbar = () => {
           </div>
 
           {/* Logout */}
-          <div className="mt-2 pt-2 border-t border-border/40">
-            <button
-              className="flex items-center gap-3 px-2 py-3.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors w-full text-left group"
-              onClick={() => setSheetOpen(false)}
-            >
-              <div className="h-9 w-9 rounded-xl bg-destructive/10 flex items-center justify-center">
-                <LogOut className="h-4.5 w-4.5 text-destructive" />
-              </div>
-              {t("logout", { ns: "common" })}
-            </button>
-          </div>
+          {false && (
+            <div className="mt-2 pt-2 border-t border-border/40">
+              <button
+                className="flex items-center gap-3 px-2 py-3.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors w-full text-left group"
+                onClick={() => setSheetOpen(false)}
+              >
+                <div className="h-9 w-9 rounded-xl bg-destructive/10 flex items-center justify-center">
+                  <LogOut className="h-4.5 w-4.5 text-destructive" />
+                </div>
+                {t("logout", { ns: "common" })}
+              </button>
+            </div>
+          )}
         </div>
       </BottomSheet>
     </>

@@ -19,6 +19,12 @@ const CreateEventPage = lazy(() =>
 const UpdateEventPage = lazy(() =>
   import("@/features/update-event/index").then((m) => ({ default: m.UpdateEventPage }))
 )
+const LoginPage = lazy(() =>
+  import("@/features/auth/index").then((m) => ({ default: m.LoginPage }))
+)
+const RegisterPage = lazy(() =>
+  import("@/features/auth/index").then((m) => ({ default: m.RegisterPage }))
+)
 
 // ─── Fallback ─────────────────────────────────────────────────────────────────
 function PageLoader() {
@@ -60,6 +66,8 @@ function App() {
                 <Route path="/events/new" element={<CreateEventPage />} />
                 <Route path="/events/:id/edit" element={<UpdateEventPage />} />
                 <Route path="/events/:id" element={<EventDetailPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
               </Routes>
             </Suspense>
           </main>
