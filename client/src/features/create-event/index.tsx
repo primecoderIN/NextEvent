@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useForm, FormProvider } from "react-hook-form"
@@ -16,20 +16,15 @@ import { getEventFormSchema, type EventFormValues } from "@/features/create-even
 
 export function CreateEventPage() {
   const navigate = useNavigate()
-  const { t, i18n } = useTranslation(["createEvent", "common"])
+  const { t } = useTranslation(["createEvent", "common"])
   const { createEvent, loading: apiLoading, error: apiError } = useCreateEvent()
   const [newEventId, setNewEventId] = useState<string | null>(null)
 
-  // ── Rebuild the Zod schema whenever the language changes ─────────────────────
-  // getEventFormSchema(t) snapshots error messages at call-time. useMemo keyed on
-  // resolvedLanguage ensures the schema (and its zodResolver) are recreated every
-  // time the user switches language, so validation errors always show in the
-  // currently active language rather than whichever language was active on mount.
-  const schema = useMemo(
-    () => getEventFormSchema(t),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [i18n.resolvedLanguage]
-  )
+  // ── Schema is recreated automatically by React Compiler whenever `t` changes.
+  // `t` gets a new reference on every language switch (react-i18next recreates
+  // the function after languageChanged fires), so the compiler re-runs this
+  // expression and zodResolver picks up the new localised error messages.
+  const schema = getEventFormSchema(t)
 
   // ── Step 1: Initialise React Hook Form ──────────────────────────────────────
   //

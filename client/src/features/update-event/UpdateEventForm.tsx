@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react"
+import { useEffect } from "react"
 import { parseISO } from "date-fns"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
@@ -49,18 +49,14 @@ interface UpdateEventFormProps {
 
 export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
   const navigate = useNavigate()
-  const { t, i18n } = useTranslation(["createEvent", "common"])
+  const { t } = useTranslation(["createEvent", "common"])
   const { updateEvent, loading: apiLoading, error: apiError } = useUpdateEvent()
 
-  // ── Rebuild the Zod schema whenever the language changes ─────────────────────
-  // getEventFormSchema(t) snapshots error messages at call-time. useMemo keyed on
-  // resolvedLanguage ensures the schema is recreated on every language switch so
-  // validation errors always appear in the currently active language.
-  const schema = useMemo(
-    () => getEventFormSchema(t),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [i18n.resolvedLanguage]
-  )
+  // ── Schema is recreated automatically by React Compiler whenever `t` changes.
+  // `t` gets a new reference on every language switch (react-i18next recreates
+  // the function after languageChanged fires), so the compiler re-runs this
+  // expression and zodResolver picks up the new localised error messages.
+  const schema = getEventFormSchema(t)
 
   const methods = useForm<EventFormValues>({
     resolver: zodResolver(schema),
