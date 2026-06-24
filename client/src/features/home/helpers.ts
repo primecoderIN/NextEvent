@@ -56,12 +56,14 @@ export function getGreeting(): string {
 }
 
 // ─── Category list ─────────────────────────────────────
+// Labels are NOT stored here — components call t(`categories.${id}`) so that
+// the display text is always taken from the active i18n namespace.
 export const CATEGORIES = [
-  { id: "all", label: "All Events", icon: LayoutGrid },
-  { id: "music", label: "Music", icon: Music },
-  { id: "nightlife", label: "Nightlife", icon: Wine },
-  { id: "workshop", label: "Workshops", icon: GraduationCap },
-  { id: "sports", label: "Sports", icon: Dumbbell },
-  { id: "business", label: "Business", icon: Briefcase },
-  { id: "more", label: "More", icon: MoreHorizontal },
+  { id: "all", icon: LayoutGrid },
+  { id: "music", icon: Music },
+  { id: "nightlife", icon: Wine },
+  { id: "workshop", icon: GraduationCap },
+  { id: "sports", icon: Dumbbell },
+  { id: "business", icon: Briefcase },
+  { id: "more", icon: MoreHorizontal },
 ]

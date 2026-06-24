@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { parseISO } from "date-fns"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
@@ -49,11 +49,21 @@ interface UpdateEventFormProps {
 
 export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
   const navigate = useNavigate()
-  const { t } = useTranslation(["createEvent", "common"])
+  const { t, i18n } = useTranslation(["createEvent", "common"])
   const { updateEvent, loading: apiLoading, error: apiError } = useUpdateEvent()
 
+  // ── Rebuild the Zod schema whenever the language changes ─────────────────────
+  // getEventFormSchema(t) snapshots error messages at call-time. useMemo keyed on
+  // resolvedLanguage ensures the schema is recreated on every language switch so
+  // validation errors always appear in the currently active language.
+  const schema = useMemo(
+    () => getEventFormSchema(t),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [i18n.resolvedLanguage]
+  )
+
   const methods = useForm<EventFormValues>({
-    resolver: zodResolver(getEventFormSchema(t)),
+    resolver: zodResolver(schema),
     defaultValues: eventToDefaults(event),
     mode: "onTouched",
   })
@@ -233,7 +243,7 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
                   {t("actions.savingChanges")}
                 </>
               ) : (
-                t("actions.saveChanges") + " →"
+                t("actions.saveChanges")
               )}
             </Button>
             <Button

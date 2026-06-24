@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useForm, FormProvider } from "react-hook-form"
@@ -16,9 +16,20 @@ import { getEventFormSchema, type EventFormValues } from "@/features/create-even
 
 export function CreateEventPage() {
   const navigate = useNavigate()
-  const { t } = useTranslation(["createEvent", "common"])
+  const { t, i18n } = useTranslation(["createEvent", "common"])
   const { createEvent, loading: apiLoading, error: apiError } = useCreateEvent()
   const [newEventId, setNewEventId] = useState<string | null>(null)
+
+  // ── Rebuild the Zod schema whenever the language changes ─────────────────────
+  // getEventFormSchema(t) snapshots error messages at call-time. useMemo keyed on
+  // resolvedLanguage ensures the schema (and its zodResolver) are recreated every
+  // time the user switches language, so validation errors always show in the
+  // currently active language rather than whichever language was active on mount.
+  const schema = useMemo(
+    () => getEventFormSchema(t),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [i18n.resolvedLanguage]
+  )
 
   // ── Step 1: Initialise React Hook Form ──────────────────────────────────────
   //
@@ -27,7 +38,7 @@ export function CreateEventPage() {
   // via useFormContext() without receiving control/errors as props.
   const methods = useForm<EventFormValues>({
     // Wire up Zod schema validation — RHF will call this on every trigger.
-    resolver: zodResolver(getEventFormSchema(t)),
+    resolver: zodResolver(schema),
 
     // Provide initial values for every field. RHF uses these to detect dirtiness
     // (changed vs. original) and to reset the form back to a clean state.

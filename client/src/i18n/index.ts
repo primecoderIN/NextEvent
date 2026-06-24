@@ -3,12 +3,15 @@ import { initReactI18next } from "react-i18next"
 import LanguageDetector from "i18next-browser-languagedetector"
 import HttpBackend, { type HttpBackendOptions } from "i18next-http-backend"
 
-// Import English translations to bundle them directly into the app
-import enCommon from "../../public/locales/en/common.json"
-import enNav from "../../public/locales/en/nav.json"
-import enHome from "../../public/locales/en/home.json"
-import enEventDetail from "../../public/locales/en/eventDetail.json"
-import enCreateEvent from "../../public/locales/en/createEvent.json"
+// ── English translations bundled directly into the app (src/i18n/locales/en/)
+// These act as the offline-safe fallback. They are NEVER fetched over HTTP.
+// All other languages (hi, etc.) live in public/locales/ and are lazy-loaded
+// on demand via HttpBackend when the user switches language.
+import enCommon from "./locales/en/common.json"
+import enNav from "./locales/en/nav.json"
+import enHome from "./locales/en/home.json"
+import enEventDetail from "./locales/en/eventDetail.json"
+import enCreateEvent from "./locales/en/createEvent.json"
 
 // ── Namespace registry ────────────────────────────────────────────────────────
 // Type the namespace names so useTranslation('nav') is type-safe.
@@ -18,8 +21,8 @@ export type Namespace = (typeof NAMESPACES)[number]
 
 // ── initI18n ─────────────────────────────────────────────────────────────────
 // Called once in main.tsx before ReactDOM.render().
-// Returns a Promise that resolves only after EAGER_NAMESPACES are loaded,
-// so layout components always get real strings on the very first render.
+// English is always available immediately (bundled). Other languages are
+// fetched from /public/locales/{lng}/{ns}.json only when needed.
 export async function initI18n(): Promise<void> {
   // Determine which language to preload. We read the same localStorage key
   // that LanguageDetector would write, falling back to "en".
@@ -29,17 +32,19 @@ export async function initI18n(): Promise<void> {
   // Explicit type annotation resolves Vite's stricter generic overload check for
   // i18n.init() when HttpBackend is registered via .use().
   const options: InitOptions<HttpBackendOptions> = {
-    // ── Backend: serve translation files from /public/locales/ ──────────────
+    // ── Backend: lazy-load non-English translation files from /public/locales/
+    // Vite copies everything in /public to the build root,
+    // so this URL resolves correctly in both dev and production.
+    // English ("en") is skipped entirely by HttpBackend because its resources
+    // are already provided below via `resources`.
     backend: {
-      // Vite copies everything in /public to the build root,
-      // so this URL resolves correctly in both dev and production.
       loadPath: "/locales/{{lng}}/{{ns}}.json",
     },
 
     // Supported languages
     supportedLngs: ["en", "hi"],
 
-    // Fall back to English if a Hindi key is missing.
+    // Fall back to English if a key is missing in the active language.
     fallbackLng: "en",
 
     // The default namespace used when useTranslation() is called without an arg.
@@ -47,19 +52,18 @@ export async function initI18n(): Promise<void> {
     defaultNS: "common",
 
     // All registered namespaces — i18next uses this list to validate calls.
-    // Lazy namespaces (home, eventDetail, createEvent) are registered here but
-    // NOT preloaded; they'll be fetched when first requested by a component.
     ns: NAMESPACES,
 
-    // Only eagerly fetch common + nav for the detected language.
-    // The HttpBackend will handle all other namespaces on demand when their
-    // route is first visited (home, eventDetail, createEvent).
+    // Preload the detected language so layout components always get real
+    // strings on the very first render. English is already bundled so
+    // preloading "en" is a no-op network-wise.
     preload: [preloadLang],
 
-    // Allows mixing eagerly bundled and HTTP-fetched namespaces cleanly.
+    // Allows mixing eagerly bundled English and HTTP-fetched other languages.
     partialBundledLanguages: true,
 
-    // Bundle English translations so the app can fallback to them without network requests
+    // English translations bundled at build time — zero network requests needed.
+    // Other languages will be fetched by HttpBackend on demand.
     resources: {
       en: {
         common: enCommon,
@@ -87,13 +91,18 @@ export async function initI18n(): Promise<void> {
     // While a lazy namespace is loading, t("key") returns the key string
     // rather than suspending the component. This keeps the UX seamless
     // since page-level lazy loading (React.lazy) already shows a spinner.
+    // bindI18n: 'languageChanged loaded' — trigger re-renders both when the
+    // user switches language AND when a lazy namespace finishes downloading.
+    // Without 'loaded', a component rendered while Hindi is still fetching
+    // would stay on English fallback strings and never update.
     react: {
       useSuspense: false,
+      bindI18n: "languageChanged loaded",
     },
   }
 
   await i18n
-    // HttpBackend: fetches /locales/{lng}/{ns}.json on demand.
+    // HttpBackend: fetches /locales/{lng}/{ns}.json on demand (non-English only).
     .use(HttpBackend)
     // LanguageDetector: reads localStorage → navigator.language.
     .use(LanguageDetector)
