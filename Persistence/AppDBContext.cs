@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Domain;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Persistence;
 
-public class AppDBContext(DbContextOptions options) : DbContext(options) //Whatever options we passed from program.cs has to be passed to DbContext
+public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(options) //Whatever options we passed from program.cs has to be passed to DbContext
 {
     public DbSet<Event> Events { get; set; }
 
@@ -39,4 +40,4 @@ public class AppDBContext(DbContextOptions options) : DbContext(options) //Whate
             }
         }
     }
-}
+}
