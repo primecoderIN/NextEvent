@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { subDays, parseISO } from "date-fns"
+
 import { useTranslation } from "react-i18next"
 import type { Event } from "@/Types/Event"
 import { Check, Plus, Minus, Shield } from "lucide-react"
@@ -35,9 +35,9 @@ const TIERS: TicketTier[] = [
   },
 ]
 
-export function TicketPanel({ event }: TicketPanelProps) {
+export function TicketPanel(_props: TicketPanelProps) {
   const [quantities, setQuantities] = useState<number[]>([1, 0, 0])
-  const { t } = useTranslation("eventDetail")
+  const { t } = useTranslation(["eventDetail", "common"])
 
   const update = (i: number, delta: number) => {
     setQuantities((prev) =>
@@ -45,8 +45,7 @@ export function TicketPanel({ event }: TicketPanelProps) {
     )
   }
 
-  // 7 days before the event: subDays is immutable and handles month boundaries.
-  const earlyBirdEnds = subDays(parseISO(event.date), 7)
+
 
   return (
     <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">

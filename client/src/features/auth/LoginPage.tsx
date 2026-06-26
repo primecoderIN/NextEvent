@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { getLoginFormSchema, type LoginFormValues } from "@/features/auth/types"
+import { useAuth } from "@/features/auth/AuthContext"
 import { FieldError } from "@/features/create-event/components"
 import { toast } from "sonner"
 
@@ -26,6 +27,8 @@ export function LoginPage() {
     mode: "onTouched",
   })
 
+  const { login } = useAuth()
+
   const {
     handleSubmit,
     register,
@@ -34,11 +37,15 @@ export function LoginPage() {
 
   async function onSubmit(values: LoginFormValues) {
     setIsSubmitting(true)
-    // Simulate API call since no actual auth backend is hooked up yet
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsSubmitting(false)
-    toast.success("Logged in successfully!")
-    navigate("/")
+    try {
+      await login(values)
+      toast.success("Logged in successfully!")
+      navigate("/")
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Login failed")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (

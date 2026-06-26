@@ -49,6 +49,7 @@ builder.Services.AddCors(options =>
     {
         policy.AllowAnyHeader()
                 .AllowAnyMethod()
+                .AllowCredentials()
                 .WithOrigins("http://localhost:3001");
     });
 });
@@ -90,9 +91,8 @@ if (app.Environment.IsDevelopment())
 //          BusinessRuleException → 409, Exception → 500
 // All responses use the ApiResponse<T> envelope.
 // -----------------------------------------------------------------------
-app.UseMiddleware<ExceptionMiddleware>();
-
 app.UseCors("CorsPolicy"); //Enable CORS with the defined policy.
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

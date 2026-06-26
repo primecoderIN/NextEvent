@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react"
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { Routes, Route } from "react-router-dom"
 import { Navbar } from "@/app/layout/Navbar"
 import { DesktopSidebar } from "@/app/layout/DesktopSidebar"
 import { RightSidebar } from "@/app/layout/RightSidebar"
@@ -40,7 +40,6 @@ function App() {
   const { events, loading } = useEvents()
 
   return (
-    <BrowserRouter>
       <div className="min-h-screen bg-background">
         <Toaster />
         {/* Desktop left sidebar — fixed */}
@@ -73,7 +72,6 @@ function App() {
           </main>
         </div>
       </div>
-    </BrowserRouter>
   )
 }
 

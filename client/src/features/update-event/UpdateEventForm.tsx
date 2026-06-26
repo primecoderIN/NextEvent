@@ -68,7 +68,7 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
     handleSubmit,
     reset,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = methods
 
   const isBusy = isSubmitting || apiLoading

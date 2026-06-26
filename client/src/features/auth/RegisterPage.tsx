@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { getRegisterFormSchema, type RegisterFormValues } from "@/features/auth/types"
+import { useAuth } from "@/features/auth/AuthContext"
 import { FieldError } from "@/features/create-event/components"
 import { toast } from "sonner"
 
@@ -25,6 +26,8 @@ export function RegisterPage() {
     mode: "onTouched",
   })
 
+  const { register: registerAuth } = useAuth()
+
   const {
     handleSubmit,
     register,
@@ -33,11 +36,15 @@ export function RegisterPage() {
 
   async function onSubmit(values: RegisterFormValues) {
     setIsSubmitting(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsSubmitting(false)
-    toast.success("Account created successfully!")
-    navigate("/")
+    try {
+      await registerAuth(values)
+      toast.success("Account created successfully!")
+      navigate("/")
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Registration failed")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (

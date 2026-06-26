@@ -1,6 +1,12 @@
 import { z } from "zod"
 import type { TFunction } from "i18next"
 
+export interface UserDTO {
+  displayName: string;
+  token: string;
+  email: string;
+}
+
 export const getLoginFormSchema = (t: TFunction<"auth">) =>
   z.object({
     email: z

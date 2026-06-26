@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { BottomSheet } from "@/components/ui/sheet"
 import { LanguageSwitcher } from "@/components/LanguageSwitcher"
+import { useAuth } from "@/features/auth/AuthContext"
 
 const navItems = [
   { icon: Home, labelKey: "home", href: "#" },
@@ -30,6 +31,7 @@ export const Navbar = () => {
   const [sheetOpen, setSheetOpen] = useState(false)
   const navigate = useNavigate()
   const { t } = useTranslation(["nav", "common"])
+  const { user, logout } = useAuth()
 
   return (
     <>
@@ -57,12 +59,23 @@ export const Navbar = () => {
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-2 ml-auto">
             <LanguageSwitcher className="mr-2" />
-            <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
-              {t("login", { ns: "common" })}
-            </Button>
-            <Button size="sm" onClick={() => navigate("/register")}>
-              {t("signUp", { ns: "common" })}
-            </Button>
+            {user ? (
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-semibold">{user.displayName}</span>
+                <Button variant="outline" size="sm" onClick={logout}>
+                  {t("logout", { ns: "common" })}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
+                  {t("login", { ns: "common" })}
+                </Button>
+                <Button size="sm" onClick={() => navigate("/register")}>
+                  {t("signUp", { ns: "common" })}
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -86,7 +99,7 @@ export const Navbar = () => {
           {/* User Auth Section */}
           <div className="py-4 border-b border-border/40">
             {/* Mock auth state - set to false to show Login/Signup */}
-            {false ? (
+            {user ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="relative">
@@ -98,7 +111,7 @@ export const Navbar = () => {
                     </div>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold leading-tight">Sanjeev Kumar</p>
+                    <p className="text-sm font-semibold leading-tight">{user.displayName}</p>
                     <a
                       href="#"
                       className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5"
@@ -177,11 +190,14 @@ export const Navbar = () => {
           </div>
 
           {/* Logout */}
-          {false && (
+          {user && (
             <div className="mt-2 pt-2 border-t border-border/40">
               <button
                 className="flex items-center gap-3 px-2 py-3.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors w-full text-left group"
-                onClick={() => setSheetOpen(false)}
+                onClick={() => {
+                  setSheetOpen(false);
+                  logout();
+                }}
               >
                 <div className="h-9 w-9 rounded-xl bg-destructive/10 flex items-center justify-center">
                   <LogOut className="h-4.5 w-4.5 text-destructive" />
