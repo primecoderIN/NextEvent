@@ -1,3 +1,4 @@
+using API.Extensions;
 using API.Middleware;
 using API.Services;
 using Application.Core;
@@ -70,6 +71,8 @@ x.AddOpenBehavior(typeof(ValidationBehavior<,>));
 });
 
 
+builder.Services.AddIdentityServices(builder.Configuration);
+
 var app = builder.Build();
 
 // Enable Swagger only in Development environment
@@ -91,6 +94,10 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseCors("CorsPolicy"); //Enable CORS with the defined policy.
 
+app.UseAuthentication();
+app.UseAuthorization();
+
+
 // Configure the HTTP request pipeline.
 app.MapControllers(); //When an HTTP request arrives, route it to controller actions.
 
@@ -103,8 +110,10 @@ var services = scope.ServiceProvider;
 try
 {
     var context = services.GetRequiredService<AppDBContext>();
+    var roleManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole>>();
+    var userManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<Domain.User>>();
     await context.Database.MigrateAsync();  //pending migration will be done //DB will be created if not created
-    await DBInitializer.SeedData(context); //Update data in database.
+    await DBInitializer.SeedData(context, roleManager, userManager); //Update data in database.
 }
 catch (Exception ex)
 {

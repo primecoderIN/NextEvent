@@ -35,6 +35,10 @@ public class ExceptionMiddleware(
         {
             await HandleBusinessRuleExceptionAsync(context, ex);
         }
+        catch (UnauthorizedException ex)
+        {
+            await HandleUnauthorizedExceptionAsync(context, ex);
+        }
         catch (Exception ex)
         {
             await HandleUnexpectedExceptionAsync(context, ex);
@@ -44,6 +48,17 @@ public class ExceptionMiddleware(
     // -----------------------------------------------------------------------
     // Handlers
     // -----------------------------------------------------------------------
+
+    private static async Task HandleUnauthorizedExceptionAsync(
+        HttpContext context,
+        UnauthorizedException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        context.Response.ContentType = "application/json";
+
+        var response = ApiResponse.Fail(ex.Message);
+        await context.Response.WriteAsJsonAsync(response);
+    }
 
     /// <summary>
     /// 400 Bad Request — FluentValidation failures grouped by property name.

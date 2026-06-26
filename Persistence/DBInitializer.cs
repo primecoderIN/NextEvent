@@ -5,8 +5,32 @@ namespace Persistence;
 
 public class DBInitializer
 {
-    public static async Task SeedData(AppDBContext context)
+    public static async Task SeedData(AppDBContext context, Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole> roleManager, Microsoft.AspNetCore.Identity.UserManager<User> userManager)
     {
+        var roles = new List<string> { "Member", "Organizer", "Admin" };
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new Microsoft.AspNetCore.Identity.IdentityRole(role));
+            }
+        }
+
+        if (!userManager.Users.Any())
+        {
+            var admin = new User { UserName = "admin", Email = "admin@test.com", DisplayName = "Admin User" };
+            await userManager.CreateAsync(admin, "Pa$$w0rd");
+            await userManager.AddToRoleAsync(admin, "Admin");
+
+            var organizer = new User { UserName = "organizer", Email = "organizer@test.com", DisplayName = "Organizer User" };
+            await userManager.CreateAsync(organizer, "Pa$$w0rd");
+            await userManager.AddToRoleAsync(organizer, "Organizer");
+
+            var member = new User { UserName = "member", Email = "member@test.com", DisplayName = "Member User" };
+            await userManager.CreateAsync(member, "Pa$$w0rd");
+            await userManager.AddToRoleAsync(member, "Member");
+        }
+
         if (await context.Events.AnyAsync())
         {
             return; // If events already exist, do not seed
