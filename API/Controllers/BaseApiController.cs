@@ -9,7 +9,6 @@ namespace API.Controllers;
 /// Provides access to MediatR without requiring constructor injection in every controller,
 /// plus thin helper methods to produce consistent <see cref="ApiResponse{T}"/> responses.
 /// </summary>
-[Route("api/[controller]")]
 [ApiController]
 public class BaseApiController : ControllerBase
 {

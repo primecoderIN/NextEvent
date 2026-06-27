@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+[Route("api/ai")]
 public class AiController(IOpenAiService openAiService) : BaseApiController
 {
     // -----------------------------------------------------------------------
