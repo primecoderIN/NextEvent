@@ -1,5 +1,10 @@
 namespace Domain;
 
+/// <summary>
+/// Represents the Event entity in the Domain layer.
+/// This entity contains the core business data and rich behavior (domain methods) 
+/// used to manipulate the state of an event.
+/// </summary>
 public class Event
 {
     /// <summary>

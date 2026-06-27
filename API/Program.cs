@@ -7,9 +7,15 @@ using Application.Events.Commands.CreateEvent;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Persistence;
 using Application.Core.Interfaces;
+using Persistence;
 
+// =======================================================================
+// API LAYER (Program.cs)
+// This is the Composition Root of the application. It acts as the entry point 
+// and wires up all dependencies across the Domain, Application, and Persistence layers.
+// It configures the HTTP request pipeline, Middleware, Authentication, and Swagger.
+// =======================================================================
 
 var builder = WebApplication.CreateBuilder(args);
 

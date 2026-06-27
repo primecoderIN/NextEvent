@@ -3,6 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Persistence;
 
+/// <summary>
+/// Handles seeding initial data into the database when the application starts.
+/// Belongs to the Persistence layer as it interacts directly with EF Core and Identity.
+/// </summary>
 public class DBInitializer
 {
     public static async Task SeedData(AppDBContext context, Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole> roleManager, Microsoft.AspNetCore.Identity.UserManager<User> userManager)
