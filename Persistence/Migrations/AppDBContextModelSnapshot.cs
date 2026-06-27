@@ -19,7 +19,8 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Event", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Category")

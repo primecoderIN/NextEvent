@@ -2,13 +2,17 @@ using API.Common;
 using Application.Events.Commands.CreateEvent;
 using Application.Events.Commands.EditEvent;
 using Application.Events.Commands.DeleteEvent;
+using Application.Events.Queries.GetEventsList;
+using Application.Events.Queries.GetEventDetailsById;
 using Application.Events.DTOs;
-using Application.Events.Quaries;
 using Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+// Using explicit routing ("api/events") rather than "[controller]" prevents 
+// breaking API contracts if the class name changes in the future.
+[Route("api/events")]
 public class EventsController : BaseApiController
 {
     /// <summary>
@@ -19,7 +23,7 @@ public class EventsController : BaseApiController
     public async Task<ActionResult<ApiResponse<List<Event>>>> GetEvents(
         CancellationToken cancellationToken)
     {
-        var events = await Mediator.Send(new GetEventsList.Query(), cancellationToken);
+        var events = await Mediator.Send(new GetEventsListQuery(), cancellationToken);
         return OkResponse(events, "Events retrieved successfully");
     }
 
@@ -27,13 +31,13 @@ public class EventsController : BaseApiController
     /// GET /api/events/{id}
     /// Returns a single event. Handler throws NotFoundException → middleware returns 404.
     /// </summary>
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<ActionResult<ApiResponse<Event>>> GetEventById(
-        string id,
+        Guid id,
         CancellationToken cancellationToken)
     {
         var eventEntity = await Mediator.Send(
-            new GetEventDetailsById.Query { Id = id },
+            new GetEventDetailsByIdQuery { Id = id },
             cancellationToken);
 
         return OkResponse(eventEntity, "Event retrieved successfully");
@@ -64,9 +68,9 @@ public class EventsController : BaseApiController
     /// PUT /api/events/{id}
     /// Updates an existing event. Handler throws NotFoundException → middleware returns 404.
     /// </summary>
-    [HttpPut("{id}")]
+    [HttpPut("{id:guid}")]
     public async Task<ActionResult<ApiResponse<object>>> UpdateEvent(
-        string id,
+        Guid id,
         [FromBody] UpdateEventDto dto,
         CancellationToken cancellationToken)
     {
@@ -81,9 +85,9 @@ public class EventsController : BaseApiController
     /// DELETE /api/events/{id}
     /// Deletes an event. Handler throws NotFoundException → middleware returns 404.
     /// </summary>
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public async Task<ActionResult<ApiResponse<object>>> DeleteEvent(
-        string id,
+        Guid id,
         CancellationToken cancellationToken)
     {
         await Mediator.Send(

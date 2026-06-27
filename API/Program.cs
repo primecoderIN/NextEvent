@@ -2,12 +2,13 @@ using API.Extensions;
 using API.Middleware;
 using API.Services;
 using Application.Core;
-using Application.Events.Quaries;
+using Application.Events.Queries.GetEventsList;
 using Application.Events.Commands.CreateEvent;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
+using Application.Core.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,6 +44,10 @@ builder.Services.AddDbContext<AppDBContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+// Register IAppDBContext so that when Application handlers request it, 
+// the DI container provides the concrete AppDBContext. This wires up Dependency Inversion.
+builder.Services.AddScoped<IAppDBContext>(provider => provider.GetRequiredService<AppDBContext>());
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
@@ -61,7 +66,7 @@ builder.Services.AddScoped<IOpenAiService, OpenAiService>();
 
 builder.Services.AddMediatR(x=>
 {
-    x.RegisterServicesFromAssemblyContaining<GetEventsList.Handler>();
+    x.RegisterServicesFromAssemblyContaining<GetEventsListQueryHandler>();
 
 // Closed registration: explicitly maps IPipelineBehavior<,> to ValidationBehavior<,>
 // x.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));

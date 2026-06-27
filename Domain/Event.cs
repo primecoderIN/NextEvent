@@ -2,7 +2,11 @@ namespace Domain;
 
 public class Event
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    /// <summary>
+    /// Using Guid as the primary key offers better indexing performance in 
+    /// relational databases compared to standard strings.
+    /// </summary>
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public required string Title { get; set; }
 

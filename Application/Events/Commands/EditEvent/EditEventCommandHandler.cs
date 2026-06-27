@@ -1,11 +1,11 @@
 using Application.Core.Exceptions;
 using Domain;
 using MediatR;
-using Persistence;
+using Application.Core.Interfaces;
 
 namespace Application.Events.Commands.EditEvent;
 
-public class EditEventCommandHandler(AppDBContext context) : IRequestHandler<EditEventCommand, Unit>
+public class EditEventCommandHandler(IAppDBContext context) : IRequestHandler<EditEventCommand, Unit>
 {
     public async Task<Unit> Handle(EditEventCommand request, CancellationToken cancellationToken)
     {

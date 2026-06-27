@@ -1,17 +1,19 @@
 using MediatR;
-using Persistence;
+using Application.Core.Interfaces;
 
 namespace Application.Events.Commands.CreateEvent;
 
-public class CreateEventCommandHandler(AppDBContext context) : IRequestHandler<CreateEventCommand, string>
+// Injecting the interface IAppDBContext instead of AppDBContext 
+// adheres to Clean Architecture Dependency Inversion.
+public class CreateEventCommandHandler(IAppDBContext context) : IRequestHandler<CreateEventCommand, Guid>
 {
-    public async Task<string> Handle(
+    public async Task<Guid> Handle(
         CreateEventCommand request,
         CancellationToken cancellationToken)
     {
         var eventEntity = new Domain.Event
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             Title = request.Event.Title,
             Description = request.Event.Description,
             Category = request.Event.Category,

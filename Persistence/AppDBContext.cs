@@ -2,10 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Application.Core.Interfaces;
 
 namespace Persistence;
 
-public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(options) //Whatever options we passed from program.cs has to be passed to DbContext
+// Implementing IAppDBContext allows the Application layer to use the DB 
+// without directly referencing Entity Framework or the Persistence project.
+public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(options), IAppDBContext //Whatever options we passed from program.cs has to be passed to DbContext
 {
     public DbSet<Event> Events { get; set; }
 

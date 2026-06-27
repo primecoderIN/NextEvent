@@ -10,6 +10,6 @@ namespace Application.Events.Commands.EditEvent;
 /// </summary>
 public class EditEventCommand : IRequest<Unit>
 {
-    public required string Id { get; set; }
+    public required Guid Id { get; set; }
     public required UpdateEventDto EventData { get; set; }
 }
