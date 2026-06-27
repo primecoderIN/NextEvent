@@ -1,4 +1,6 @@
 import axios from "axios";
+import type { ApiResponse } from "@/Types/ApiResponse";
+import type { UserDTO } from "@/features/auth/types";
 
 const sleep = (delay: number) => {
   return new Promise((resolve) => {
@@ -31,18 +33,18 @@ axiosHttpAgent.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const response = await axios.post(
+        // refresh-token now returns ApiResponse<UserDTO> — payload is in .data.data
+        const response = await axios.post<ApiResponse<UserDTO>>(
           `${import.meta.env.VITE_API_URL}/account/refresh-token`,
           {},
           { withCredentials: true }
         );
-        const data = response.data;
-        localStorage.setItem("token", data.token);
-        originalRequest.headers.Authorization = `Bearer ${data.token}`;
+        const user = response.data.data!;
+        localStorage.setItem("token", user.token);
+        originalRequest.headers.Authorization = `Bearer ${user.token}`;
         return axiosHttpAgent(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem("token");
-        // We could redirect to login here if needed
         return Promise.reject(refreshError);
       }
     }

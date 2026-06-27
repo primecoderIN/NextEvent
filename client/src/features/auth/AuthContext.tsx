@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { UserDTO, LoginFormValues, RegisterFormValues } from "./types";
+import type { ApiResponse } from "@/Types/ApiResponse";
 import { axiosHttpAgent } from "@/lib/axios";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -22,12 +23,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loadUser = useCallback(async () => {
     try {
-      // Attempt to get user via refresh-token cookie
-      // If we don't have a cookie, this will fail and we just set loading to false.
-      const response = await axiosHttpAgent.post("/account/refresh-token");
-      const data = response.data;
-      localStorage.setItem("token", data.token);
-      setUser(data);
+      // Attempt to get user via refresh-token cookie.
+      // Response is now ApiResponse<UserDTO> — payload lives in .data.data
+      const response = await axiosHttpAgent.post<ApiResponse<UserDTO>>("/account/refresh-token");
+      const user = response.data.data!;
+      localStorage.setItem("token", user.token);
+      setUser(user);
     } catch (error) {
       localStorage.removeItem("token");
       setUser(null);
@@ -45,23 +46,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = async (data: LoginFormValues) => {
-    const response = await axiosHttpAgent.post("/account/login", data);
-    const user = response.data;
+    // Response is now ApiResponse<UserDTO> — payload lives in .data.data
+    const response = await axiosHttpAgent.post<ApiResponse<UserDTO>>("/account/login", data);
+    const user = response.data.data!;
     setToken(user.token);
     setUser(user);
   };
 
   const register = async (data: RegisterFormValues) => {
-    // We expect the backend to want Name/UserName. The form has 'name'. 
-    // We map 'name' to 'displayName' and 'userName' just in case.
     const payload = {
       displayName: data.name,
       userName: data.name.replace(/\s+/g, "").toLowerCase() + Math.floor(Math.random() * 1000),
       email: data.email,
       password: data.password
     };
-    const response = await axiosHttpAgent.post("/account/register", payload);
-    const user = response.data;
+    // Response is now ApiResponse<UserDTO> — payload lives in .data.data
+    const response = await axiosHttpAgent.post<ApiResponse<UserDTO>>("/account/register", payload);
+    const user = response.data.data!;
     setToken(user.token);
     setUser(user);
   };
