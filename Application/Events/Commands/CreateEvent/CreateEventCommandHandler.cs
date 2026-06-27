@@ -1,5 +1,5 @@
-using MediatR;
-using Application.Core.Interfaces;
+// using MediatR;
+// using Application.Core.Interfaces;
 
 namespace Application.Events.Commands.CreateEvent;
 

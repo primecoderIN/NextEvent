@@ -5,8 +5,8 @@ using Application.Events.Commands.DeleteEvent;
 using Application.Events.Queries.GetEventsList;
 using Application.Events.Queries.GetEventDetailsById;
 using Application.Events.DTOs;
-using Domain;
-using Microsoft.AspNetCore.Mvc;
+// using Domain;
+// using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 

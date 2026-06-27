@@ -1,7 +1,7 @@
-using Application.Core.Interfaces;
-using Domain;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
+// using Application.Core.Interfaces;
+// using Domain;
+// using MediatR;
+// using Microsoft.EntityFrameworkCore;
 
 namespace Application.Events.Queries.GetEventsList;
 

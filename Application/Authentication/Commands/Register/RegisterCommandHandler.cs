@@ -1,11 +1,11 @@
 using Application.Authentication.DTOs;
 using Application.Authentication.Interfaces;
-using Domain;
-using FluentValidation;
+// using Domain;
+// using FluentValidation;
 using FluentValidation.Results;
-using MediatR;
+// using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+// using Microsoft.EntityFrameworkCore;
 
 namespace Application.Authentication.Commands.Register;
 

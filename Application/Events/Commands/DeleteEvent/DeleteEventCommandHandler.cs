@@ -1,7 +1,7 @@
 using Application.Core.Exceptions;
-using Domain;
-using MediatR;
-using Application.Core.Interfaces;
+// using Domain;
+// using MediatR;
+// using Application.Core.Interfaces;
 
 namespace Application.Events.Commands.DeleteEvent;
 

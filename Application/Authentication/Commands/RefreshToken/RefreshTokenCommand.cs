@@ -1,5 +1,5 @@
 using Application.Authentication.DTOs;
-using MediatR;
+// using MediatR;
 
 namespace Application.Authentication.Commands.RefreshToken;
 

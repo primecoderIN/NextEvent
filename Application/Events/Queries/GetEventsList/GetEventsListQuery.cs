@@ -1,5 +1,5 @@
-using Domain;
-using MediatR;
+// using Domain;
+// using MediatR;
 
 namespace Application.Events.Queries.GetEventsList;
 

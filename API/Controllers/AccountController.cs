@@ -4,7 +4,7 @@ using Application.Authentication.Commands.RefreshToken;
 using Application.Authentication.Commands.Register;
 using Application.Authentication.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+// using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
