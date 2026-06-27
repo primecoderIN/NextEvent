@@ -1,14 +1,13 @@
-using Application.Events.Commands;
 using Application.Events.Constants;
 using FluentValidation;
 
-namespace Application.Events.Validators;
+namespace Application.Events.Commands.CreateEvent;
 
-public class CreateEventValidator : AbstractValidator<CreateEvent.Command> 
+public class CreateEventCommandValidator : AbstractValidator<CreateEventCommand> 
 {
-    public CreateEventValidator()
+    public CreateEventCommandValidator()
     {
-            RuleFor(x => x.Event.Title)
+        RuleFor(x => x.Event.Title)
             .NotEmpty()
             .WithMessage(ValidationErrors.TitleRequired);
 
@@ -39,7 +38,6 @@ public class CreateEventValidator : AbstractValidator<CreateEvent.Command>
         RuleFor(x => x.Event.Longitude)
             .InclusiveBetween(-180, 180)
             .WithMessage(ValidationErrors.LongitudeOutOfRange);
-
     }
 }
 

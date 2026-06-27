@@ -1,5 +1,7 @@
 using API.Common;
-using Application.Events.Commands;
+using Application.Events.Commands.CreateEvent;
+using Application.Events.Commands.EditEvent;
+using Application.Events.Commands.DeleteEvent;
 using Application.Events.DTOs;
 using Application.Events.Quaries;
 using Domain;
@@ -48,7 +50,7 @@ public class EventsController : BaseApiController
         CancellationToken cancellationToken)
     {
         var id = await Mediator.Send(
-            new CreateEvent.Command { Event = dto },
+            new CreateEventCommand { Event = dto },
             cancellationToken);
 
         return CreatedResponse(
@@ -69,7 +71,7 @@ public class EventsController : BaseApiController
         CancellationToken cancellationToken)
     {
         await Mediator.Send(
-            new EditEvent.Command { Id = id, EventData = dto },
+            new EditEventCommand { Id = id, EventData = dto },
             cancellationToken);
 
         return OkResponse<object>(null!, "Event updated successfully");
@@ -85,7 +87,7 @@ public class EventsController : BaseApiController
         CancellationToken cancellationToken)
     {
         await Mediator.Send(
-            new DeleteEvent.Command { Id = id },
+            new DeleteEventCommand { Id = id },
             cancellationToken);
 
         return OkResponse<object>(null!, "Event deleted successfully");

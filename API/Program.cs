@@ -3,7 +3,7 @@ using API.Middleware;
 using API.Services;
 using Application.Core;
 using Application.Events.Quaries;
-using Application.Events.Validators;
+using Application.Events.Commands.CreateEvent;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +36,7 @@ builder.Services.AddControllers()
     });
 
 // Register all validators in the assembly
-builder.Services.AddValidatorsFromAssemblyContaining<CreateEventValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateEventCommandValidator>();
 
 builder.Services.AddDbContext<AppDBContext>(options =>
 {
