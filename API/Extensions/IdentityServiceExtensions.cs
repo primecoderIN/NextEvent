@@ -9,6 +9,11 @@ using Persistence;
 
 namespace API.Extensions;
 
+/// <summary>
+/// Responsibility: Configures Security, Authentication, and Identity Management.
+/// This includes setting up ASP.NET Core Identity (Users, Roles, Store), JWT token generation,
+/// and incoming JWT Bearer authentication validation parameters.
+/// </summary>
 public static class IdentityServiceExtensions
 {
     public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)

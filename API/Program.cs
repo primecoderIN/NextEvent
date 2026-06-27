@@ -1,13 +1,6 @@
 using API.Extensions;
 using API.Middleware;
-using API.Services;
-using Application.Core;
-using Application.Events.Queries.GetEventsList;
-using Application.Events.Commands.CreateEvent;
-using FluentValidation;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Application.Core.Interfaces;
 using Persistence;
 
 // =======================================================================
@@ -20,69 +13,10 @@ using Persistence;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-/* =======================
-   Routing
-   ======================= */
-builder.Services.AddRouting(options =>
-{
-    options.LowercaseUrls = true;
-});
-
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        // Serialize all JSON responses in camelCase to match TypeScript client expectations
-        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-        // Always serialize DateTime as UTC ISO-8601 with Z suffix (Zulu format)
-        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeJsonConverter());
-    });
-
-// Register all validators in the assembly
-builder.Services.AddValidatorsFromAssemblyContaining<CreateEventCommandValidator>();
-
-builder.Services.AddDbContext<AppDBContext>(options =>
-{
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-
-// Register IAppDBContext so that when Application handlers request it, 
-// the DI container provides the concrete AppDBContext. This wires up Dependency Inversion.
-builder.Services.AddScoped<IAppDBContext>(provider => provider.GetRequiredService<AppDBContext>());
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("CorsPolicy", policy =>
-    {
-        policy.AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials()
-                .WithOrigins("http://localhost:3001");
-    });
-});
-
-/* =======================
-   AI Services
-   ======================= */
-builder.Services.AddScoped<IOpenAiService, OpenAiService>();
-
-builder.Services.AddMediatR(x=>
-{
-    x.RegisterServicesFromAssemblyContaining<GetEventsListQueryHandler>();
-
-// Closed registration: explicitly maps IPipelineBehavior<,> to ValidationBehavior<,>
-// x.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-
-// Open generic registration: MediatR automatically applies ValidationBehavior<TRequest,TResponse>
-// to every request/response pair
-x.AddOpenBehavior(typeof(ValidationBehavior<,>));
-});
-
-
+builder.Services.AddApiServices();
+builder.Services.AddDatabaseServices(builder.Configuration);
+builder.Services.AddApplicationServices();
+builder.Services.AddSwaggerServices();
 builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
