@@ -1,4 +1,4 @@
-// using Application.Core.Interfaces;
+using Application.Core.Interfaces;
 // using Microsoft.EntityFrameworkCore;
 using Persistence;
 
@@ -15,10 +15,13 @@ public static class DatabaseServiceExtensions
     {
         services.AddDbContext<AppDBContext>(options =>
         {
-            options.UseSqlite(config.GetConnectionString("DefaultConnection"));
+            options.UseSqlServer(config.GetConnectionString("DefaultConnection"));
         });
 
         services.AddScoped<IAppDBContext>(provider => provider.GetRequiredService<AppDBContext>());
+        
+        // Register the ISqlConnectionFactory so query handlers can inject it to use Dapper for fast reads.
+        services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
 
         return services;
     }
