@@ -1,13 +1,14 @@
 using Application.Core.Exceptions;
-// using Application.Core.Interfaces;
-// using Domain;
-// using MediatR;
+using Application.Core.Interfaces;
+using Application.Events.DTOs;
+using Dapper;
+using MediatR;
 
 namespace Application.Events.Queries.GetEventDetailsById;
 
-public class GetEventDetailsByIdQueryHandler(ISqlConnectionFactory connectionFactory) : IRequestHandler<GetEventDetailsByIdQuery, Event>
+public class GetEventDetailsByIdQueryHandler(ISqlConnectionFactory connectionFactory) : IRequestHandler<GetEventDetailsByIdQuery, EventDto>
 {
-    public async Task<Event> Handle(GetEventDetailsByIdQuery request, CancellationToken cancellationToken)
+    public async Task<EventDto> Handle(GetEventDetailsByIdQuery request, CancellationToken cancellationToken)
     {
         // CQRS (Queries): Create a raw connection instead of using EF Core
         using var connection = connectionFactory.CreateConnection();
@@ -15,10 +16,10 @@ public class GetEventDetailsByIdQueryHandler(ISqlConnectionFactory connectionFac
         // Parameterized SQL query to prevent SQL injection
         var sql = "SELECT * FROM Events WHERE Id = @Id";
         
-        // Dapper securely executes the query and maps the first result to the Event class
-        var eventEntity = await connection.QueryFirstOrDefaultAsync<Event>(sql, new { Id = request.Id });
+        // Dapper securely executes the query and maps the first result to the EventDto class
+        var eventDto = await connection.QueryFirstOrDefaultAsync<EventDto>(sql, new { Id = request.Id });
         
-        if (eventEntity == null) 
+        if (eventDto == null) 
         {
             throw new NotFoundException(nameof(Event), request.Id);
         }

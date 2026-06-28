@@ -1,13 +1,14 @@
-// using Domain;
-// using MediatR;
+using Application.Core.Pagination;
+using Application.Events.DTOs;
+using MediatR;
 
 namespace Application.Events.Queries.GetEventsList;
 
 /// <summary>
-/// A query to retrieve a paginated list of events.
-/// Inherits PaginationParams to automatically gain PageNumber and PageSize properties.
-/// Returns a PagedList of Event objects instead of a standard List to support UI pagination.
+/// A query that requests a paginated list of events.
+/// Inherits from PaginationParams to automatically get PageNumber and PageSize properties,
+/// allowing API endpoints to bind [FromQuery] parameters effortlessly.
 /// </summary>
-public class GetEventsListQuery : PaginationParams, IRequest<PagedList<Event>>
+public class GetEventsListQuery : PaginationParams, IRequest<PagedList<EventDto>>
 {
 }
