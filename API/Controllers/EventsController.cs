@@ -16,10 +16,11 @@ namespace API.Controllers;
 public class EventsController : BaseApiController
 {
     /// <summary>
-    /// GET /api/events
-    /// Returns all events wrapped in ApiResponse.
+    /// Retrieves a list of all events.
     /// </summary>
+    /// <response code="200">Events retrieved successfully.</response>
     [HttpGet]
+    [ProducesResponseType(typeof(ApiResponse<List<Event>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<List<Event>>>> GetEvents(
         CancellationToken cancellationToken)
     {
@@ -28,10 +29,13 @@ public class EventsController : BaseApiController
     }
 
     /// <summary>
-    /// GET /api/events/{id}
-    /// Returns a single event. Handler throws NotFoundException → middleware returns 404.
+    /// Retrieves the details of a specific event by its unique ID.
     /// </summary>
+    /// <response code="200">Event retrieved successfully.</response>
+    /// <response code="404">No event exists with the provided ID.</response>
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<Event>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<Event>>> GetEventById(
         Guid id,
         CancellationToken cancellationToken)
@@ -44,11 +48,13 @@ public class EventsController : BaseApiController
     }
 
     /// <summary>
-    /// POST /api/events
-    /// Creates a new event and returns 201 Created with the new resource's id.
-    /// ValidationBehavior runs before the handler; failures produce a 400 automatically.
+    /// Creates a new event and returns the new resource's ID.
     /// </summary>
+    /// <response code="201">Event created successfully.</response>
+    /// <response code="400">Validation failure.</response>
     [HttpPost]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse<object>>> CreateNewEvent(
         [FromBody] CreateEventDto dto,
         CancellationToken cancellationToken)
@@ -65,10 +71,15 @@ public class EventsController : BaseApiController
     }
 
     /// <summary>
-    /// PUT /api/events/{id}
-    /// Updates an existing event. Handler throws NotFoundException → middleware returns 404.
+    /// Updates an existing event.
     /// </summary>
+    /// <response code="200">Event updated successfully.</response>
+    /// <response code="400">Validation failure.</response>
+    /// <response code="404">No event exists with the provided ID.</response>
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<object>>> UpdateEvent(
         Guid id,
         [FromBody] UpdateEventDto dto,
@@ -82,10 +93,13 @@ public class EventsController : BaseApiController
     }
 
     /// <summary>
-    /// DELETE /api/events/{id}
-    /// Deletes an event. Handler throws NotFoundException → middleware returns 404.
+    /// Deletes an event by its ID.
     /// </summary>
+    /// <response code="200">Event deleted successfully.</response>
+    /// <response code="404">No event exists with the provided ID.</response>
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<object>>> DeleteEvent(
         Guid id,
         CancellationToken cancellationToken)

@@ -15,6 +15,10 @@ public static class SwaggerServiceExtensions
     {
         services.AddSwaggerGen(options =>
         {
+            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
+            options.IncludeXmlComments(xmlPath);
+
             // AddSecurityDefinition("Bearer", ...): This tells Swagger to use JWT Bearer authentication 
             // and displays the "Authorize" button at the top of the Swagger UI page.
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

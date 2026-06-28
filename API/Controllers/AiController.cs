@@ -26,11 +26,13 @@ public class AiController(IOpenAiService openAiService) : BaseApiController
     // -----------------------------------------------------------------------
 
     /// <summary>
-    /// POST /api/ai/generate-description
-    /// Uses GPT-4o-mini to generate a compelling event description from
-    /// the provided title, category, city, and venue.
+    /// Uses GPT-4o-mini to generate a compelling event description from the provided title, category, city, and venue.
     /// </summary>
+    /// <response code="200">Description generated successfully.</response>
+    /// <response code="400">Title is missing or invalid.</response>
     [HttpPost("generate-description")]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse<string>>> GenerateDescription(
         [FromBody] GenerateDescriptionRequest request,
         CancellationToken cancellationToken)
@@ -49,11 +51,13 @@ public class AiController(IOpenAiService openAiService) : BaseApiController
     }
 
     /// <summary>
-    /// POST /api/ai/suggest-category
-    /// Uses GPT-4o-mini to classify the event title into one of the known categories.
-    /// Returns an empty string if no confident match is found.
+    /// Uses GPT-4o-mini to classify the event title into one of the known categories. Returns an empty string if no confident match is found.
     /// </summary>
+    /// <response code="200">Category suggested successfully.</response>
+    /// <response code="400">Title is missing or invalid.</response>
     [HttpPost("suggest-category")]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse<string>>> SuggestCategory(
         [FromBody] SuggestCategoryRequest request,
         CancellationToken cancellationToken)
