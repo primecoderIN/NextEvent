@@ -37,7 +37,9 @@ function PageLoader() {
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 function App() {
-  const { events, loading } = useEvents()
+  // We extract the new pagination helpers (fetchNextPage, hasNextPage, isFetchingNextPage) 
+  // from our useInfiniteQuery hook and pass them directly down to the HomePage.
+  const { events, loading, fetchNextPage, hasNextPage, isFetchingNextPage } = useEvents()
 
   return (
       <div className="min-h-screen bg-background">
@@ -60,7 +62,7 @@ function App() {
               <Routes>
                 <Route
                   path="/"
-                  element={<HomePage events={events} loading={loading} />}
+                  element={<HomePage events={events} loading={loading} fetchNextPage={fetchNextPage} hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage} />}
                 />
                 <Route path="/events/new" element={<CreateEventPage />} />
                 <Route path="/events/:id/edit" element={<UpdateEventPage />} />

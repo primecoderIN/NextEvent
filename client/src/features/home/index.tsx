@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react"
 import { compareDesc, parseISO } from "date-fns"
 import type { Event } from "@/Types/Event"
+import { Button } from "@/components/ui/button"
 import { GreetingHeader } from "@/features/home/GreetingHeader"
 import { CategoryFilter } from "@/features/home/CategoryFilter"
 import { FeaturedCarousel } from "@/features/home/FeaturedCarousel"
@@ -10,9 +11,12 @@ import { TrendingSection } from "@/features/home/TrendingSection"
 interface HomePageProps {
   events: Event[]
   loading: boolean
+  fetchNextPage?: () => void
+  hasNextPage?: boolean
+  isFetchingNextPage?: boolean
 }
 
-export function HomePage({ events, loading }: HomePageProps) {
+export function HomePage({ events, loading, fetchNextPage, hasNextPage, isFetchingNextPage }: HomePageProps) {
   const [activeCategory, setActiveCategory] = useState("all")
 
   const filteredEvents = useMemo(() => {
@@ -46,6 +50,24 @@ export function HomePage({ events, loading }: HomePageProps) {
 
       {/* ── Trending This Week ── */}
       <TrendingSection events={trendingEvents} loading={loading} />
+
+      {/* ── Load More Button ── */}
+      {/* Only render this button if react-query determines there is a next page available in the database */}
+      {hasNextPage && (
+        <div className="flex justify-center pt-4">
+          <Button 
+            variant="outline" 
+            onClick={() => fetchNextPage && fetchNextPage()} 
+            disabled={isFetchingNextPage}
+            className="w-full sm:w-auto"
+          >
+            {isFetchingNextPage ? (
+              <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin mr-2" />
+            ) : null}
+            {isFetchingNextPage ? "Loading more..." : "Load More Events"}
+          </Button>
+        </div>
+      )}
 
       {/* Bottom padding for mobile bottom nav */}
       <div className="h-2 lg:hidden" />

@@ -5,6 +5,7 @@ using Application.Events.Commands.DeleteEvent;
 using Application.Events.Queries.GetEventsList;
 using Application.Events.Queries.GetEventDetailsById;
 using Application.Events.DTOs;
+using Application.Core.Pagination;
 // using Domain;
 // using Microsoft.AspNetCore.Mvc;
 
@@ -16,15 +17,18 @@ namespace API.Controllers;
 public class EventsController : BaseApiController
 {
     /// <summary>
-    /// Retrieves a list of all events.
+    /// Retrieves a paginated list of events.
     /// </summary>
     /// <response code="200">Events retrieved successfully.</response>
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<List<Event>>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ApiResponse<List<Event>>>> GetEvents(
+    [ProducesResponseType(typeof(ApiResponse<PagedList<Event>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<PagedList<Event>>>> GetEvents(
+        // [FromQuery] automatically binds query string parameters (like ?pageNumber=1) 
+        // to the GetEventsListQuery properties, completely case-insensitively.
+        [FromQuery] GetEventsListQuery query,
         CancellationToken cancellationToken)
     {
-        var events = await Mediator.Send(new GetEventsListQuery(), cancellationToken);
+        var events = await Mediator.Send(query, cancellationToken);
         return OkResponse(events, "Events retrieved successfully");
     }
 

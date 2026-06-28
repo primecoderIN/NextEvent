@@ -10,20 +10,31 @@ namespace Application.Events.Queries.GetEventsList;
 /// Belongs to the Application layer, containing business logic and orchestrating data retrieval
 /// via the ISqlConnectionFactory interface to avoid Persistence coupling and use Dapper for faster queries.
 /// </summary>
-public class GetEventsListQueryHandler(ISqlConnectionFactory connectionFactory) : IRequestHandler<GetEventsListQuery, List<Event>>
+public class GetEventsListQueryHandler(ISqlConnectionFactory connectionFactory) : IRequestHandler<GetEventsListQuery, PagedList<Event>>
 {
-    public async Task<List<Event>> Handle(GetEventsListQuery request, CancellationToken cancellationToken)
+    public async Task<PagedList<Event>> Handle(GetEventsListQuery request, CancellationToken cancellationToken)
     {
-        // CQRS (Queries): Create a raw IDbConnection. This does not use EF Core's DbContext, 
-        // bypassing change tracking for faster reads.
         using var connection = connectionFactory.CreateConnection();
         
-        // Write raw, highly optimized SQL.
-        var sql = "SELECT * FROM Events";
+        var offset = (request.PageNumber - 1) * request.PageSize;
         
-        // Dapper automatically maps the SQL result set directly to our domain objects (or DTOs).
-        var events = await connection.QueryAsync<Event>(sql);
+        // Execute two queries in a single database roundtrip using Dapper's QueryMultiple
+        // 1. Gets the absolute total count of events in the database (for TotalPages calculation)
+        // 2. Gets only the specific subset of events for the current page (using OFFSET/FETCH)
+        var sql = @"
+            SELECT COUNT(Id) FROM Events;
+            
+            SELECT * FROM Events 
+            ORDER BY Date DESC
+            OFFSET @Offset ROWS 
+            FETCH NEXT @PageSize ROWS ONLY;";
+            
+        using var multi = await connection.QueryMultipleAsync(sql, new { Offset = offset, PageSize = request.PageSize });
         
-        return events.ToList();
+        // The results must be read in the exact order they were executed in the SQL string
+        var totalCount = await multi.ReadFirstAsync<int>();
+        var events = (await multi.ReadAsync<Event>()).ToList();
+        
+        return new PagedList<Event>(events, totalCount, request.PageNumber, request.PageSize);
     }
 }

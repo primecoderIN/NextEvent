@@ -3,6 +3,11 @@
 
 namespace Application.Events.Queries.GetEventsList;
 
-public class GetEventsListQuery : IRequest<List<Event>>
+/// <summary>
+/// A query to retrieve a paginated list of events.
+/// Inherits PaginationParams to automatically gain PageNumber and PageSize properties.
+/// Returns a PagedList of Event objects instead of a standard List to support UI pagination.
+/// </summary>
+public class GetEventsListQuery : PaginationParams, IRequest<PagedList<Event>>
 {
 }
