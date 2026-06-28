@@ -23,11 +23,11 @@ public class EventsController : BaseApiController
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<PagedList<Event>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<PagedList<Event>>>> GetEvents(
-        // [FromQuery] automatically binds query string parameters (like ?pageNumber=1) 
-        // to the GetEventsListQuery properties, completely case-insensitively.
-        [FromQuery] GetEventsListQuery query,
-        CancellationToken cancellationToken)
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
+        var query = new GetEventsListQuery { PageNumber = pageNumber, PageSize = pageSize };
         var events = await Mediator.Send(query, cancellationToken);
         return OkResponse(events, "Events retrieved successfully");
     }
