@@ -6,9 +6,9 @@ using MediatR;
 
 namespace Application.Events.Queries.GetEventDetailsById;
 
-public class GetEventDetailsByIdQueryHandler(ISqlConnectionFactory connectionFactory) : IRequestHandler<GetEventDetailsByIdQuery, EventDto>
+public class GetEventDetailsByIdQueryHandler(ISqlConnectionFactory connectionFactory) : IRequestHandler<GetEventDetailsByIdQuery, EventResponseDto>
 {
-    public async Task<EventDto> Handle(GetEventDetailsByIdQuery request, CancellationToken cancellationToken)
+    public async Task<EventResponseDto> Handle(GetEventDetailsByIdQuery request, CancellationToken cancellationToken)
     {
         // CQRS (Queries): Create a raw connection instead of using EF Core
         using var connection = connectionFactory.CreateConnection();
@@ -16,14 +16,15 @@ public class GetEventDetailsByIdQueryHandler(ISqlConnectionFactory connectionFac
         // Parameterized SQL query to prevent SQL injection
         var sql = "SELECT * FROM Events WHERE Id = @Id";
         
-        // Dapper securely executes the query and maps the first result to the EventDto class
-        var eventDto = await connection.QueryFirstOrDefaultAsync<EventDto>(sql, new { Id = request.Id });
+        // Dapper securely executes the query and maps the first result to the EventResponseDto class
+        var eventDto = await connection.QueryFirstOrDefaultAsync<EventResponseDto>(sql, new { Id = request.Id });
         
         if (eventDto == null) 
         {
             throw new NotFoundException(nameof(Event), request.Id);
         }
-
-        return eventEntity;
+        
+        // Note: the ExceptionMiddleware will catch nulls and return 404
+        return eventDto;
     }
 }

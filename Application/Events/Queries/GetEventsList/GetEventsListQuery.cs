@@ -9,6 +9,6 @@ namespace Application.Events.Queries.GetEventsList;
 /// Inherits from PaginationParams to automatically get PageNumber and PageSize properties,
 /// allowing API endpoints to bind [FromQuery] parameters effortlessly.
 /// </summary>
-public class GetEventsListQuery : PaginationParams, IRequest<PagedList<EventDto>>
+public class GetEventsListQuery : PaginationParams, IRequest<PagedList<EventResponseDto>>
 {
 }

@@ -19,9 +19,9 @@ public class AccountController : BaseApiController
     /// <response code="400">Validation failed.</response>
     [AllowAnonymous]
     [HttpPost("register")]
-    [ProducesResponseType(typeof(ApiResponse<UserDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<RegisterResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<ApiResponse<UserDTO>>> RegisterUser([FromBody] RegisterCommand command)
+    public async Task<ActionResult<ApiResponse<RegisterResponseDto>>> RegisterUser([FromBody] RegisterCommand command)
     {
         var result = await Mediator.Send(command);
         SetRefreshTokenCookie(result.RefreshToken);
@@ -37,10 +37,10 @@ public class AccountController : BaseApiController
     /// <response code="401">Invalid credentials.</response>
     [AllowAnonymous]
     [HttpPost("login")]
-    [ProducesResponseType(typeof(ApiResponse<UserDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<ApiResponse<UserDTO>>> LoginUser([FromBody] LoginCommand command)
+    public async Task<ActionResult<ApiResponse<LoginResponseDto>>> LoginUser([FromBody] LoginCommand command)
     {
         var result = await Mediator.Send(command);
         SetRefreshTokenCookie(result.RefreshToken);
@@ -54,9 +54,9 @@ public class AccountController : BaseApiController
     /// <response code="401">Refresh token is missing or invalid.</response>
     [AllowAnonymous]
     [HttpPost("refresh-token")]
-    [ProducesResponseType(typeof(ApiResponse<UserDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<ApiResponse<UserDTO>>> RefreshToken()
+    public async Task<ActionResult<ApiResponse<LoginResponseDto>>> RefreshToken()
     {
         var refreshToken = Request.Cookies["refreshToken"];
 

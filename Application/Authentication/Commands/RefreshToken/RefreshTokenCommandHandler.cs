@@ -4,20 +4,20 @@ using Application.Authentication.Interfaces;
 // using Domain;
 // using MediatR;
 using Microsoft.AspNetCore.Identity;
-// using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Authentication.Commands.RefreshToken;
 
 public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenService tokenService) 
-    : IRequestHandler<RefreshTokenCommand, AuthResult>
+    : IRequestHandler<RefreshTokenCommand, AuthResult<LoginResponseDto>>
 {
-    public async Task<AuthResult> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+    public async Task<AuthResult<LoginResponseDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == request.Token && u.RefreshTokenExpiryTime > DateTime.UtcNow, cancellationToken);
 
         if (user == null)
         {
-            throw new UnauthorizedException("Invalid or expired refresh token");
+            throw new UnauthorizedException("Invalid refresh token");
         }
 
         var newRefreshToken = tokenService.GenerateRefreshToken();
@@ -25,18 +25,16 @@ public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenSer
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await userManager.UpdateAsync(user);
 
-        var userDto = new UserDTO
+        return new AuthResult<LoginResponseDto>
         {
-            DisplayName = user.DisplayName ?? user.UserName!,
-            Token = tokenService.CreateToken(user),
-            UserName = user.UserName!,
-            Image = user.ImageUrl
-        };
-
-        return new AuthResult
-        {
-            User = userDto,
-            RefreshToken = newRefreshToken
+            RefreshToken = newRefreshToken,
+            User = new LoginResponseDto
+            {
+                DisplayName = user.DisplayName ?? user.UserName!,
+                Image = user.ImageUrl,
+                Token = tokenService.CreateToken(user),
+                Username = user.UserName!
+            }
         };
     }
 }

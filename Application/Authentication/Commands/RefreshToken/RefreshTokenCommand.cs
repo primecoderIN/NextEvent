@@ -3,7 +3,7 @@ using Application.Authentication.DTOs;
 
 namespace Application.Authentication.Commands.RefreshToken;
 
-public class RefreshTokenCommand : IRequest<AuthResult>
+public class RefreshTokenCommand : IRequest<AuthResult<LoginResponseDto>>
 {
     public required string Token { get; set; }
 }

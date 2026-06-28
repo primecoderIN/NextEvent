@@ -1,6 +1,6 @@
 namespace Application.Authentication.DTOs;
 
-public class RegisterDTO
+public class RegisterRequestDto
 {
     public required string DisplayName { get; set; }
     public required string Email { get; set; }

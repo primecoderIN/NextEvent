@@ -21,8 +21,8 @@ public class EventsController : BaseApiController
     /// </summary>
     /// <response code="200">Events retrieved successfully.</response>
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<PagedList<EventDto>>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ApiResponse<PagedList<EventDto>>>> GetEvents(
+    [ProducesResponseType(typeof(ApiResponse<PagedList<EventResponseDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<PagedList<EventResponseDto>>>> GetEvents(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -38,9 +38,9 @@ public class EventsController : BaseApiController
     /// <response code="200">Event retrieved successfully.</response>
     /// <response code="404">No event exists with the provided ID.</response>
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(ApiResponse<EventDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<EventResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ApiResponse<EventDto>>> GetEventById(
+    public async Task<ActionResult<ApiResponse<EventResponseDto>>> GetEventById(
         Guid id,
         CancellationToken cancellationToken)
     {

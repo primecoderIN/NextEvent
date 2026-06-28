@@ -3,7 +3,7 @@ using Application.Authentication.DTOs;
 
 namespace Application.Authentication.Commands.Register;
 
-public class RegisterCommand : IRequest<AuthResult>
+public class RegisterCommand : IRequest<AuthResult<RegisterResponseDto>>
 {
     public required string DisplayName { get; set; }
     public required string Email { get; set; }

@@ -1,9 +1,9 @@
 namespace Application.Authentication.DTOs;
 
-public class UserDTO
+public class LoginResponseDto
 {
-    public required string DisplayName { get; set; }
     public required string Token { get; set; }
-    public required string UserName { get; set; }
+    public required string Username { get; set; }
+    public required string DisplayName { get; set; }
     public string? Image { get; set; }
 }

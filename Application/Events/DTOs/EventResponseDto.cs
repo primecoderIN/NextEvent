@@ -1,6 +1,6 @@
 namespace Application.Events.DTOs;
 
-public class EventDto
+public class EventResponseDto
 {
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
