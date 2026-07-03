@@ -6,6 +6,7 @@ using Application.Events.Queries.GetEventsList;
 using Application.Events.Queries.GetEventDetailsById;
 using Application.Events.DTOs;
 using Application.Core.Pagination;
+using Microsoft.AspNetCore.Authorization;
 // using Domain;
 // using Microsoft.AspNetCore.Mvc;
 
@@ -56,6 +57,7 @@ public class EventsController : BaseApiController
     /// </summary>
     /// <response code="201">Event created successfully.</response>
     /// <response code="400">Validation failure.</response>
+    [Authorize]
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -80,6 +82,7 @@ public class EventsController : BaseApiController
     /// <response code="200">Event updated successfully.</response>
     /// <response code="400">Validation failure.</response>
     /// <response code="404">No event exists with the provided ID.</response>
+    [Authorize]
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -101,6 +104,7 @@ public class EventsController : BaseApiController
     /// </summary>
     /// <response code="200">Event deleted successfully.</response>
     /// <response code="404">No event exists with the provided ID.</response>
+    [Authorize]
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
