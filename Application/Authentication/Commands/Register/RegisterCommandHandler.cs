@@ -1,6 +1,7 @@
 using Application.Authentication.DTOs;
 using Application.Authentication.Interfaces;
 using Domain;
+using Domain.Constants;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
@@ -44,7 +45,7 @@ public class RegisterCommandHandler(UserManager<User> userManager, ITokenService
             throw new ValidationException(errors);
         }
         
-        await userManager.AddToRoleAsync(user, "Member");
+        await userManager.AddToRoleAsync(user, RoleConstants.Member);
 
         var refreshToken = tokenService.GenerateRefreshToken();
         user.RefreshToken = refreshToken;

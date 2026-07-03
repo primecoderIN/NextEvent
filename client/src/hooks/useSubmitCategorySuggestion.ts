@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosHttpAgent } from "@/lib/axios";
+import { CategoryApiRoutes } from "@/constants/apiRoutes";
+import { QueryKeys } from "@/constants/queryKeys";
 import type { ApiResponse } from "@/Types/ApiResponse";
 import type { Category } from "@/Types/Category";
 
@@ -10,7 +12,7 @@ interface SuggestCategoryPayload {
 }
 
 const postSuggest = async (payload: SuggestCategoryPayload): Promise<Category> => {
-  const res = await axiosHttpAgent.post<ApiResponse<Category>>("/categories/suggest", payload);
+  const res = await axiosHttpAgent.post<ApiResponse<Category>>(CategoryApiRoutes.Suggest, payload);
   return res.data.data!;
 }
 
@@ -19,7 +21,7 @@ export function useSubmitCategorySuggestion() {
 
   const mutation = useMutation<Category, unknown, SuggestCategoryPayload>({
     mutationFn: postSuggest,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["categories"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: QueryKeys.Categories }),
   });
 
   return {

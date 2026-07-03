@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { BottomSheet } from "@/components/ui/sheet"
 import { LanguageSwitcher } from "@/components/LanguageSwitcher"
 import { useAuth } from "@/features/auth/AuthContext"
+import { RoutePaths } from "@/constants/routePaths"
 
 const navItems = [
   { icon: Home, labelKey: "home", href: "#" },
@@ -68,10 +69,10 @@ export const Navbar = () => {
               </div>
             ) : (
               <>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
+                <Button variant="ghost" size="sm" onClick={() => navigate(RoutePaths.Login)}>
                   {t("login", { ns: "common" })}
                 </Button>
-                <Button size="sm" onClick={() => navigate("/register")}>
+                <Button size="sm" onClick={() => navigate(RoutePaths.Register)}>
                   {t("signUp", { ns: "common" })}
                 </Button>
               </>
@@ -135,7 +136,7 @@ export const Navbar = () => {
                   className="flex-1"
                   onClick={() => {
                     setSheetOpen(false)
-                    navigate("/login")
+                    navigate(RoutePaths.Login)
                   }}
                 >
                   {t("login", { ns: "common" })}
@@ -144,7 +145,7 @@ export const Navbar = () => {
                   className="flex-1"
                   onClick={() => {
                     setSheetOpen(false)
-                    navigate("/register")
+                    navigate(RoutePaths.Register)
                   }}
                 >
                   {t("signUp", { ns: "common" })}
@@ -180,7 +181,7 @@ export const Navbar = () => {
               style={{
                 background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
               }}
-              onClick={() => { setSheetOpen(false); navigate("/events/new") }}
+              onClick={() => { setSheetOpen(false); navigate(RoutePaths.CreateEvent) }}
             >
               <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
                 <Plus className="h-4 w-4" />

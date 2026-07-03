@@ -6,6 +6,7 @@ using Application.Events.Queries.GetEventsList;
 using Application.Events.Queries.GetEventDetailsById;
 using Application.Events.DTOs;
 using Application.Core.Pagination;
+using Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 // using Domain;
 // using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ namespace API.Controllers;
 
 // Using explicit routing ("api/events") rather than "[controller]" prevents 
 // breaking API contracts if the class name changes in the future.
-[Route("api/events")]
+[Route(ApiRouteConstants.Events.Base)]
 public class EventsController : BaseApiController
 {
     /// <summary>
@@ -38,7 +39,7 @@ public class EventsController : BaseApiController
     /// </summary>
     /// <response code="200">Event retrieved successfully.</response>
     /// <response code="404">No event exists with the provided ID.</response>
-    [HttpGet("{id:guid}")]
+    [HttpGet(ApiRouteConstants.Events.Id)]
     [ProducesResponseType(typeof(ApiResponse<EventResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<EventResponseDto>>> GetEventById(
@@ -83,7 +84,7 @@ public class EventsController : BaseApiController
     /// <response code="400">Validation failure.</response>
     /// <response code="404">No event exists with the provided ID.</response>
     [Authorize]
-    [HttpPut("{id:guid}")]
+    [HttpPut(ApiRouteConstants.Events.Update)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
@@ -105,7 +106,7 @@ public class EventsController : BaseApiController
     /// <response code="200">Event deleted successfully.</response>
     /// <response code="404">No event exists with the provided ID.</response>
     [Authorize]
-    [HttpDelete("{id:guid}")]
+    [HttpDelete(ApiRouteConstants.Events.Delete)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<object>>> DeleteEvent(

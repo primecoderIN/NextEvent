@@ -4,11 +4,12 @@ using Application.Authentication.Commands.Logout;
 using Application.Authentication.Commands.RefreshToken;
 using Application.Authentication.Commands.Register;
 using Application.Authentication.DTOs;
+using Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
-[Route("api/account")]
+[Route(ApiRouteConstants.Account.Base)]
 public class AccountController : BaseApiController
 {
     /// <summary>
@@ -18,7 +19,7 @@ public class AccountController : BaseApiController
     /// <response code="200">User registered successfully.</response>
     /// <response code="400">Validation failed.</response>
     [AllowAnonymous]
-    [HttpPost("register")]
+    [HttpPost(ApiRouteConstants.Account.Register)]
     [ProducesResponseType(typeof(ApiResponse<RegisterResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse<RegisterResponseDto>>> RegisterUser([FromBody] RegisterCommand command)
@@ -36,7 +37,7 @@ public class AccountController : BaseApiController
     /// <response code="400">Validation failed.</response>
     /// <response code="401">Invalid credentials.</response>
     [AllowAnonymous]
-    [HttpPost("login")]
+    [HttpPost(ApiRouteConstants.Account.Login)]
     [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
@@ -53,7 +54,7 @@ public class AccountController : BaseApiController
     /// <response code="200">Token refreshed successfully.</response>
     /// <response code="401">Refresh token is missing or invalid.</response>
     [AllowAnonymous]
-    [HttpPost("refresh-token")]
+    [HttpPost(ApiRouteConstants.Account.RefreshToken)]
     [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<ApiResponse<LoginResponseDto>>> RefreshToken()
@@ -74,7 +75,7 @@ public class AccountController : BaseApiController
     /// <response code="200">Logged out successfully.</response>
     /// <response code="401">User is not authenticated.</response>
     [Authorize]
-    [HttpPost("logout")]
+    [HttpPost(ApiRouteConstants.Account.Logout)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<ApiResponse<object>>> Logout()

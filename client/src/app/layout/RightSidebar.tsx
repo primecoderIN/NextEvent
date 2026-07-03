@@ -5,6 +5,7 @@ import type { Event } from "@/Types/Event"
 import { formatDate } from "@/features/home/helpers"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
+import { RoutePaths } from "@/constants/routePaths"
 
 const TOP_ORGANIZERS = [
   { name: "BookMyShow Live", followers: "12.4K", initials: "BL", color: "bg-red-500" },
@@ -121,7 +122,7 @@ export function RightSidebar({ events = [] }: { events: Event[] }) {
           </div>
           <Button
             variant="outline"
-            onClick={() => navigate("/events/new")}
+            onClick={() => navigate(RoutePaths.CreateEvent)}
             className="mt-3 w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
           >
             {t("createEvent")}

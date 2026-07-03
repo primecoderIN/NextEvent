@@ -1,10 +1,11 @@
 using API.Common;
 using API.Services;
+using Domain.Constants;
 // using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-[Route("api/ai")]
+[Route(ApiRouteConstants.Ai.Base)]
 public class AiController(IOpenAiService openAiService) : BaseApiController
 {
     // -----------------------------------------------------------------------
@@ -30,7 +31,7 @@ public class AiController(IOpenAiService openAiService) : BaseApiController
     /// </summary>
     /// <response code="200">Description generated successfully.</response>
     /// <response code="400">Title is missing or invalid.</response>
-    [HttpPost("generate-description")]
+    [HttpPost(ApiRouteConstants.Ai.GenerateDescription)]
     [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse<string>>> GenerateDescription(
@@ -55,7 +56,7 @@ public class AiController(IOpenAiService openAiService) : BaseApiController
     /// </summary>
     /// <response code="200">Category suggested successfully.</response>
     /// <response code="400">Title is missing or invalid.</response>
-    [HttpPost("suggest-category")]
+    [HttpPost(ApiRouteConstants.Ai.SuggestCategory)]
     [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse<string>>> SuggestCategory(

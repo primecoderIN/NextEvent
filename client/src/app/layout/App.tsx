@@ -5,6 +5,7 @@ import { DesktopSidebar } from "@/app/layout/DesktopSidebar"
 import { RightSidebar } from "@/app/layout/RightSidebar"
 import { useEvents } from "@/hooks/useEvents"
 import { Toaster } from "@/components/ui/sonner"
+import { RoutePaths } from "@/constants/routePaths"
 
 // ─── Lazy-loaded page bundles ─────────────────────────────────────────────────
 const HomePage = lazy(() =>
@@ -63,16 +64,16 @@ function App() {
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route
-                  path="/"
+                  path={RoutePaths.Home}
                   element={<HomePage events={events} loading={loading} fetchNextPage={fetchNextPage} hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage} />}
                 />
-                <Route path="/events/new" element={<CreateEventPage />} />
-                <Route path="/events/:id/edit" element={<UpdateEventPage />} />
-                <Route path="/events/:id" element={<EventDetailPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/admin/categories/new" element={<CreateCategoryPage />} />
-                <Route path="/categories/suggest" element={<SuggestCategoryPage />} />
+                <Route path={RoutePaths.CreateEvent} element={<CreateEventPage />} />
+                <Route path={RoutePaths.EditEvent} element={<UpdateEventPage />} />
+                <Route path={RoutePaths.EventDetail} element={<EventDetailPage />} />
+                <Route path={RoutePaths.Login} element={<LoginPage />} />
+                <Route path={RoutePaths.Register} element={<RegisterPage />} />
+                <Route path={RoutePaths.CreateCategory} element={<CreateCategoryPage />} />
+                <Route path={RoutePaths.SuggestCategory} element={<SuggestCategoryPage />} />
               </Routes>
             </Suspense>
           </main>

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { getCreateCategorySchema, type CreateCategoryFormValues } from "./types";
 import { useCreateCategory } from "@/hooks/useCreateCategory";
 import { useAuth } from "@/features/auth/AuthContext";
+import { Roles } from "@/constants/roles";
 import { toast } from "sonner";
 
 export default function CreateCategoryPage() {
@@ -13,7 +14,7 @@ export default function CreateCategoryPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  if (!user || !user.roles?.includes("Admin")) {
+  if (!user || !user.roles?.includes(Roles.Admin)) {
     return <div className="p-6">Not authorized</div>;
   }
 

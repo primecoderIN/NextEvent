@@ -3,10 +3,13 @@ import { axiosHttpAgent } from "@/lib/axios"
 import type { Category } from "@/Types/Category"
 import type { ApiResponse } from "@/Types/ApiResponse"
 
-export const CATEGORIES_QUERY_KEY = ["categories"] as const
+import { CategoryApiRoutes } from "@/constants/apiRoutes"
+import { QueryKeys } from "@/constants/queryKeys"
+
+export const CATEGORIES_QUERY_KEY = QueryKeys.Categories
 
 export const fetchCategories = async (): Promise<Category[]> => {
-  const response = await axiosHttpAgent.get<ApiResponse<Category[]>>("/categories")
+  const response = await axiosHttpAgent.get<ApiResponse<Category[]>>(CategoryApiRoutes.Base)
   return response.data.data ?? []
 }
 

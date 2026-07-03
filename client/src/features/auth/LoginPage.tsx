@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { getLoginFormSchema, type LoginFormValues } from "@/features/auth/types"
 import { useAuth } from "@/features/auth/AuthContext"
 import { FieldError } from "@/features/create-event/components"
+import { RoutePaths } from "@/constants/routePaths"
 import { toast } from "sonner"
 
 export function LoginPage() {
@@ -40,7 +41,7 @@ export function LoginPage() {
     try {
       await login(values)
       toast.success("Logged in successfully!")
-      navigate("/")
+      navigate(RoutePaths.Home)
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed")
     } finally {
@@ -124,7 +125,7 @@ export function LoginPage() {
 
         <p className="text-center text-sm text-muted-foreground">
           {t("login.noAccount")}{" "}
-          <Link to="/register" className="font-semibold text-primary hover:underline">
+          <Link to={RoutePaths.Register} className="font-semibold text-primary hover:underline">
             {t("login.signUp")}
           </Link>
         </p>

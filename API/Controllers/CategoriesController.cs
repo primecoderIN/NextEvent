@@ -4,11 +4,12 @@ using Application.Categories.Commands.CreateCategory;
 using Application.Categories.Commands.SuggestCategory;
 using Application.Categories.Commands.ApproveCategory;
 using API.Common;
+using Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
-[Route("api/categories")]
+[Route(ApiRouteConstants.Categories.Base)]
 public class CategoriesController : BaseApiController
 {
     [HttpGet]
@@ -20,7 +21,7 @@ public class CategoriesController : BaseApiController
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status201Created)]
     public async Task<ActionResult<ApiResponse<CategoryDto>>> CreateCategory([FromBody] CreateCategoryDto dto, CancellationToken cancellationToken)
     {
@@ -28,7 +29,7 @@ public class CategoriesController : BaseApiController
         return CreatedResponse(nameof(GetCategories), new { id = created.Id }, created, "Category created successfully");
     }
 
-    [HttpPost("suggest")]
+    [HttpPost(ApiRouteConstants.Categories.Suggest)]
     [Authorize]
     [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status201Created)]
     public async Task<ActionResult<ApiResponse<CategoryDto>>> SuggestCategory([FromBody] CreateCategoryDto dto, CancellationToken cancellationToken)
@@ -37,8 +38,8 @@ public class CategoriesController : BaseApiController
         return CreatedResponse(nameof(GetCategories), new { id = created.Id }, created, "Category suggestion submitted and pending approval");
     }
 
-    [HttpPost("{id:guid}/approve")]
-    [Authorize(Roles = "Admin")]
+    [HttpPost(ApiRouteConstants.Categories.Approve)]
+    [Authorize(Roles = RoleConstants.Admin)]
     [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<CategoryDto>>> ApproveCategory([FromRoute] Guid id, CancellationToken cancellationToken)
     {

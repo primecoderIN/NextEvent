@@ -18,6 +18,8 @@ import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { LanguageSwitcher } from "@/components/LanguageSwitcher"
 import { useAuth } from "@/features/auth/AuthContext"
+import { Roles } from "@/constants/roles"
+import { RoutePaths } from "@/constants/routePaths"
 
 const navItems = [
   { icon: Home, labelKey: "home", href: "#", active: true },
@@ -78,16 +80,16 @@ export function DesktopSidebar() {
       {/* Create Event CTA */}
       <div className="px-3 mb-3 shrink-0">
         <button
-          onClick={() => navigate("/events/new")}
+          onClick={() => navigate(RoutePaths.CreateEvent)}
           className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
           style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
         >
           <Plus className="h-4 w-4" />
           {t("createEvent", { ns: "common" })}
         </button>
-        {user?.roles?.includes("Admin") && (
+        {user?.roles?.includes(Roles.Admin) && (
           <button
-            onClick={() => navigate("/admin/categories/new")}
+            onClick={() => navigate(RoutePaths.CreateCategory)}
             className="w-full mt-2 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-border/50"
           >
             {t("createCategory", { ns: "admin" })}
@@ -95,7 +97,7 @@ export function DesktopSidebar() {
         )}
         {user && (
           <button
-            onClick={() => navigate("/categories/suggest")}
+            onClick={() => navigate(RoutePaths.SuggestCategory)}
             className="w-full mt-2 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-border/50"
           >
             {t("suggestCategory", { ns: "admin" })}
@@ -139,13 +141,13 @@ export function DesktopSidebar() {
         ) : (
           <div className="flex flex-col gap-2">
             <button
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(RoutePaths.Login)}
               className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-muted transition-colors border border-border/50"
             >
               {t("login", { ns: "common" })}
             </button>
             <button
-              onClick={() => navigate("/register")}
+              onClick={() => navigate(RoutePaths.Register)}
               className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary text-sm font-semibold hover:bg-primary/20 transition-colors"
             >
               {t("signUp", { ns: "common" })}

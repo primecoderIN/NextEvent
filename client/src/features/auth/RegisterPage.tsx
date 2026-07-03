@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { getRegisterFormSchema, type RegisterFormValues } from "@/features/auth/types"
 import { useAuth } from "@/features/auth/AuthContext"
 import { FieldError } from "@/features/create-event/components"
+import { RoutePaths } from "@/constants/routePaths"
 import { toast } from "sonner"
 
 export function RegisterPage() {
@@ -149,7 +150,7 @@ export function RegisterPage() {
 
         <p className="text-center text-sm text-muted-foreground">
           {t("register.hasAccount")}{" "}
-          <Link to="/login" className="font-semibold text-primary hover:underline">
+          <Link to={RoutePaths.Login} className="font-semibold text-primary hover:underline">
             {t("register.login")}
           </Link>
         </p>
