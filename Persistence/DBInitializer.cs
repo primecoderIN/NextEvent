@@ -40,13 +40,38 @@ public class DBInitializer
             return; // If events already exist, do not seed
         }
 
+        // Seed initial categories (idempotent) to match frontend CATEGORIES
+        var initialCategories = new List<Category>
+        {
+            new() { Name = "Music", Slug = "music", Description = "Music events and concerts" },
+            new() { Name = "Nightlife", Slug = "nightlife", Description = "Nightlife and club events" },
+            new() { Name = "Workshop", Slug = "workshop", Description = "Educational workshops" },
+            new() { Name = "Sports", Slug = "sports", Description = "Sporting events and competitions" },
+            new() { Name = "Business", Slug = "business", Description = "Conferences and business meetups" },
+            new() { Name = "Other", Slug = "other", Description = "Miscellaneous events" }
+        };
+
+        foreach (var cat in initialCategories)
+        {
+            // Use Slug uniqueness to ensure idempotent seeding
+            var exists = await context.Categories.AnyAsync(c => c.Slug == cat.Slug);
+            if (!exists)
+            {
+                // Ensure timestamps are set correctly on insert
+                cat.CreatedAtUtc = DateTime.UtcNow;
+                cat.UpdatedAtUtc = DateTime.UtcNow;
+                context.Categories.Add(cat);
+            }
+        }
+        await context.SaveChangesAsync();
+
 
         var events = new List<Event>
         {
             new() {
                 Title = "Tech Conference 2026",
                 Description = "Annual technology conference for developers and architects.",
-                Category = "Technology",
+                Category = "Business",
                 Date = DateTime.UtcNow.AddDays(15),
                 City = "Bangalore",
                 Venue = "Bangalore International Exhibition Centre",
@@ -90,7 +115,7 @@ public class DBInitializer
             new() {
                 Title = "Food Carnival",
                 Description = "Experience cuisines from around the world.",
-                Category = "Food",
+                Category = "Other",
                 Date = DateTime.UtcNow.AddDays(75),
                 City = "Chennai",
                 Venue = "Island Grounds",
