@@ -11,6 +11,7 @@ namespace Persistence;
 public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(options), IAppDBContext //Whatever options we passed from program.cs has to be passed to DbContext
 {
     public DbSet<Event> Events { get; set; }
+    public DbSet<Category> Categories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,5 +43,36 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
                     property.SetValueConverter(nullableUtcConverter);
             }
         }
+
+        // Category entity configuration
+        modelBuilder.Entity<Category>(b =>
+        {
+            b.HasKey(c => c.Id);
+
+            b.Property(c => c.Name)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            b.Property(c => c.Slug)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            b.Property(c => c.Description)
+                .HasMaxLength(2000);
+
+            b.Property(c => c.IsActive)
+                .HasDefaultValue(true);
+
+            b.Property(c => c.SortOrder)
+                .HasDefaultValue(0);
+
+            b.Property(c => c.CreatedAtUtc)
+                .IsRequired();
+
+            b.Property(c => c.UpdatedAtUtc)
+                .IsRequired();
+
+            b.HasIndex(c => c.Slug).IsUnique();
+        });
     }
 }

@@ -20,6 +20,11 @@ public static class ApiServiceExtensions
             options.LowercaseUrls = true;
         });
 
+        // Register IHttpContextAccessor to make the current HTTP context available to services.
+        // By default, only controllers have direct access to HttpContext. This registration
+        // allows non-controller services (like CurrentUserService) to access the current request's
+        // User claims, headers, and other HTTP details through dependency injection.
+        // This is essential for implementing ICurrentUserService without coupling it directly to controllers.
         services.AddHttpContextAccessor();
 
         services.AddControllers()

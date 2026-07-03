@@ -7,6 +7,10 @@ namespace API.Services;
 /// API-layer implementation of ICurrentUserService.
 /// Extracts the current user's ID from the HttpContext's User ClaimsPrincipal,
 /// following the standard ASP.NET Core pattern of storing the user ID in the NameIdentifier claim.
+/// 
+/// Note: Depends on IHttpContextAccessor (registered via AddHttpContextAccessor() in Startup).
+/// This allows the Application layer to access HTTP context through an abstraction,
+/// keeping it decoupled from direct HttpContext dependencies while remaining testable and reusable.
 /// </summary>
 public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
 {
