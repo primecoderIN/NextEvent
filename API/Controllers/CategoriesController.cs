@@ -1,6 +1,10 @@
 using Application.Categories.Queries.GetCategories;
 using Application.Categories.DTOs;
+using Application.Categories.Commands.CreateCategory;
+using Application.Categories.Commands.SuggestCategory;
+using Application.Categories.Commands.ApproveCategory;
 using API.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
@@ -13,5 +17,32 @@ public class CategoriesController : BaseApiController
     {
         var categories = await Mediator.Send(new GetCategoriesQuery(), cancellationToken);
         return OkResponse(categories, "Categories retrieved successfully");
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status201Created)]
+    public async Task<ActionResult<ApiResponse<CategoryDto>>> CreateCategory([FromBody] CreateCategoryDto dto, CancellationToken cancellationToken)
+    {
+        var created = await Mediator.Send(new CreateCategoryCommand { Name = dto.Name, Slug = dto.Slug, Description = dto.Description }, cancellationToken);
+        return CreatedResponse(nameof(GetCategories), new { id = created.Id }, created, "Category created successfully");
+    }
+
+    [HttpPost("suggest")]
+    [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status201Created)]
+    public async Task<ActionResult<ApiResponse<CategoryDto>>> SuggestCategory([FromBody] CreateCategoryDto dto, CancellationToken cancellationToken)
+    {
+        var created = await Mediator.Send(new SuggestCategoryCommand { Name = dto.Name, Slug = dto.Slug, Description = dto.Description }, cancellationToken);
+        return CreatedResponse(nameof(GetCategories), new { id = created.Id }, created, "Category suggestion submitted and pending approval");
+    }
+
+    [HttpPost("{id:guid}/approve")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(ApiResponse<CategoryDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<CategoryDto>>> ApproveCategory([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var updated = await Mediator.Send(new ApproveCategoryCommand { Id = id }, cancellationToken);
+        return OkResponse(updated, "Category approved");
     }
 }

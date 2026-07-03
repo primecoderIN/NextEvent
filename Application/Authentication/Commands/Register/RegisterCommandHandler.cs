@@ -59,6 +59,9 @@ public class RegisterCommandHandler(UserManager<User> userManager, ITokenService
             Username = user.UserName!
         };
 
+        var roles = await userManager.GetRolesAsync(user);
+        userDto.Roles = roles;
+
         return new AuthResult<RegisterResponseDto>
         {
             User = userDto,

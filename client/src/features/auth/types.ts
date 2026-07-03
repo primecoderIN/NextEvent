@@ -7,6 +7,10 @@ export interface UserDTO {
   email: string;
 }
 
+export interface UserDTOWithRoles extends UserDTO {
+  roles?: string[];
+}
+
 export const getLoginFormSchema = (t: TFunction<"auth">) =>
   z.object({
     email: z

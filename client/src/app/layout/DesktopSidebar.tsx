@@ -85,6 +85,22 @@ export function DesktopSidebar() {
           <Plus className="h-4 w-4" />
           {t("createEvent", { ns: "common" })}
         </button>
+        {user?.roles?.includes("Admin") && (
+          <button
+            onClick={() => navigate("/admin/categories/new")}
+            className="w-full mt-2 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-border/50"
+          >
+            {t("createCategory", { ns: "admin" })}
+          </button>
+        )}
+        {user && (
+          <button
+            onClick={() => navigate("/categories/suggest")}
+            className="w-full mt-2 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-border/50"
+          >
+            {t("suggestCategory", { ns: "admin" })}
+          </button>
+        )}
       </div>
 
       {/* Secondary nav */}

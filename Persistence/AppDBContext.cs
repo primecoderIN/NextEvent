@@ -17,31 +17,30 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
     {
         base.OnModelCreating(modelBuilder);
 
-        // Value converter: store DateTime as UTC ISO-8601 text only for SQLite.
-        // For SQL Server we keep native datetime semantics and avoid comparing
-        // string-backed date columns against DateTime parameters.
-        if (Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true)
+        // Value converter: store DateTime as UTC ISO-8601 text.
+        // This keeps the current database mapping compatible with existing
+        // string-backed date columns, including Identity refresh token expiry.
+        var utcConverter = new ValueConverter<DateTime, string>(
+            v => v.ToUniversalTime().ToString("O"),
+            v => DateTime.SpecifyKind(DateTime.Parse(v), DateTimeKind.Utc)
+        );
+
+        var nullableUtcConverter = new ValueConverter<DateTime?, string?>(
+            v => v.HasValue ? v.Value.ToUniversalTime().ToString("O") : null,
+            v => v != null ? DateTime.SpecifyKind(DateTime.Parse(v), DateTimeKind.Utc) : (DateTime?)null
+        );
+
+        // Apply converters to every DateTime / DateTime? column across all entities.
+        // This prevents `System.String` -> `System.DateTime` cast failures when the
+        // current database schema stores dates as text.
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            var utcConverter = new ValueConverter<DateTime, string>(
-                v => v.ToUniversalTime().ToString("O"),
-                v => DateTime.SpecifyKind(DateTime.Parse(v), DateTimeKind.Utc)
-            );
-
-            var nullableUtcConverter = new ValueConverter<DateTime?, string?>(
-                v => v.HasValue ? v.Value.ToUniversalTime().ToString("O") : null,
-                v => v != null ? DateTime.SpecifyKind(DateTime.Parse(v), DateTimeKind.Utc) : (DateTime?)null
-            );
-
-            // Apply converters to every DateTime / DateTime? column across all entities
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            foreach (var property in entityType.GetProperties())
             {
-                foreach (var property in entityType.GetProperties())
-                {
-                    if (property.ClrType == typeof(DateTime))
-                        property.SetValueConverter(utcConverter);
-                    else if (property.ClrType == typeof(DateTime?))
-                        property.SetValueConverter(nullableUtcConverter);
-                }
+                if (property.ClrType == typeof(DateTime))
+                    property.SetValueConverter(utcConverter);
+                else if (property.ClrType == typeof(DateTime?))
+                    property.SetValueConverter(nullableUtcConverter);
             }
         }
 

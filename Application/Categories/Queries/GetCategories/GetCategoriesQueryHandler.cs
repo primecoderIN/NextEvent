@@ -8,6 +8,7 @@ public class GetCategoriesQueryHandler(IAppDBContext context) : IRequestHandler<
     public async Task<IEnumerable<CategoryDto>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
         return await context.Categories
+            .Where(c => c.IsActive)
             .OrderBy(c => c.SortOrder)
             .Select(c => new CategoryDto
             {

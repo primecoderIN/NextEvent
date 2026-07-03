@@ -25,6 +25,8 @@ public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenSer
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await userManager.UpdateAsync(user);
 
+        var roles = await userManager.GetRolesAsync(user);
+
         return new AuthResult<LoginResponseDto>
         {
             RefreshToken = newRefreshToken,
@@ -33,7 +35,8 @@ public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenSer
                 DisplayName = user.DisplayName ?? user.UserName!,
                 Image = user.ImageUrl,
                 Token = tokenService.CreateToken(user),
-                Username = user.UserName!
+                Username = user.UserName!,
+                Roles = roles
             }
         };
     }

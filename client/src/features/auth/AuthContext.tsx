@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import type { UserDTO, LoginFormValues, RegisterFormValues } from "./types";
+import type { UserDTOWithRoles, LoginFormValues, RegisterFormValues } from "./types";
 import type { ApiResponse } from "@/Types/ApiResponse";
 import { axiosHttpAgent } from "@/lib/axios";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
-  user: UserDTO | null;
+  user: UserDTOWithRoles | null;
   loading: boolean;
   login: (data: LoginFormValues) => Promise<void>;
   register: (data: RegisterFormValues) => Promise<void>;
@@ -17,7 +17,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserDTO | null>(null);
+  const [user, setUser] = useState<UserDTOWithRoles | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Attempt to get user via refresh-token cookie.
       // Response is now ApiResponse<UserDTO> — payload lives in .data.data
-      const response = await axiosHttpAgent.post<ApiResponse<UserDTO>>("/account/refresh-token");
+      const response = await axiosHttpAgent.post<ApiResponse<UserDTOWithRoles>>("/account/refresh-token");
       const user = response.data.data!;
       localStorage.setItem("token", user.token);
       setUser(user);
@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (data: LoginFormValues) => {
     // Response is now ApiResponse<UserDTO> — payload lives in .data.data
-    const response = await axiosHttpAgent.post<ApiResponse<UserDTO>>("/account/login", data);
+    const response = await axiosHttpAgent.post<ApiResponse<UserDTOWithRoles>>("/account/login", data);
     const user = response.data.data!;
     setToken(user.token);
     setUser(user);
@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       password: data.password
     };
     // Response is now ApiResponse<UserDTO> — payload lives in .data.data
-    const response = await axiosHttpAgent.post<ApiResponse<UserDTO>>("/account/register", payload);
+    const response = await axiosHttpAgent.post<ApiResponse<UserDTOWithRoles>>("/account/register", payload);
     const user = response.data.data!;
     setToken(user.token);
     setUser(user);

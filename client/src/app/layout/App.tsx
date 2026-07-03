@@ -25,6 +25,8 @@ const LoginPage = lazy(() =>
 const RegisterPage = lazy(() =>
   import("@/features/auth/index").then((m) => ({ default: m.RegisterPage }))
 )
+const CreateCategoryPage = lazy(() => import("@/features/admin/CreateCategoryPage").then((m) => ({ default: m.default })) )
+const SuggestCategoryPage = lazy(() => import("@/features/categories/SuggestCategoryPage").then((m) => ({ default: m.default })) )
 
 // ─── Fallback ─────────────────────────────────────────────────────────────────
 function PageLoader() {
@@ -69,6 +71,8 @@ function App() {
                 <Route path="/events/:id" element={<EventDetailPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/admin/categories/new" element={<CreateCategoryPage />} />
+                <Route path="/categories/suggest" element={<SuggestCategoryPage />} />
               </Routes>
             </Suspense>
           </main>

@@ -33,6 +33,9 @@ public class LoginCommandHandler(UserManager<User> userManager, ITokenService to
             Image = user.ImageUrl
         };
 
+        var roles = await userManager.GetRolesAsync(user);
+        userDto.Roles = roles;
+
         return new AuthResult<LoginResponseDto>
         {
             User = userDto,
