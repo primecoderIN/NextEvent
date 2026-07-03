@@ -8,7 +8,7 @@ import type { ApiResponse } from "@/Types/ApiResponse"
 export interface UpdateEventPayload {
   title?: string
   description?: string
-  category?: string
+  categoryId?: string
   date?: string        // ISO 8601 datetime string
   city?: string
   venue?: string

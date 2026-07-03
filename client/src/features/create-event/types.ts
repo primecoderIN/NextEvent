@@ -24,7 +24,8 @@ export const CATEGORIES = [
 export const baseEventFormSchema = z.object({
   title: z.string(),
   description: z.string(),
-  category: z.string(),
+  categoryId: z.string(),
+  category: z.string().optional(),
   date: z.date(),
   time: z.string(),
   city: z.string(),
@@ -51,7 +52,8 @@ export const getEventFormSchema = (t: TFunction<"createEvent">) =>
       .min(1, { error: t("validation.descriptionRequired") })
       .min(10, { error: t("validation.descriptionMin") })
       .max(1000, { error: t("validation.descriptionMax") }),
-    category: z.string().min(1, { error: t("validation.categoryRequired") }),
+    categoryId: z.string().min(1, { error: t("validation.categoryRequired") }),
+    category: z.string().optional(),
     date: z.date({ error: t("validation.dateRequired") }),
     time: z
       .string()

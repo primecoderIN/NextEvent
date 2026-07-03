@@ -16,6 +16,11 @@ public interface IAppDBContext
     DbSet<Event> Events { get; set; }
 
     /// <summary>
+    /// Gets or sets the Categories dataset.
+    /// </summary>
+    DbSet<Category> Categories { get; set; }
+
+    /// <summary>
     /// Saves all changes made in this context to the underlying database.
     /// </summary>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

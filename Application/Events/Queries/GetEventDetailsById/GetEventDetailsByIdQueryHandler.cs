@@ -14,7 +14,21 @@ public class GetEventDetailsByIdQueryHandler(ISqlConnectionFactory connectionFac
         using var connection = connectionFactory.CreateConnection();
         
         // Parameterized SQL query to prevent SQL injection
-        var sql = "SELECT * FROM Events WHERE Id = @Id";
+        var sql = @"
+            SELECT e.Id,
+                   e.Title,
+                   e.Description,
+                   e.CategoryId,
+                   c.Name AS Category,
+                   e.Date,
+                   e.City,
+                   e.Venue,
+                   e.IsCancelled,
+                   e.Latitude,
+                   e.Longitude
+            FROM Events e
+            LEFT JOIN Categories c ON e.CategoryId = c.Id
+            WHERE e.Id = @Id";
         
         // Dapper securely executes the query and maps the first result to the EventResponseDto class
         var eventDto = await connection.QueryFirstOrDefaultAsync<EventResponseDto>(sql, new { Id = request.Id });

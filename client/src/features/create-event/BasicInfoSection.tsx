@@ -14,10 +14,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { EventFormValues } from "@/features/create-event/types"
-import { CATEGORIES } from "@/features/create-event/types"
 import { FieldError, SectionTitle } from "@/features/create-event/components"
 import { useGenerateDescription } from "@/hooks/useGenerateDescription"
 import { useSuggestCategory } from "@/hooks/useSuggestCategory"
+import { useCategories } from "@/hooks/useCategories"
 
 // ── Step 1: Read form context and watch values ────────────────────────────────
 // useFormContext() — retrieves the form instance created by useForm() in the
@@ -43,6 +43,7 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
   // created in the parent. The generic ensures the field names and types are
   // type-safe throughout this component.
   const { control, formState: { errors }, setValue } = useFormContext<EventFormValues>()
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories()
 
   // ── Step 3: Subscribe to field values with a single batched useWatch ────────
   //
@@ -184,24 +185,38 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
           {t("fields.category.label")} <span className="text-destructive">*</span>
         </Label>
         <Controller
-          name="category"
+          name="categoryId"
           control={control}
           render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
+            <Select
+              value={field.value}
+              onValueChange={(value) => {
+                const selected = categories.find((cat) => cat.id === value)
+                setValue("categoryId", value)
+                setValue("category", selected?.name ?? "")
+                field.onChange(value)
+              }}
+            >
               <SelectTrigger
                 id="event-category"
-                aria-invalid={!!errors.category}
-                className={cn(errors.category && "border-destructive/60 bg-destructive/5")}
+                aria-invalid={!!errors.categoryId}
+                className={cn(errors.categoryId && "border-destructive/60 bg-destructive/5")}
               >
                 <Tag className="h-4 w-4 text-muted-foreground shrink-0" />
                 <SelectValue placeholder={t("fields.category.placeholder")} />
               </SelectTrigger>
               <SelectContent>
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
+                {categoriesLoading ? (
+                  <SelectItem value="_loading" disabled>
+                    {t("loading")}
                   </SelectItem>
-                ))}
+                ) : (
+                  categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           )}
@@ -232,7 +247,7 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
           </div>
         )}
 
-        <FieldError msg={errors.category?.message} />
+        <FieldError msg={errors.categoryId?.message} />
       </div>
     </section>
   )

@@ -9,7 +9,7 @@ public class UpdateEventDto
 {
     public string? Title { get; set; }
     public string? Description { get; set; }
-    public string? Category { get; set; }
+    public Guid? CategoryId { get; set; }
     public DateTime? Date { get; set; }
     public string? City { get; set; }
     public string? Venue { get; set; }

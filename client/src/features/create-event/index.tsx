@@ -41,6 +41,7 @@ export function CreateEventPage() {
     defaultValues: {
       title: "",
       description: "",
+      categoryId: "",
       category: "",
       time: "",
       city: "",
@@ -100,7 +101,7 @@ export function CreateEventPage() {
     const id = await createEvent({
       title: values.title.trim(),
       description: values.description.trim(),
-      category: values.category,
+      categoryId: values.categoryId,
       date: utcDate.toISOString(),
       city: values.city.trim(),
       venue: values.venue.trim(),

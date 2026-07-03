@@ -25,9 +25,21 @@ public class GetEventsListQueryHandler(ISqlConnectionFactory connectionFactory) 
         // 2. Gets only the specific subset of events for the current page (using OFFSET/FETCH)
         var sql = @"
             SELECT COUNT(Id) FROM Events;
-            
-            SELECT * FROM Events 
-            ORDER BY Date DESC
+
+            SELECT e.Id,
+                   e.Title,
+                   e.Description,
+                   e.CategoryId,
+                   c.Name AS Category,
+                   e.Date,
+                   e.City,
+                   e.Venue,
+                   e.IsCancelled,
+                   e.Latitude,
+                   e.Longitude
+            FROM Events e
+            LEFT JOIN Categories c ON e.CategoryId = c.Id
+            ORDER BY e.Date DESC
             OFFSET @Offset ROWS 
             FETCH NEXT @PageSize ROWS ONLY;";
             

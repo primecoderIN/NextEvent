@@ -13,9 +13,9 @@ public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenSer
 {
     public async Task<AuthResult<LoginResponseDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        var user = await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == request.Token && u.RefreshTokenExpiryTime > DateTime.UtcNow, cancellationToken);
+        var user = await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == request.Token, cancellationToken);
 
-        if (user == null)
+        if (user == null || user.RefreshTokenExpiryTime == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
         {
             throw new UnauthorizedException("Invalid refresh token");
         }

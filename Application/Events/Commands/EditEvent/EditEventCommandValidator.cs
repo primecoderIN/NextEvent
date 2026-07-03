@@ -31,12 +31,11 @@ public class EditEventCommandValidator : AbstractValidator<EditEventCommand>
                 .WithMessage("Description cannot be empty when provided");
         });
 
-        When(x => x.EventData.Category != null, () =>
+        When(x => x.EventData.CategoryId.HasValue, () =>
         {
-            // Category must be non-empty when provided.
-            RuleFor(x => x.EventData.Category)
+            RuleFor(x => x.EventData.CategoryId)
                 .NotEmpty()
-                .WithMessage("Category cannot be empty when provided");
+                .WithMessage("CategoryId cannot be empty when provided");
         });
 
         // For nullable DateTime we validate the nullable itself rather

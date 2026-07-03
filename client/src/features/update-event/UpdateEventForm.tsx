@@ -32,6 +32,7 @@ function eventToDefaults(event: Event): EventFormValues {
   return {
     title: event.title ?? "",
     description: event.description ?? "",
+    categoryId: event.categoryId ?? "",
     category: event.category ?? "",
     date: event.date ? isoToDate(event.date) : new Date(),
     time: event.date ? isoToTime(event.date) : "",
@@ -98,7 +99,7 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
     // String field diff — only include if the trimmed value actually changed
     if (values.title.trim() !== event.title) payload.title = values.title.trim()
     if (values.description.trim() !== event.description) payload.description = values.description.trim()
-    if (values.category !== event.category) payload.category = values.category
+    if (values.categoryId !== event.categoryId) payload.categoryId = values.categoryId
     if (values.city.trim() !== event.city) payload.city = values.city.trim()
     if (values.venue.trim() !== event.venue) payload.venue = values.venue.trim()
 

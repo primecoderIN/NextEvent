@@ -15,7 +15,7 @@ public class EditEventCommandHandler(IAppDBContext context) : IRequestHandler<Ed
 
         eventEntity.ChangeTitle(dto.Title);
         eventEntity.ChangeDescription(dto.Description);
-        eventEntity.ChangeCategory(dto.Category);
+        eventEntity.ChangeCategoryId(dto.CategoryId);
         eventEntity.ChangeDate(dto.Date);
         eventEntity.ChangeCity(dto.City);
         eventEntity.ChangeVenue(dto.Venue);

@@ -65,13 +65,15 @@ public class DBInitializer
         }
         await context.SaveChangesAsync();
 
+        var categoriesInDb = await context.Categories.ToListAsync();
 
         var events = new List<Event>
         {
-            new() {
+            new()
+            {
                 Title = "Tech Conference 2026",
                 Description = "Annual technology conference for developers and architects.",
-                Category = "Business",
+                CategoryId = categoriesInDb.Single(c => c.Slug == "business").Id,
                 Date = DateTime.UtcNow.AddDays(15),
                 City = "Bangalore",
                 Venue = "Bangalore International Exhibition Centre",
@@ -79,10 +81,11 @@ public class DBInitializer
                 Longitude = 77.5890
             },
 
-            new() {
+            new()
+            {
                 Title = "Startup Networking Meetup",
                 Description = "Connect with founders, investors, and entrepreneurs.",
-                Category = "Business",
+                CategoryId = categoriesInDb.Single(c => c.Slug == "business").Id,
                 Date = DateTime.UtcNow.AddDays(30),
                 City = "Hyderabad",
                 Venue = "HITEX Convention Center",
@@ -90,10 +93,11 @@ public class DBInitializer
                 Longitude = 78.3762
             },
 
-            new() {
+            new()
+            {
                 Title = "Music Festival",
                 Description = "Live performances from top artists across the country.",
-                Category = "Music",
+                CategoryId = categoriesInDb.Single(c => c.Slug == "music").Id,
                 Date = DateTime.UtcNow.AddDays(45),
                 City = "Mumbai",
                 Venue = "Jio World Garden",
@@ -101,10 +105,11 @@ public class DBInitializer
                 Longitude = 72.8295
             },
 
-            new() {
+            new()
+            {
                 Title = "Marathon 2026",
                 Description = "A city-wide marathon open to runners of all levels.",
-                Category = "Sports",
+                CategoryId = categoriesInDb.Single(c => c.Slug == "sports").Id,
                 Date = DateTime.UtcNow.AddDays(60),
                 City = "Delhi",
                 Venue = "Jawaharlal Nehru Stadium",
@@ -112,10 +117,11 @@ public class DBInitializer
                 Longitude = 77.2337
             },
 
-            new() {
+            new()
+            {
                 Title = "Food Carnival",
                 Description = "Experience cuisines from around the world.",
-                Category = "Other",
+                CategoryId = categoriesInDb.Single(c => c.Slug == "other").Id,
                 Date = DateTime.UtcNow.AddDays(75),
                 City = "Chennai",
                 Venue = "Island Grounds",

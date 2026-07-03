@@ -17,7 +17,12 @@ public class Event
 
     public required string Description { get; set; }
 
-    public required string Category { get; set; }
+    // New optional foreign key to the Category entity.
+    // We keep it nullable so existing events can remain valid during migration.
+    public Guid? CategoryId { get; set; }
+
+    // Navigation property for the Category relationship.
+    public Category? CategoryRef { get; set; }
 
     public DateTime Date { get; set; }
     public required string City { get; set; }
@@ -45,9 +50,9 @@ public class Event
         if (value is not null) Description = value;
     }
 
-    public void ChangeCategory(string? value)
+    public void ChangeCategoryId(Guid? value)
     {
-        if (value is not null) Category = value;
+        if (value.HasValue) CategoryId = value.Value;
     }
 
     public void ChangeDate(DateTime? value)

@@ -22,7 +22,7 @@ public class CreateEventCommandHandler(IAppDBContext context, ICurrentUserServic
             Id = Guid.NewGuid(),
             Title = request.Event.Title,
             Description = request.Event.Description,
-            Category = request.Event.Category,
+            CategoryId = request.Event.CategoryId,
             Date = request.Event.Date,
             City = request.Event.City,
             Venue = request.Event.Venue,

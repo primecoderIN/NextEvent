@@ -15,7 +15,7 @@ public class CreateEventCommandValidator : AbstractValidator<CreateEventCommand>
             .NotEmpty()
             .WithMessage(ValidationErrors.DescriptionRequired);
 
-        RuleFor(x => x.Event.Category)
+        RuleFor(x => x.Event.CategoryId)
             .NotEmpty()
             .WithMessage(ValidationErrors.CategoryRequired);
 
