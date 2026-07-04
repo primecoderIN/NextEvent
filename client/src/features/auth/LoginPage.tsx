@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
+import { useNavigate, Link, useLocation } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -11,10 +11,12 @@ import { getLoginFormSchema, type LoginFormValues } from "@/features/auth/types"
 import { useAuth } from "@/features/auth/AuthContext"
 import { FieldError } from "@/features/create-event/components"
 import { RoutePaths } from "@/constants/routePaths"
+import { Roles } from "@/constants/roles"
 import { toast } from "sonner"
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { t } = useTranslation(["auth", "common"])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -39,9 +41,16 @@ export function LoginPage() {
   async function onSubmit(values: LoginFormValues) {
     setIsSubmitting(true)
     try {
-      await login(values)
+      const loggedInUser = await login(values)
       toast.success("Logged in successfully!")
-      navigate(RoutePaths.Home)
+      // Admins always go to the admin dashboard.
+      // Other users go to the page they were trying to reach, or home.
+      if (loggedInUser.roles?.includes(Roles.Admin)) {
+        navigate(RoutePaths.AdminDashboard, { replace: true })
+      } else {
+        const from = (location.state as { from?: Location })?.from?.pathname ?? RoutePaths.Home
+        navigate(from, { replace: true })
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed")
     } finally {

@@ -8,8 +8,8 @@ import { useNavigate } from "react-router-dom";
 interface AuthContextType {
   user: UserDTOWithRoles | null;
   loading: boolean;
-  login: (data: LoginFormValues) => Promise<void>;
-  register: (data: RegisterFormValues) => Promise<void>;
+  login: (data: LoginFormValues) => Promise<UserDTOWithRoles>;
+  register: (data: RegisterFormValues) => Promise<UserDTOWithRoles>;
   logout: () => Promise<void>;
   setToken: (token: string) => void;
 }
@@ -45,15 +45,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem("token", token);
   };
 
-  const login = async (data: LoginFormValues) => {
+  const login = async (data: LoginFormValues): Promise<UserDTOWithRoles> => {
     // Response is now ApiResponse<UserDTO> — payload lives in .data.data
     const response = await axiosHttpAgent.post<ApiResponse<UserDTOWithRoles>>("/account/login", data);
     const user = response.data.data!;
     setToken(user.token);
     setUser(user);
+    return user;
   };
 
-  const register = async (data: RegisterFormValues) => {
+  const register = async (data: RegisterFormValues): Promise<UserDTOWithRoles> => {
     const payload = {
       displayName: data.name,
       userName: data.name.replace(/\s+/g, "").toLowerCase() + Math.floor(Math.random() * 1000),
@@ -65,6 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const user = response.data.data!;
     setToken(user.token);
     setUser(user);
+    return user;
   };
 
   const logout = async () => {

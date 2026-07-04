@@ -69,6 +69,34 @@ public class DBInitializer
 
         var categoriesInDb = await context.Categories.ToListAsync();
 
+        // Seed some category suggestions
+        var memberUser = await userManager.FindByNameAsync("member");
+        if (memberUser != null && !await context.CategorySuggestions.AnyAsync())
+        {
+            var suggestions = new List<CategorySuggestion>
+            {
+                new()
+                {
+                    Name = "Gaming",
+                    Slug = "gaming",
+                    Description = "Esports and video game tournaments",
+                    SuggestedById = memberUser.Id,
+                    Status = CategorySuggestionStatus.Pending
+                },
+                new()
+                {
+                    Name = "Art Exhibitions",
+                    Slug = "art-exhibitions",
+                    Description = "Local and international art galleries",
+                    SuggestedById = memberUser.Id,
+                    Status = CategorySuggestionStatus.Pending
+                }
+            };
+
+            context.CategorySuggestions.AddRange(suggestions);
+            await context.SaveChangesAsync();
+        }
+
         var events = new List<Event>
         {
             new()

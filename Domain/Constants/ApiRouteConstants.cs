@@ -29,7 +29,9 @@ public static class ApiRouteConstants
     public static class Categories
     {
         public const string Base = "api/categories";
-        public const string Suggest = "suggest";
+        public const string Suggest = "suggest";           // POST — submit a suggestion
+        public const string Suggestions = "suggestions";   // GET  — list suggestions (admin)
         public const string Approve = "{id:guid}/approve";
+        public const string Reject = "{id:guid}/reject";
     }
 }

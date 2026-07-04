@@ -21,6 +21,11 @@ public interface IAppDBContext
     DbSet<Category> Categories { get; set; }
 
     /// <summary>
+    /// Gets or sets the CategorySuggestions dataset.
+    /// </summary>
+    DbSet<CategorySuggestion> CategorySuggestions { get; set; }
+
+    /// <summary>
     /// Saves all changes made in this context to the underlying database.
     /// </summary>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

@@ -1,36 +1,41 @@
 using Application.Categories.DTOs;
 using Application.Core.Interfaces;
-using Domain;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Categories.Commands.SuggestCategory;
 
-public class SuggestCategoryCommandHandler(IAppDBContext context) : IRequestHandler<SuggestCategoryCommand, CategoryDto>
+/// <summary>
+/// Writes a new CategorySuggestion row (Status = Pending) instead of creating an inactive Category.
+/// The slug is auto-generated from the name if not supplied.
+/// </summary>
+public class SuggestCategoryCommandHandler(
+    IAppDBContext context,
+    ICurrentUserService currentUserService)
+    : IRequestHandler<SuggestCategoryCommand, CategoryDto>
 {
     public async Task<CategoryDto> Handle(SuggestCategoryCommand request, CancellationToken cancellationToken)
     {
-        // If slug not provided, generate from name
+        var userId = currentUserService.GetCurrentUserId()
+            ?? throw new UnauthorizedAccessException("User must be authenticated to suggest a category.");
+
         var slug = string.IsNullOrWhiteSpace(request.Slug)
             ? request.Name.Trim().ToLower().Replace(' ', '-')
             : request.Slug.Trim().ToLower();
 
-        var exists = await context.Categories.AnyAsync(c => c.Slug == slug, cancellationToken);
-        if (exists)
-            throw new Exception("A category with the specified slug already exists.");
-
-        var cat = new Category
+        var suggestion = new CategorySuggestion
         {
-            Name = request.Name,
-            Slug = slug,
+            Name        = request.Name,
+            Slug        = slug,
             Description = request.Description,
-            IsActive = false, // mark as pending until admin approves
+            SuggestedById = userId,
+            Status      = CategorySuggestionStatus.Pending,
             CreatedAtUtc = DateTime.UtcNow,
             UpdatedAtUtc = DateTime.UtcNow,
         };
 
-        context.Categories.Add(cat);
+        context.CategorySuggestions.Add(suggestion);
         await context.SaveChangesAsync(cancellationToken);
 
-        return new CategoryDto { Id = cat.Id, Name = cat.Name, Slug = cat.Slug };
+        // Return a lightweight CategoryDto as the API contract hasn't changed
+        return new CategoryDto { Id = suggestion.Id, Name = suggestion.Name, Slug = suggestion.Slug };
     }
 }

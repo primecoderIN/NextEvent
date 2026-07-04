@@ -14,7 +14,7 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 | CQRS | MediatR |
 | Validation | FluentValidation + MediatR pipeline behavior |
 | ORM | Entity Framework Core |
-| Database | SQLite (file: `API/nextevents.db`) |
+| Database | SQL Server (`NextEventDb`) |
 | Serialisation | `System.Text.Json` with camelCase naming policy |
 | URL style | Lowercase route generation |
 
@@ -48,7 +48,6 @@ NextEvent/
 │   ├── Middleware/
 │   │   └── ExceptionMiddleware.cs  # Centralised exception → ApiResponse mapping
 │   ├── Program.cs              # DI setup, middleware, DB migration on startup
-│   └── nextevents.db           # SQLite database (auto-created)
 │
 ├── Application/                # Business logic (CQRS with MediatR)
 │   ├── Authentication/         # Auth feature folders
@@ -132,7 +131,7 @@ The core principle of Clean Architecture is **Dependency Inversion**: the inner 
   * **Role**: The infrastructure layer responsible for data access. It implements the interfaces defined by the Application layer (e.g., `AppDBContext` implements `IAppDBContext`).
   * **Depends on**: **Application layer**.
   * **Why it depends on Application**: It must reference the Application layer to access the `IAppDBContext` interface it needs to implement. It also references the Domain layer implicitly to configure how entities map to the database via Entity Framework Core.
-  * **Benefits**: If we decide to swap from SQLite to PostgreSQL, we *only* change this layer. The Application and Domain layers remain entirely untouched.
+  * **Benefits**: If we decide to swap from SQL Server to PostgreSQL, we *only* change this layer. The Application and Domain layers remain entirely untouched.
 
 * **API (`API`)**: 
   * **Role**: The presentation layer. It acts as the "Composition Root" in `Program.cs`, wiring up the Dependency Injection (DI) container.
@@ -324,7 +323,7 @@ cd API
 dotnet watch
 ```
 
-The API starts at `https://localhost:5001`. SQLite database is **auto-created and seeded** on first run — no manual migration step needed.
+The API starts at `https://localhost:5001`. The SQL Server database is **auto-created and seeded** on first run (via `Program.cs`) — no manual migration step needed.
 
 ### 2. Run the Client
 

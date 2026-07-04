@@ -12,6 +12,7 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
 {
     public DbSet<Event> Events { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<CategorySuggestion> CategorySuggestions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -102,6 +103,43 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
                 .IsRequired();
 
             b.HasIndex(c => c.Slug).IsUnique();
+        });
+
+        // CategorySuggestion entity configuration
+        modelBuilder.Entity<CategorySuggestion>(b =>
+        {
+            b.HasKey(s => s.Id);
+
+            b.Property(s => s.Name).IsRequired().HasMaxLength(200);
+            b.Property(s => s.Slug).IsRequired().HasMaxLength(200);
+            b.Property(s => s.Description).HasMaxLength(2000);
+
+            // Store enum as integer for efficiency
+            b.Property(s => s.Status)
+                .HasConversion<int>()
+                .HasDefaultValue(CategorySuggestionStatus.Pending);
+
+            // FK: SuggestedBy → AspNetUsers (no cascade — keep suggestion if user deleted)
+            b.HasOne(s => s.SuggestedBy)
+                .WithMany()
+                .HasForeignKey(s => s.SuggestedById)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // FK: ReviewedBy → AspNetUsers (nullable)
+            b.HasOne(s => s.ReviewedBy)
+                .WithMany()
+                .HasForeignKey(s => s.ReviewedById)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            // FK: ApprovedCategory → Categories (nullable — only set on approval)
+            b.HasOne(s => s.ApprovedCategory)
+                .WithMany()
+                .HasForeignKey(s => s.ApprovedCategoryId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
+
+            b.HasIndex(s => s.Status);  // fast admin dashboard filter
         });
     }
 }
