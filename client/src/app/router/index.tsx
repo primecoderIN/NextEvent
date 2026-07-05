@@ -1,9 +1,9 @@
 import { createBrowserRouter } from "react-router-dom"
 import { AppRoot } from "../layout/AppRoot"
-import { PublicLayout } from "@/portals/public/layouts/PublicLayout"
-import { adminRoutes } from "@/portals/admin/routes"
-import { publicRoutes } from "@/portals/public/routes"
-import { organizerRoutes } from "@/portals/organizer/routes"
+import { PublicLayout } from "@/app/(public)/layout"
+import { adminRoutes } from "@/app/admin/routes"
+import { publicRoutes } from "@/app/(public)/routes"
+import { organizerRoutes } from "@/app/organizer/routes"
 
 export const router = createBrowserRouter([
   {

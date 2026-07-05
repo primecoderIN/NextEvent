@@ -4,14 +4,14 @@ import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, ArrowLeft, Mail, Lock } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/shared/ui/button"
+import { Input } from "@/shared/ui/input"
+import { Label } from "@/shared/ui/label"
 import { getLoginFormSchema, type LoginFormValues } from "@/features/auth/types"
-import { useAuth } from "@/features/auth/AuthContext"
-import { FieldError } from "@/portals/organizer/pages/create-event/components"
-import { RoutePaths } from "@/constants/routePaths"
-import { Roles } from "@/constants/roles"
+import { useAuth } from "@/features/auth/context/AuthContext"
+import { FieldError } from "@/features/events/components/EventForm/components"
+import { RoutePaths } from "@/shared/constants/routePaths"
+import { Roles } from "@/shared/constants/roles"
 import { toast } from "sonner"
 
 export function LoginPage() {
@@ -142,3 +142,4 @@ export function LoginPage() {
     </div>
   )
 }
+
