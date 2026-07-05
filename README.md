@@ -84,23 +84,20 @@ NextEvent/
 └── client/                     # React frontend (Vite)
     └── src/
         ├── app/
-        │   └── layout/         # App shell: routing, Navbar, sidebars
-        ├── components/
-        │   └── ui/             # Shared shadcn-style components
-        │       ├── button.tsx
-        │       ├── dialog.tsx
-        │       ├── input.tsx
-        │       ├── label.tsx
-        │       ├── select.tsx
-        │       ├── sheet.tsx
-        │       └── textarea.tsx
-        ├── features/
-        │   ├── home/           # Home page: category filter, featured carousel, event cards
-        │   ├── event-detail/   # Event detail page: hero, tabs, ticket panel, delete
-        │   └── create-event/   # Multi-section create event form
-        ├── hooks/              # API hooks (useEvents, useEventDetail, useCreateEvent, useDeleteEvent)
-        └── Types/              # Shared TypeScript types (Event)
-```
+        │   ├── layout/         # App root shell providers
+        │   └── router/         # Centralized React Router v6 Data Router configuration
+        ├── portals/            # Feature-Sliced Portals for different user roles
+        │   ├── admin/          # Admin-only dashboard, layout, and admin route configuration
+        │   ├── organizer/      # Organizer tools (create/edit events) and organizer routes
+        │   └── public/         # Public views (Home, Event Details), navigation sidebars, and public routes
+        ├── features/           # Shared cross-portal business logic (e.g., AuthContext)
+        ├── shared/             # Reusable hooks, types, constants, and utilities
+        └── components/         # Base UI components (Radix/shadcn-style wrappers)
+            └── ui/
+                ├── button.tsx
+                ├── dialog.tsx
+                ├── input.tsx
+                └── ...
 
 ---
 
@@ -202,10 +199,13 @@ The frontend is a Single Page Application (SPA) built for performance, modularit
 * **React 19**: Used for building the UI component tree.
 * **Vite**: Replaces Create React App/Webpack. It uses native ES modules for near-instant dev server startup and extremely fast Hot Module Replacement (HMR).
 
-#### 2.2 Routing (React Router)
+#### 2.2 Routing (React Router v6 Data Router)
 
-We use **React Router** to manage client-side navigation. 
-**Why:** It allows users to transition between pages (Home, Event Details, Create Event) without full page reloads, preserving application state and providing a fluid experience.
+We use the **React Router v6 Data Router** (`createBrowserRouter`) to manage client-side navigation. 
+
+**Decentralized Configuration:** To prevent routing logic from becoming a bloated monolith, routing is implemented using a **Feature-Sliced Design (FSD)** approach. Each portal (`admin`, `organizer`, `public`) owns and exports its specific `routes.tsx` configuration array. The global `app/router/index.tsx` simply imports these arrays and securely composes the top-level route tree.
+
+**Why:** It allows users to transition between pages without full page reloads. The object-based Data Router unlocks advanced features like parallel data loading, actions, and strict error boundary isolation, while the decentralized setup ensures maximum scalability as the app grows.
 
 #### 2.3 Styling Strategy (Tailwind CSS v4 + Radix UI)
 
