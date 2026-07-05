@@ -1,4 +1,6 @@
 using Application.Categories.DTOs;
+using Domain;
+using MediatR;
 
 namespace Application.Categories.Queries.GetCategorySuggestions;
 

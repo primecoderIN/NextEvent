@@ -1,4 +1,7 @@
 using Application.Categories.DTOs;
+using Application.Core.Interfaces;
+using Domain;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Categories.Queries.GetCategorySuggestions;
@@ -34,7 +37,7 @@ public class GetCategorySuggestionsQueryHandler(IAppDBContext context)
                 Name                   = s.Name,
                 Slug                   = s.Slug,
                 Description            = s.Description,
-                SuggestedByDisplayName = s.SuggestedBy != null ? s.SuggestedBy.DisplayName : "Unknown",
+                SuggestedByDisplayName = s.SuggestedBy != null ? (s.SuggestedBy.DisplayName ?? "Unknown") : "Unknown",
                 CreatedAtUtc           = s.CreatedAtUtc,
                 Status                 = s.Status.ToString(),
             })

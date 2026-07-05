@@ -1,7 +1,7 @@
-// using Domain;
-// using Microsoft.EntityFrameworkCore;
-
+using Domain;
 using Domain.Constants;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Persistence;
 
@@ -11,14 +11,14 @@ namespace Persistence;
 /// </summary>
 public class DBInitializer
 {
-    public static async Task SeedData(AppDBContext context, Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole> roleManager, Microsoft.AspNetCore.Identity.UserManager<User> userManager)
+    public static async Task SeedData(AppDBContext context, RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
     {
         var roles = new List<string> { RoleConstants.Member, RoleConstants.Organizer, RoleConstants.Admin };
         foreach (var role in roles)
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
-                await roleManager.CreateAsync(new Microsoft.AspNetCore.Identity.IdentityRole(role));
+                await roleManager.CreateAsync(new IdentityRole(role));
             }
         }
 

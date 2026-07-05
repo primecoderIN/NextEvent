@@ -1,7 +1,7 @@
-// using Domain;
-// using MediatR;
 using Microsoft.AspNetCore.Identity;
-// using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Domain;
+using MediatR;
 
 namespace Application.Authentication.Commands.Logout;
 

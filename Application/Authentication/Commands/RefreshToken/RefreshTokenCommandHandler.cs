@@ -1,8 +1,8 @@
 using Application.Core.Exceptions;
 using Application.Authentication.DTOs;
 using Application.Authentication.Interfaces;
-// using Domain;
-// using MediatR;
+using Domain;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

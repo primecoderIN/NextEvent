@@ -1,8 +1,8 @@
-// using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-// using Domain;
+using Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-// using Application.Core.Interfaces;
+using Application.Core.Interfaces;
 
 namespace Persistence;
 

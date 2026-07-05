@@ -1,6 +1,7 @@
 using API.Extensions;
 using API.Middleware;
-// using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 // =======================================================================
@@ -55,8 +56,8 @@ var services = scope.ServiceProvider;
 try
 {
     var context = services.GetRequiredService<AppDBContext>();
-    var roleManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole>>();
-    var userManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<Domain.User>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<Domain.User>>();
     await context.Database.MigrateAsync();  //pending migration will be done //DB will be created if not created
     await DBInitializer.SeedData(context, roleManager, userManager); //Update data in database.
 }

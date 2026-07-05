@@ -1,5 +1,5 @@
-// using Domain;
-// using Microsoft.EntityFrameworkCore;
+using Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Core.Interfaces;
 

@@ -1,5 +1,5 @@
 using Application.Events.Constants;
-// using FluentValidation;
+using FluentValidation;
 
 namespace Application.Events.Commands.CreateEvent;
 

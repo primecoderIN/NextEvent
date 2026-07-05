@@ -1,4 +1,4 @@
-// using FluentValidation;
+using FluentValidation;
 
 namespace Application.Authentication.Commands.Register;
 

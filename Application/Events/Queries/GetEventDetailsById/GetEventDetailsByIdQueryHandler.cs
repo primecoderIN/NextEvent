@@ -2,6 +2,7 @@ using Application.Core.Exceptions;
 using Application.Core.Interfaces;
 using Application.Events.DTOs;
 using Dapper;
+using Domain;
 using MediatR;
 
 namespace Application.Events.Queries.GetEventDetailsById;

@@ -1,5 +1,7 @@
 using Application.Categories.DTOs;
 using Application.Core.Interfaces;
+using Domain;
+using MediatR;
 
 namespace Application.Categories.Commands.SuggestCategory;
 

@@ -1,4 +1,5 @@
 using Application.Categories.DTOs;
+using MediatR;
 
 namespace Application.Categories.Commands.SuggestCategory;
 

@@ -6,6 +6,7 @@ using Application.Authentication.Commands.Register;
 using Application.Authentication.DTOs;
 using Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 

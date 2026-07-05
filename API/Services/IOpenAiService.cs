@@ -14,6 +14,7 @@ public interface IOpenAiService
     /// <param name="city">City where the event takes place.</param>
     /// <param name="venue">Venue name.</param>
     /// <returns>Generated description string.</returns>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<string> GenerateEventDescriptionAsync(
         string title,
         string category,
@@ -27,6 +28,7 @@ public interface IOpenAiService
     /// </summary>
     /// <param name="title">Event title to classify.</param>
     /// <returns>Suggested category name, or empty string.</returns>
+    /// <param name="cancellationToken">Token to cancel the operation.</param>
     Task<string> SuggestCategoryAsync(
         string title,
         CancellationToken cancellationToken = default);

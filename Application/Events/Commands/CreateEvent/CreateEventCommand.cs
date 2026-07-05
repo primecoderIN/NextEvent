@@ -1,5 +1,5 @@
-// using MediatR;
 using Application.Events.DTOs;
+using MediatR;
 
 namespace Application.Events.Commands.CreateEvent;
 

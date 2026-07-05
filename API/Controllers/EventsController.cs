@@ -6,10 +6,10 @@ using Application.Events.Queries.GetEventsList;
 using Application.Events.Queries.GetEventDetailsById;
 using Application.Events.DTOs;
 using Application.Core.Pagination;
+using Domain;
 using Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
-// using Domain;
-// using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 

@@ -1,4 +1,5 @@
 using Application.Events.DTOs;
+using FluentValidation;
 
 namespace Application.Events.Commands.EditEvent;
 
