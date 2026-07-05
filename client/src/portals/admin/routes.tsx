@@ -1,0 +1,74 @@
+import { lazy, Suspense } from "react"
+import type { RouteObject } from "react-router-dom"
+import { AdminRouteGuard } from "./layouts/AdminRouteGuard"
+import { RoutePaths } from "@/constants/routePaths"
+
+const AdminLayout = lazy(() => import("./layouts/AdminLayout").then((m) => ({ default: m.AdminLayout })))
+const AdminDashboardPage = lazy(() => import("./pages/dashboard/index").then((m) => ({ default: m.AdminDashboardPage })))
+const CreateCategoryPage = lazy(() => import("./pages/CreateCategoryPage").then((m) => ({ default: m.default })))
+
+function AdminPageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+    </div>
+  )
+}
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+    </div>
+  )
+}
+
+export const adminRoutes: RouteObject[] = [
+  {
+    path: `${RoutePaths.Admin}/*`,
+    element: <AdminRouteGuard />,
+    children: [
+      {
+        element: (
+          <Suspense fallback={<AdminPageLoader />}>
+            <AdminLayout />
+          </Suspense>
+        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <AdminDashboardPage />
+              </Suspense>
+            )
+          },
+          {
+            path: "dashboard",
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <AdminDashboardPage />
+              </Suspense>
+            )
+          },
+          {
+            path: "categories/new",
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <CreateCategoryPage />
+              </Suspense>
+            )
+          },
+          {
+            path: "*",
+            element: (
+              <div className="flex items-center justify-center min-h-[60vh] text-muted-foreground text-sm">
+                Coming soon…
+              </div>
+            )
+          }
+        ]
+      }
+    ]
+  }
+]

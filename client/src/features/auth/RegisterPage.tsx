@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { getRegisterFormSchema, type RegisterFormValues } from "@/features/auth/types"
 import { useAuth } from "@/features/auth/AuthContext"
-import { FieldError } from "@/features/create-event/components"
+import { FieldError } from "@/portals/organizer/pages/create-event/components"
 import { RoutePaths } from "@/constants/routePaths"
 import { toast } from "sonner"
 
