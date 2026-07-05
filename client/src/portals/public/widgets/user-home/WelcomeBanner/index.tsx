@@ -1,16 +1,13 @@
 import { Bell } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { getGreeting } from "@/portals/public/pages/home/helpers"
+import { getGreeting } from "@/portals/public/widgets/common/helpers"
 
-interface GreetingHeaderProps {
+interface WelcomeBannerProps {
   username: string
-  notificationCount: number
+  notificationCount?: number
 }
 
-export function GreetingHeader({
-  username,
-  notificationCount,
-}: GreetingHeaderProps) {
+export function WelcomeBanner({ username, notificationCount = 0 }: WelcomeBannerProps) {
   const { t } = useTranslation("home")
 
   return (

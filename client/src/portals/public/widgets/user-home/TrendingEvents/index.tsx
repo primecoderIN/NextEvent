@@ -1,16 +1,20 @@
 import { TrendingUp } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import type { Event } from "@/Types/Event"
-import { SectionHeader } from "@/portals/public/pages/home/SectionHeader"
-import { EventCard, EventCardSkeleton } from "@/portals/public/pages/home/EventCard"
+import { SectionHeader } from "@/portals/public/widgets/common/SectionHeader"
+import { EventCard, EventCardSkeleton } from "@/portals/public/widgets/common/EventCard"
 
-interface TrendingSectionProps {
+interface TrendingEventsProps {
   /** Pre-sorted trending events to display */
   events: Event[]
   loading: boolean
 }
 
-export function TrendingSection({ events, loading }: TrendingSectionProps) {
+/**
+ * Shared by both UserHomePage and PublicHomePage.
+ * No duplicate — PublicHomePage imports this directly from user-home.
+ */
+export function TrendingEvents({ events, loading }: TrendingEventsProps) {
   const { t } = useTranslation("home")
 
   if (!loading && events.length === 0) return null

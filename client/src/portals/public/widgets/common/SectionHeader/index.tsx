@@ -19,7 +19,7 @@ export function SectionHeader({
         onClick={onSeeAll}
         className="text-sm text-primary font-medium hover:underline flex items-center gap-0.5"
       >
-        See All <ChevronRight className="h-3.5 w-3.5" />
+        View All <ChevronRight className="h-3.5 w-3.5" />
       </a>
     </div>
   )

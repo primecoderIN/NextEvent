@@ -1,6 +1,6 @@
 import type { Event } from "@/Types/Event"
 import { BadgeCheck, Globe, Link2, X } from "lucide-react"
-import { getEventImage } from "@/portals/public/pages/home/helpers"
+import { getEventImage } from "@/portals/public/widgets/common/helpers"
 import { Button } from "@/components/ui/button"
 
 interface OrganizerCardProps {

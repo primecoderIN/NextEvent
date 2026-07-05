@@ -1,12 +1,12 @@
 import { useTranslation } from "react-i18next"
-import { CATEGORIES } from "@/portals/public/pages/home/helpers"
+import { CATEGORIES } from "@/portals/public/widgets/common/helpers"
 
-interface CategoryFilterProps {
+interface CategoryCarouselProps {
   active: string
   onChange: (cat: string) => void
 }
 
-export function CategoryFilter({ active, onChange }: CategoryFilterProps) {
+export function CategoryCarousel({ active, onChange }: CategoryCarouselProps) {
   const { t } = useTranslation("home")
 
   return (

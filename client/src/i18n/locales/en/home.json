@@ -22,5 +22,27 @@
     "business": "Business",
     "more": "More"
   },
-  "empty": "No events found in this category yet."
+  "empty": "No events found in this category yet.",
+  "publicHero": {
+    "headline": "Discover amazing events happening around you.",
+    "sub": "Find events that match your interests, connect with people and create memories.",
+    "cta": "Explore Events",
+    "socialProof": "Join thousands of people discovering events every day"
+  },
+  "organizer": {
+    "title": "Become an Organizer",
+    "desc": "Have an idea for an event? Create, manage and sell tickets to your own events on NextEvent.",
+    "cta": "Start for Free"
+  },
+  "joinNow": {
+    "title": "Join thousands of event-goers",
+    "sub": "Sign up free and start discovering events that match your passions.",
+    "signUp": "Sign Up Free",
+    "login": "Log In"
+  },
+  "trust": {
+    "secure": { "title": "Safe & Secure", "desc": "Your data is protected with top security." },
+    "ticketing": { "title": "Easy Ticketing", "desc": "Book tickets easily and securely." },
+    "network": { "title": "Connect & Network", "desc": "Meet people with similar interests." }
+  }
 }

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { useFormContext, useWatch } from "react-hook-form"
 import type { EventFormValues } from "@/portals/organizer/pages/create-event/types"
 import { SectionTitle } from "@/portals/organizer/pages/create-event/components"
-import { getEventImage, getCategoryBadgeClass } from "@/portals/public/pages/home/helpers"
+import { getEventImage, getCategoryBadgeClass } from "@/portals/public/widgets/common/helpers"
 
 export function EventPreviewCard() {
   const { t } = useTranslation(["createEvent", "common"])

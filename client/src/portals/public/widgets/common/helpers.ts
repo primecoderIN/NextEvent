@@ -11,7 +11,6 @@ import { format, parseISO, getHours } from "date-fns"
 
 // ─── Date formatting ───────────────────────────────────
 // Formats a UTC ISO-8601 string (with Z suffix) as a human-readable date.
-// Uses date-fns format() with parseISO() for safe, consistent parsing.
 export function formatDate(dateStr: string): string {
   try {
     return format(parseISO(dateStr), "d MMM yyyy")
@@ -28,8 +27,8 @@ export function getEventImage(
 ): string {
   const dims: Record<string, string> = {
     banner: "800/480",
-    card: "400/280",
-    thumb: "120/120",
+    card:   "400/280",
+    thumb:  "120/120",
   }
   return `https://picsum.photos/seed/${category}-${seed}/${dims[variant]}`
 }
@@ -37,12 +36,12 @@ export function getEventImage(
 // ─── Category badge colour ─────────────────────────────
 export function getCategoryBadgeClass(category: string): string {
   const map: Record<string, string> = {
-    music: "bg-blue-600",
+    music:     "bg-blue-600",
     nightlife: "bg-violet-600",
-    workshop: "bg-amber-500",
+    workshop:  "bg-amber-500",
     workshops: "bg-amber-500",
-    sports: "bg-green-600",
-    business: "bg-slate-700",
+    sports:    "bg-green-600",
+    business:  "bg-slate-700",
   }
   return map[category.toLowerCase()] ?? "bg-primary"
 }
@@ -59,11 +58,11 @@ export function getGreeting(): string {
 // Labels are NOT stored here — components call t(`categories.${id}`) so that
 // the display text is always taken from the active i18n namespace.
 export const CATEGORIES = [
-  { id: "all", icon: LayoutGrid },
-  { id: "music", icon: Music },
+  { id: "all",       icon: LayoutGrid },
+  { id: "music",     icon: Music },
   { id: "nightlife", icon: Wine },
-  { id: "workshop", icon: GraduationCap },
-  { id: "sports", icon: Dumbbell },
-  { id: "business", icon: Briefcase },
-  { id: "more", icon: MoreHorizontal },
+  { id: "workshop",  icon: GraduationCap },
+  { id: "sports",    icon: Dumbbell },
+  { id: "business",  icon: Briefcase },
+  { id: "more",      icon: MoreHorizontal },
 ]

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Heart, Calendar, MapPin, Play, ChevronLeft, ChevronRight } from "lucide-react"
 import type { Event } from "@/Types/Event"
-import { formatDate, getEventImage } from "@/portals/public/pages/home/helpers"
+import { formatDate, getEventImage } from "@/portals/public/widgets/common/helpers"
 import { Button } from "@/components/ui/button"
 
 interface FeaturedCarouselProps {
@@ -29,13 +29,13 @@ export function FeaturedCarousel({ events }: FeaturedCarouselProps) {
     return (
       <div
         className="w-full rounded-2xl bg-muted animate-pulse"
-        style={{ aspectRatio: "16/8" }}
+        style={{ aspectRatio: "16/10" }}
       />
     )
   }
 
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden" style={{ aspectRatio: "16/8" }}>
+    <div className="relative w-full rounded-2xl overflow-hidden" style={{ aspectRatio: "16/10" }}>
       {featured.map((event, i) => (
         <div
           key={event.id}
@@ -80,7 +80,7 @@ export function FeaturedCarousel({ events }: FeaturedCarouselProps) {
                 onClick={() => navigate(`/events/${event.id}`)}
                 className="shadow-lg"
               >
-                Book Tickets
+                View Details
               </Button>
               <button className="flex items-center gap-2 text-white text-sm font-semibold hover:opacity-80 transition-opacity">
                 <span className="h-8 w-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">

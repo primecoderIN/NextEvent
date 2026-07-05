@@ -18,20 +18,36 @@ function AdminRedirect({ children }: { children: React.ReactNode }) {
 
 export function PublicLayout() {
   const { events } = useEvents()
+  const { user, loading } = useAuth()
+
+  // While auth is resolving, keep layout stable to avoid shift
+  const isAuthenticated = !loading && !!user
 
   return (
     <AdminRedirect>
       <div className="min-h-screen bg-background">
-        {/* Desktop left sidebar — fixed */}
-        <DesktopSidebar />
+        {/* Left sidebar — only for authenticated users */}
+        {isAuthenticated && <DesktopSidebar />}
 
-        {/* Desktop right sidebar — fixed */}
+        {/* Right sidebar — shown for all users on xl+ */}
         <RightSidebar events={events} />
 
-        {/* Main content area */}
-        <div className="lg:ml-56 xl:mr-80 flex flex-col min-h-screen">
-          {/* Mobile top navbar */}
-          <div className="lg:hidden sticky top-0 z-40">
+        {/* Main content area
+            - Authenticated: offset by left sidebar (lg:ml-56) + right sidebar (xl:mr-80)
+            - Public: only offset by right sidebar (xl:mr-80), full-width on smaller screens */}
+        <div
+          className={`${
+            isAuthenticated ? "lg:ml-56" : ""
+          } xl:mr-80 flex flex-col min-h-screen`}
+        >
+          {/* Top navbar:
+              - Authenticated: mobile only (desktop uses DesktopSidebar)
+              - Public: always visible (no left sidebar on desktop) */}
+          <div
+            className={`${
+              isAuthenticated ? "lg:hidden" : ""
+            } sticky top-0 z-40`}
+          >
             <Navbar />
           </div>
 
