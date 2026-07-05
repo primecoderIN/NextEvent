@@ -32,9 +32,7 @@ const RegisterPage = lazy(() =>
 const CreateCategoryPage = lazy(() =>
   import("@/features/admin/CreateCategoryPage").then((m) => ({ default: m.default }))
 )
-const SuggestCategoryPage = lazy(() =>
-  import("@/features/categories/SuggestCategoryPage").then((m) => ({ default: m.default }))
-)
+
 
 // ─── Admin bundles — lazy, downloaded ONLY after AdminRouteGuard passes ───────
 const AdminLayout = lazy(() =>
@@ -164,7 +162,6 @@ function App() {
                         <Route path={RoutePaths.Login}            element={<LoginPage />} />
                         <Route path={RoutePaths.Register}         element={<RegisterPage />} />
                         <Route path={RoutePaths.AdminCategoryNew} element={<CreateCategoryPage />} />
-                        <Route path={RoutePaths.SuggestCategory}  element={<SuggestCategoryPage />} />
                       </Routes>
                     </Suspense>
                   </main>

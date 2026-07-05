@@ -8,7 +8,6 @@ export const RoutePaths = {
   EditEvent: "/events/:id/edit",
   EventDetailLink: (id: string) => `/events/${id}`,
   EventEditLink: (id: string) => `/events/${id}/edit`,
-  SuggestCategory: "/categories/suggest",
   Profile: "/profile",
 
   // ─── Admin ──────────────────────────────────────────────────────────────────
