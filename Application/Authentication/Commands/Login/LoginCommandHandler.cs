@@ -25,16 +25,17 @@ public class LoginCommandHandler(UserManager<User> userManager, ITokenService to
         
         await userManager.UpdateAsync(user);
 
+        var roles = await userManager.GetRolesAsync(user);
+
         var userDto = new LoginResponseDto
         {
             DisplayName = user.DisplayName ?? user.UserName!,
-            Token = tokenService.CreateToken(user),
+            // Pass roles to CreateToken so they are embedded in the JWT claims
+            Token = tokenService.CreateToken(user, roles),
             Username = user.UserName!,
-            Image = user.ImageUrl
+            Image = user.ImageUrl,
+            Roles = roles
         };
-
-        var roles = await userManager.GetRolesAsync(user);
-        userDto.Roles = roles;
 
         return new AuthResult<LoginResponseDto>
         {

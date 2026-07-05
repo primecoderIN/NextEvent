@@ -10,7 +10,7 @@ namespace API.Services;
 
 public class TokenService(IConfiguration config) : ITokenService
 {
-    public string CreateToken(User user)
+    public string CreateToken(User user, IList<string> roles)
     {
         var claims = new List<Claim>
         {
@@ -18,6 +18,12 @@ public class TokenService(IConfiguration config) : ITokenService
             new Claim(ClaimTypes.Email, user.Email!),
             new Claim(ClaimTypes.Name, user.UserName!)
         };
+
+        foreach (var role in roles)
+        {
+            // Add Role claims to the JWT so that [Authorize(Roles = "...")] attributes work properly
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var keyString = config["TokenKey"] ?? throw new Exception("TokenKey not found in config");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));

@@ -34,7 +34,8 @@ public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenSer
             {
                 DisplayName = user.DisplayName ?? user.UserName!,
                 Image = user.ImageUrl,
-                Token = tokenService.CreateToken(user),
+                // Pass roles to CreateToken so they are embedded in the refreshed JWT claims
+                Token = tokenService.CreateToken(user, roles),
                 Username = user.UserName!,
                 Roles = roles
             }

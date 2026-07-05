@@ -52,16 +52,17 @@ public class RegisterCommandHandler(UserManager<User> userManager, ITokenService
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await userManager.UpdateAsync(user);
 
+        var roles = await userManager.GetRolesAsync(user);
+
         var userDto = new RegisterResponseDto
         {
             DisplayName = user.DisplayName ?? user.UserName!,
             Image = user.ImageUrl,
-            Token = tokenService.CreateToken(user),
-            Username = user.UserName!
+            // Pass roles to CreateToken so they are embedded in the JWT claims
+            Token = tokenService.CreateToken(user, roles),
+            Username = user.UserName!,
+            Roles = roles
         };
-
-        var roles = await userManager.GetRolesAsync(user);
-        userDto.Roles = roles;
 
         return new AuthResult<RegisterResponseDto>
         {
