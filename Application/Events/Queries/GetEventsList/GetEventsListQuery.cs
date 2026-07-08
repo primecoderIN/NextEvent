@@ -11,4 +11,9 @@ namespace Application.Events.Queries.GetEventsList;
 /// </summary>
 public class GetEventsListQuery : PaginationParams, IRequest<PagedList<EventResponseDto>>
 {
+    public string? Q { get; init; }
+    public Guid? CategoryId { get; init; }
+    public string? City { get; init; }
+    public DateTime? DateFrom { get; init; }
+    public DateTime? DateTo { get; init; }
 }

@@ -83,21 +83,21 @@ NextEvent/
 │
 └── client/                     # React frontend (Vite)
     └── src/
-        ├── app/
-        │   ├── layout/         # App root shell providers
+        ├── app/                # App-level configurations and routing portals
+        │   ├── (public)/       # Public routes and views (Home, Event Details)
+        │   ├── admin/          # Admin portal routes and dashboard
+        │   ├── organizer/      # Organizer portal routes and tools
+        │   ├── layout/         # Root layout providers and shells
         │   └── router/         # Centralized React Router v6 Data Router configuration
-        ├── portals/            # Feature-Sliced Portals for different user roles
-        │   ├── admin/          # Admin-only dashboard, layout, and admin route configuration
-        │   ├── organizer/      # Organizer tools (create/edit events) and organizer routes
-        │   └── public/         # Public views (Home, Event Details), navigation sidebars, and public routes
-        ├── features/           # Shared cross-portal business logic (e.g., AuthContext)
-        ├── shared/             # Reusable hooks, types, constants, and utilities
-        └── components/         # Base UI components (Radix/shadcn-style wrappers)
-            └── ui/
-                ├── button.tsx
-                ├── dialog.tsx
-                ├── input.tsx
-                └── ...
+        ├── authorization/      # Auth logic, route guards, and session management
+        ├── features/           # Feature-sliced domain modules (auth, events, categories...)
+        ├── i18n/               # Internationalization setup and translation files
+        ├── shared/             # Reusable layer decoupled from specific features
+        │   ├── constants/      # App-wide constants
+        │   ├── hooks/          # Reusable custom React hooks
+        │   ├── lib/            # Utility functions (e.g., tailwind merge helpers)
+        │   └── ui/             # Base UI components (Radix/shadcn-style wrappers)
+        └── types/              # Global TypeScript types
 
 ---
 
