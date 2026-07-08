@@ -1,4 +1,5 @@
-import { Navigate, Outlet } from "react-router-dom"
+import { useMemo } from "react"
+import { Navigate, Outlet, useSearchParams } from "react-router-dom"
 import { Navbar } from "@/app/(public)/layouts/Navbar"
 import { DesktopSidebar } from "@/app/(public)/layouts/DesktopSidebar"
 import { RightSidebar } from "@/app/(public)/layouts/RightSidebar"
@@ -17,7 +18,16 @@ function AdminRedirect({ children }: { children: React.ReactNode }) {
 }
 
 export function PublicLayout() {
-  const { events } = useEvents()
+  const [searchParams] = useSearchParams()
+  const filters = useMemo(() => ({
+    q: searchParams.get("q"),
+    categoryId: searchParams.get("categoryId"),
+    city: searchParams.get("city"),
+    dateFrom: searchParams.get("dateFrom"),
+    dateTo: searchParams.get("dateTo")
+  }), [searchParams])
+
+  const { events } = useEvents(filters)
   const { user, loading } = useAuth()
 
   // While auth is resolving, keep layout stable to avoid shift

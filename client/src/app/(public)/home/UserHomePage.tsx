@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
+import { useSearchParams } from "react-router-dom"
 import { compareDesc, parseISO } from "date-fns"
 import type { Event } from "@/types/Event"
 import { Button } from "@/shared/ui/button"
@@ -29,14 +30,18 @@ export function UserHomePage({
   isFetchingNextPage,
 }: UserHomePageProps) {
   const { user } = useAuth()
-  const [activeCategory, setActiveCategory] = useState("all")
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeCategory = searchParams.get("categoryId") || "all"
 
-  const filteredEvents = useMemo(() => {
-    if (activeCategory === "all" || activeCategory === "more") return events
-    return events.filter((e) =>
-      e.category.toLowerCase().startsWith(activeCategory)
-    )
-  }, [events, activeCategory])
+  const handleCategoryChange = (categoryId: string) => {
+    const newParams = new URLSearchParams(searchParams)
+    if (categoryId === "all") {
+      newParams.delete("categoryId")
+    } else {
+      newParams.set("categoryId", categoryId)
+    }
+    setSearchParams(newParams)
+  }
 
   const trendingEvents = useMemo(
     () =>
@@ -55,7 +60,7 @@ export function UserHomePage({
       <SearchBar placeholder="Search events, categories, artists..." />
 
       {/* 3. Recommended Events */}
-      <RecommendedEvents events={filteredEvents} loading={loading} />
+      <RecommendedEvents events={events} loading={loading} />
 
       {/* 4. Upcoming Registrations */}
       <UpcomingRegistrations />
@@ -72,7 +77,7 @@ export function UserHomePage({
       {/* 8. Category Carousel */}
       <section className="space-y-4">
         <h2 className="text-lg font-bold">Browse by Category</h2>
-        <CategoryCarousel active={activeCategory} onChange={setActiveCategory} />
+        <CategoryCarousel active={activeCategory} onChange={handleCategoryChange} />
       </section>
 
       {/* 9. Trending This Week */}

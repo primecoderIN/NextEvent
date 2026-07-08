@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
+import { useSearchParams } from "react-router-dom"
 import { compareDesc, parseISO } from "date-fns"
 import type { Event } from "@/types/Event"
 import { SearchBar } from "@/app/(public)/widgets/common/SearchBar"
@@ -16,14 +17,18 @@ interface PublicHomePageProps {
 }
 
 export function PublicHomePage({ events, loading }: PublicHomePageProps) {
-  const [activeCategory, setActiveCategory] = useState("all")
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeCategory = searchParams.get("categoryId") || "all"
 
-  const filteredEvents = useMemo(() => {
-    if (activeCategory === "all" || activeCategory === "more") return events
-    return events.filter((e) =>
-      e.category.toLowerCase().startsWith(activeCategory)
-    )
-  }, [events, activeCategory])
+  const handleCategoryChange = (categoryId: string) => {
+    const newParams = new URLSearchParams(searchParams)
+    if (categoryId === "all") {
+      newParams.delete("categoryId")
+    } else {
+      newParams.set("categoryId", categoryId)
+    }
+    setSearchParams(newParams)
+  }
 
   const trendingEvents = useMemo(
     () =>
@@ -42,10 +47,10 @@ export function PublicHomePage({ events, loading }: PublicHomePageProps) {
       <SearchBar placeholder="Search events, categories..." />
 
       {/* 3. Popular Categories */}
-      <CategorySection active={activeCategory} onChange={setActiveCategory} />
+      <CategorySection active={activeCategory} onChange={handleCategoryChange} />
 
       {/* 4. Recommended Events */}
-      <RecommendedEventsSection events={filteredEvents} loading={loading} />
+      <RecommendedEventsSection events={events} loading={loading} />
 
       {/* 5. Trending This Week — re-used from user-home, no duplication */}
       <TrendingEvents events={trendingEvents} loading={loading} />

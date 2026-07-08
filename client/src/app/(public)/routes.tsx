@@ -1,4 +1,5 @@
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, useMemo } from "react"
+import { useSearchParams } from "react-router-dom"
 import type { RouteObject } from "react-router-dom"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { useEvents } from "@/shared/hooks/useEvents"
@@ -19,7 +20,17 @@ function PageLoader() {
 }
 
 function HomePageWrapper() {
-  const { events, loading, fetchNextPage, hasNextPage, isFetchingNextPage } = useEvents()
+  const [searchParams] = useSearchParams()
+  
+  const filters = useMemo(() => ({
+    q: searchParams.get("q"),
+    categoryId: searchParams.get("categoryId"),
+    city: searchParams.get("city"),
+    dateFrom: searchParams.get("dateFrom"),
+    dateTo: searchParams.get("dateTo")
+  }), [searchParams])
+
+  const { events, loading, fetchNextPage, hasNextPage, isFetchingNextPage } = useEvents(filters)
   return (
     <Suspense fallback={<PageLoader />}>
       <HomePage
