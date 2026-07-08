@@ -36,8 +36,8 @@ public class GetEventsListQueryHandler(ISqlConnectionFactory connectionFactory) 
         // filter events where the title or description contains the string.
         if (!string.IsNullOrWhiteSpace(request.Q))
         {
-            whereClauses.Add("(e.Title LIKE '%' + @Q + '%' OR e.Description LIKE '%' + @Q + '%')");
-            parameters.Add("Q", request.Q);
+            whereClauses.Add("(e.Title LIKE @Q OR e.Description LIKE @Q)");
+            parameters.Add("Q", $"%{request.Q}%");
         }
         
         // Exact match on CategoryId if provided
@@ -50,8 +50,8 @@ public class GetEventsListQueryHandler(ISqlConnectionFactory connectionFactory) 
         // Partial text match on City name if provided
         if (!string.IsNullOrWhiteSpace(request.City))
         {
-            whereClauses.Add("e.City LIKE '%' + @City + '%'");
-            parameters.Add("City", request.City);
+            whereClauses.Add("e.City LIKE @City");
+            parameters.Add("City", $"%{request.City}%");
         }
         
         // DateRange logic: Only include events occurring ON or AFTER DateFrom
