@@ -15,7 +15,6 @@ public static class ApiRouteConstants
     {
         public const string Base = "api/ai";
         public const string GenerateDescription = "generate-description";
-        public const string SuggestCategory = "suggest-category";
     }
 
     public static class Events

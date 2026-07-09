@@ -8,15 +8,14 @@ namespace API.Extensions;
 /// <summary>
 /// Responsibility: Configures services strictly belonging to the Application and Domain logic layer.
 /// This includes registering CQRS handlers (MediatR), validation pipelines (FluentValidation),
-/// and core business integrations like the OpenAI service.
+/// and core business integrations like the Gemini service.
 /// </summary>
 public static class ApplicationServiceExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddValidatorsFromAssemblyContaining<CreateEventCommandValidator>();
-
-        services.AddScoped<IOpenAiService, OpenAiService>();
+        services.AddHttpClient<IGeminiService, GeminiService>();
 
         services.AddMediatR(x =>
         {

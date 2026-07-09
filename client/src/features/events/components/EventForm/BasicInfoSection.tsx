@@ -16,7 +16,7 @@ import { cn } from "@/shared/lib/utils"
 import type { EventFormValues } from "@/features/events/components/EventForm/types"
 import { FieldError, SectionTitle } from "@/features/events/components/EventForm/components"
 import { useGenerateDescription } from "@/shared/hooks/useGenerateDescription"
-import { useSuggestCategory } from "@/shared/hooks/useSuggestCategory"
+
 import { useCategories } from "@/shared/hooks/useCategories"
 
 // ── Step 1: Read form context and watch values ────────────────────────────────
@@ -61,9 +61,7 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
   })
 
   const { generate, loading: generating, error: generateError } = useGenerateDescription()
-  // Pass the live `title` value to useSuggestCategory — same reference from
-  // the useWatch above, no second subscription needed.
-  const { suggestion, loading: suggesting, clearSuggestion } = useSuggestCategory(title ?? "")
+
 
   async function handleGenerate() {
     const result = await generate({
@@ -75,20 +73,7 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
     if (result) onDescriptionGenerated(result)
   }
 
-  // ── Step 4: Programmatic field update (AI suggestion chip) ─────────────────
-  //
-  // setValue() is the correct way to update a field outside of a Controller.
-  // Anti-pattern avoided: wrapping the suggestion button in its own <Controller>
-  // just to call field.onChange() registers a duplicate field instance and
-  // confuses RHF's internal state. Use setValue() from the form context instead.
-  //
-  // shouldValidate: true → immediately re-run Zod for "category" so the error
-  //   clears as soon as the suggestion is accepted.
-  // shouldDirty: true   → mark the field as changed in the dirty state map.
-  function handleAcceptSuggestion() {
-    setValue("category", suggestion!, { shouldValidate: true, shouldDirty: true })
-    clearSuggestion()
-  }
+
 
   const canGenerate = (title?.trim().length ?? 0) >= 3
 
@@ -222,30 +207,7 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
           )}
         />
 
-        {(suggestion || suggesting) && !category && (
-          <div className="flex items-center gap-2 mt-1.5">
-            {suggesting ? (
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                {t("ai.thinking")}
-              </span>
-            ) : suggestion ? (
-              <button
-                type="button"
-                onClick={handleAcceptSuggestion}
-                className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
-                  "bg-violet-500/10 text-violet-400 border border-violet-500/30",
-                  "hover:bg-violet-500/20 hover:border-violet-400/50 transition-all duration-150",
-                  "cursor-pointer"
-                )}
-              >
-                <Sparkles className="h-3 w-3" />
-                {t("ai.suggestion", { category: suggestion })}
-              </button>
-            ) : null}
-          </div>
-        )}
+
 
         <FieldError msg={errors.categoryId?.message} />
       </div>
