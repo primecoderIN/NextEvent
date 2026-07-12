@@ -26,6 +26,11 @@ public interface IAppDBContext
     DbSet<CategorySuggestion> CategorySuggestions { get; set; }
 
     /// <summary>
+    /// Gets or sets the Organizations dataset.
+    /// </summary>
+    DbSet<Organization> Organizations { get; set; }
+
+    /// <summary>
     /// Saves all changes made in this context to the underlying database.
     /// </summary>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

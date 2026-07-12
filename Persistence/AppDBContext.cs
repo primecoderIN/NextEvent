@@ -13,6 +13,7 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
     public DbSet<Event> Events { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<CategorySuggestion> CategorySuggestions { get; set; }
+    public DbSet<Organization> Organizations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -140,6 +141,108 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
                 .IsRequired(false);
 
             b.HasIndex(s => s.Status);  // fast admin dashboard filter
+        });
+
+        // Organization entity configuration
+        modelBuilder.Entity<Organization>(b =>
+        {
+            b.HasKey(o => o.Id);
+
+            // -----------------------------------------------------------------
+            // Column constraints — matching Architecture.md §4.2 SQL Server schema
+            // -----------------------------------------------------------------
+
+            b.Property(o => o.Name)
+                .IsRequired()
+                .HasMaxLength(160)
+                .HasColumnType("varchar(160)");
+
+            b.Property(o => o.Slug)
+                .IsRequired()
+                .HasMaxLength(180)
+                .HasColumnType("varchar(180)");
+
+            b.Property(o => o.Description)
+                .IsRequired(false);
+
+            b.Property(o => o.LogoUrl)
+                .IsRequired(false);
+
+            b.Property(o => o.CoverImageUrl)
+                .IsRequired(false);
+
+            b.Property(o => o.WebsiteUrl)
+                .IsRequired(false);
+
+            b.Property(o => o.ContactEmail)
+                .IsRequired(false)
+                .HasMaxLength(256)
+                .HasColumnType("varchar(256)");
+
+            b.Property(o => o.ContactPhone)
+                .IsRequired(false)
+                .HasMaxLength(40)
+                .HasColumnType("varchar(40)");
+
+            b.Property(o => o.Status)
+                .IsRequired()
+                .HasMaxLength(30)
+                .HasColumnType("varchar(30)")
+                .HasDefaultValue("pending_verification");
+
+            b.Property(o => o.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false);
+
+            // -----------------------------------------------------------------
+            // RowVersion — SQL Server rowversion, auto-managed concurrency token
+            // -----------------------------------------------------------------
+
+            b.Property(o => o.RowVersion)
+                .IsRowVersion()          // maps to SQL Server rowversion
+                .IsConcurrencyToken();   // EF optimistic concurrency guard
+
+            // -----------------------------------------------------------------
+            // Foreign keys → AspNetUsers
+            // DeleteBehavior.Restrict: prevents deleting a User who owns / created
+            // an Organization, forcing explicit cleanup first.
+            // -----------------------------------------------------------------
+
+            // OwnerUserId — required, business ownership
+            b.HasOne(o => o.Owner)
+                .WithMany()
+                .HasForeignKey(o => o.OwnerUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // VerifiedByUserId — optional, set by Admin on approval
+            b.HasOne(o => o.VerifiedBy)
+                .WithMany()
+                .HasForeignKey(o => o.VerifiedByUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            // CreatedByUserId — required, immutable audit
+            b.HasOne(o => o.CreatedBy)
+                .WithMany()
+                .HasForeignKey(o => o.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // -----------------------------------------------------------------
+            // Indexes — matching Architecture.md §4.2
+            // -----------------------------------------------------------------
+
+            // UX_Organizations_Slug — slug must be globally unique
+            b.HasIndex(o => o.Slug)
+                .IsUnique()
+                .HasDatabaseName("UX_Organizations_Slug");
+
+            // IX_Organizations_OwnerUserId — fast lookup of orgs by owner
+            b.HasIndex(o => o.OwnerUserId)
+                .HasDatabaseName("IX_Organizations_OwnerUserId");
+
+            // IX_Organizations_Status — fast admin dashboard filter
+            b.HasIndex(o => o.Status)
+                .HasDatabaseName("IX_Organizations_Status");
         });
     }
 }
