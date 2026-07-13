@@ -175,7 +175,7 @@ export function BasicInfoSection({ onDescriptionGenerated }: BasicInfoSectionPro
           render={({ field }) => (
             <Select
               value={field.value}
-              onValueChange={(value) => {
+              onValueChange={(value: string) => {
                 const selected = categories.find((cat) => cat.id === value)
                 setValue("categoryId", value)
                 setValue("category", selected?.name ?? "")
