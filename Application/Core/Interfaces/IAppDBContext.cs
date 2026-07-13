@@ -31,6 +31,11 @@ public interface IAppDBContext
     DbSet<Organization> Organizations { get; set; }
 
     /// <summary>
+    /// Gets or sets the OrganizationMembers dataset.
+    /// </summary>
+    DbSet<OrganizationMember> OrganizationMembers { get; set; }
+
+    /// <summary>
     /// Saves all changes made in this context to the underlying database.
     /// </summary>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

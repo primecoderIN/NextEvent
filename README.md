@@ -310,6 +310,188 @@ Validation error codes are centralised in `Application/Events/Constants/Validati
 
 ---
 
+## Database Schema & Entity Relationships
+
+This section documents every domain entity, its columns, foreign key relationships, delete behaviors, and index strategy. Keep this updated whenever a migration is added.
+
+> **Convention:** All deletes are **soft deletes** (`IsDeleted = true`). Hard deletes are never performed. FKs that point to `AspNetUsers` use `Restrict` (cannot delete a user who is referenced) unless otherwise noted.
+
+---
+
+### Entities at a Glance
+
+| Table | PK type | Soft delete | Row-version | Notes |
+|---|---|---|---|---|
+| `AspNetUsers` | `nvarchar(450)` | ✗ | ✗ | ASP.NET Identity |
+| `Events` | `uniqueidentifier` | ✗ | ✗ | Core event listing |
+| `Categories` | `uniqueidentifier` | ✗ | ✗ | Event taxonomy |
+| `CategorySuggestions` | `uniqueidentifier` | ✗ | ✗ | Community proposals |
+| `Organizations` | `uniqueidentifier` | ✓ | ✓ | Organizer entity |
+| `OrganizationMembers` | `uniqueidentifier` | ✓ | ✗ | User ↔ Organization join |
+
+---
+
+### Entity Details
+
+#### `Events`
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `Id` | `uniqueidentifier` | ✗ | PK, client-generated |
+| `Title` | `nvarchar` | ✗ | Required |
+| `Description` | `nvarchar` | ✗ | Required |
+| `City` | `nvarchar` | ✗ | |
+| `Venue` | `nvarchar` | ✗ | |
+| `CategoryId` | `uniqueidentifier` | ✓ | FK → `Categories.Id` (`SetNull` on delete) |
+| `Date`, `Latitude`, `Longitude`, … | various | varies | |
+
+**Relationships:**
+- `CategoryId` → `Categories.Id` — `SetNull` (event stays valid if category is deleted)
+
+---
+
+#### `Categories`
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `Id` | `uniqueidentifier` | ✗ | PK |
+| `Name` | `nvarchar(200)` | ✗ | |
+| `Slug` | `varchar(200)` | ✗ | **Unique** (`UX_Categories_Slug`) |
+| `Description` | `nvarchar(2000)` | ✓ | |
+| `IsActive` | `bit` | ✗ | Default `true` |
+| `SortOrder` | `int` | ✗ | Default `0` |
+| `CreatedAtUtc` | `datetimeoffset` | ✗ | |
+| `UpdatedAtUtc` | `datetimeoffset` | ✗ | |
+
+**Indexes:** `UX_Categories_Slug` (unique)
+
+---
+
+#### `CategorySuggestions`
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `Id` | `uniqueidentifier` | ✗ | PK |
+| `Name` | `nvarchar(200)` | ✗ | |
+| `Slug` | `varchar(200)` | ✗ | |
+| `Description` | `nvarchar(2000)` | ✓ | |
+| `Status` | `int` | ✗ | Enum: `Pending=0`, `Approved=1`, `Rejected=2` |
+| `SuggestedById` | `nvarchar(450)` | ✗ | FK → `AspNetUsers.Id` (`Restrict`) |
+| `ReviewedById` | `nvarchar(450)` | ✓ | FK → `AspNetUsers.Id` (`Restrict`) |
+| `ReviewedAt` | `datetime` | ✓ | |
+| `RejectionReason` | `nvarchar` | ✓ | |
+| `ApprovedCategoryId` | `uniqueidentifier` | ✓ | FK → `Categories.Id` (`SetNull`) |
+| `OrganizationId` | `uniqueidentifier` | ✓ | Reserved for future use |
+| `CreatedAtUtc` | `datetime` | ✗ | |
+| `UpdatedAtUtc` | `datetime` | ✗ | |
+
+**Relationships:**
+- `SuggestedById` → `AspNetUsers.Id` — `Restrict`
+- `ReviewedById` → `AspNetUsers.Id` — `Restrict` (nullable)
+- `ApprovedCategoryId` → `Categories.Id` — `SetNull` (nullable)
+
+**Indexes:** `IX_CategorySuggestions_Status`
+
+---
+
+#### `Organizations`
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `Id` | `uniqueidentifier` | ✗ | PK, client-generated |
+| `Name` | `varchar(160)` | ✗ | |
+| `Slug` | `varchar(180)` | ✗ | **Unique** (`UX_Organizations_Slug`) |
+| `Description` | `nvarchar(max)` | ✓ | |
+| `LogoUrl` | `nvarchar(max)` | ✓ | |
+| `CoverImageUrl` | `nvarchar(max)` | ✓ | |
+| `WebsiteUrl` | `nvarchar(max)` | ✓ | |
+| `ContactEmail` | `varchar(256)` | ✓ | |
+| `ContactPhone` | `varchar(40)` | ✓ | |
+| `Status` | `varchar(30)` | ✗ | `pending_verification` \| `active` \| `suspended` \| `rejected` |
+| `OwnerUserId` | `nvarchar(450)` | ✗ | FK → `AspNetUsers.Id` (`Restrict`) |
+| `VerifiedAtUtc` | `datetimeoffset` | ✓ | Set by Admin on approval |
+| `VerifiedByUserId` | `nvarchar(450)` | ✓ | FK → `AspNetUsers.Id` (`Restrict`) |
+| `CreatedAtUtc` | `datetimeoffset` | ✗ | |
+| `CreatedByUserId` | `nvarchar(450)` | ✗ | FK → `AspNetUsers.Id` (`Restrict`) — immutable |
+| `UpdatedAtUtc` | `datetimeoffset` | ✓ | |
+| `UpdatedByUserId` | `nvarchar(max)` | ✓ | |
+| `IsDeleted` | `bit` | ✗ | Default `false` |
+| `DeletedAtUtc` | `datetimeoffset` | ✓ | |
+| `DeletedByUserId` | `nvarchar(max)` | ✓ | |
+| `RowVersion` | `rowversion` | ✗ | Auto-managed optimistic-concurrency token |
+
+**Relationships:**
+- `OwnerUserId` → `AspNetUsers.Id` — `Restrict`
+- `VerifiedByUserId` → `AspNetUsers.Id` — `Restrict` (nullable)
+- `CreatedByUserId` → `AspNetUsers.Id` — `Restrict`
+
+**Indexes:**
+| Name | Columns | Unique |
+|---|---|---|
+| `UX_Organizations_Slug` | `Slug` | ✓ |
+| `IX_Organizations_OwnerUserId` | `OwnerUserId` | ✗ |
+| `IX_Organizations_Status` | `Status` | ✗ |
+
+---
+
+#### `OrganizationMembers`
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `Id` | `uniqueidentifier` | ✗ | PK, client-generated |
+| `OrganizationId` | `uniqueidentifier` | ✗ | FK → `Organizations.Id` (`Cascade`) |
+| `UserId` | `nvarchar(450)` | ✗ | FK → `AspNetUsers.Id` (`Restrict`) |
+| `Status` | `int` | ✗ | Enum: `Invited=0`, `Active=1`, `Declined=2`, `Removed=3`. Default `0` |
+| `JoinedAtUtc` | `datetimeoffset` | ✓ | Set when `Status` transitions to `Active` |
+| `CreatedAtUtc` | `datetimeoffset` | ✗ | |
+| `CreatedByUserId` | `nvarchar(450)` | ✗ | FK → `AspNetUsers.Id` (`Restrict`) — immutable |
+| `IsDeleted` | `bit` | ✗ | Default `false` |
+| `DeletedAtUtc` | `datetimeoffset` | ✓ | |
+| `DeletedByUserId` | `nvarchar(max)` | ✓ | |
+
+**Relationships:**
+- `OrganizationId` → `Organizations.Id` — `Cascade` (safety net; orgs are soft-deleted)
+- `UserId` → `AspNetUsers.Id` — `Restrict`
+- `CreatedByUserId` → `AspNetUsers.Id` — `Restrict`
+
+**Indexes:**
+| Name | Columns | Unique | Filter | Purpose |
+|---|---|---|---|---|
+| `IX_OrganizationMembers_OrganizationId` | `OrganizationId` | ✗ | — | List all members of an org |
+| `IX_OrganizationMembers_UserId` | `UserId` | ✗ | — | List all orgs a user belongs to |
+| `UX_OrganizationMembers_Active` | `(OrganizationId, UserId)` | ✓ | `[Status]=1 AND [IsDeleted]=0` | **One active membership per user per org** |
+
+**Uniqueness rule — `UX_OrganizationMembers_Active` (filtered unique index)**
+
+A user may hold **at most one `Active` membership** per organization at any point in time. This is enforced at the database level by the filtered unique index above — not a composite primary key — for two reasons:
+
+1. **Audit trail:** Historical rows (`Declined`, `Removed`) must be retained. A composite PK on `(OrganizationId, UserId)` would permanently prevent re-inviting a user after they leave.
+2. **Soft deletes:** Soft-deleted rows (`IsDeleted = 1`) are excluded from the filter, so an archived record never blocks a new membership.
+
+The filter `[Status] = 1 AND [IsDeleted] = 0` means only currently-active, non-deleted rows participate in uniqueness. Any attempt to `INSERT` or `UPDATE` a second active membership for the same `(OrganizationId, UserId)` pair is rejected by SQL Server before it reaches the application layer.
+
+**State machine:**
+```
+Invited (0) ──► Active (1) ──► Removed (3)
+          └───► Declined (2)
+```
+
+---
+
+### Migration History
+
+| Migration | Date | Description |
+|---|---|---|
+| `InitialCreate` | 2026-06-28 | Identity tables + `Events` |
+| `AddCategory` | 2026-07-03 | `Categories` table |
+| `AddCategoryReferenceToEvent` | 2026-07-03 | `Events.CategoryId` FK |
+| `RemoveEventCategoryString` | 2026-07-03 | Dropped legacy string category column |
+| `CategorySuggestions` | 2026-07-04 | `CategorySuggestions` table |
+| `AddOrganization` | 2026-07-12 | `Organizations` table |
+| `AddOrganizationMember` | 2026-07-13 | `OrganizationMembers` table + filtered unique index |
+
+---
+
 ## Getting Started
 
 ### Prerequisites
