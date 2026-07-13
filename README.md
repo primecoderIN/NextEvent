@@ -320,14 +320,14 @@ This section documents every domain entity, its columns, foreign key relationshi
 
 ### Entities at a Glance
 
-| Table | PK type | Soft delete | Row-version | Notes |
-|---|---|---|---|---|
-| `AspNetUsers` | `nvarchar(450)` | ✗ | ✗ | ASP.NET Identity |
-| `Events` | `uniqueidentifier` | ✗ | ✗ | Core event listing |
-| `Categories` | `uniqueidentifier` | ✗ | ✗ | Event taxonomy |
-| `CategorySuggestions` | `uniqueidentifier` | ✗ | ✗ | Community proposals |
-| `Organizations` | `uniqueidentifier` | ✓ | ✓ | Organizer entity |
-| `OrganizationMembers` | `uniqueidentifier` | ✓ | ✗ | User ↔ Organization join |
+| Table | PK type | Soft delete | Hard delete | Row-version | Notes |
+|---|---|---|---|---|---|
+| `AspNetUsers` | `nvarchar(450)` | ✗ | ✓ | ✗ | Managed by ASP.NET Identity |
+| `Events` | `uniqueidentifier` | ✗ | ✓ | ✗ | Core event listing |
+| `Categories` | `uniqueidentifier` | ✗ | ✓ | ✗ | Event taxonomy |
+| `CategorySuggestions` | `uniqueidentifier` | ✗ | ✓ | ✗ | Community proposals |
+| `Organizations` | `uniqueidentifier` | ✓ | ✗ | ✓ | Organizer entity |
+| `OrganizationMembers` | `uniqueidentifier` | ✓ | ✗ | ✗ | User ↔ Organization join |
 
 ---
 
