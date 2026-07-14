@@ -230,6 +230,16 @@ Base URL: `https://localhost:5001/api`
 | `PUT` | `/events/{id}` | `200 OK` | Edit an existing event (partial update supported) |
 | `DELETE` | `/events/{id}` | `200 OK` | Delete an event |
 
+### Categories
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/categories` | Get all categories |
+| `POST` | `/categories` | Create a new category (Admin only) |
+| `GET` | `/categories/suggestions` | Get category suggestions (Admin only) |
+| `POST` | `/categories/suggest` | Suggest a new category (Authenticated users) |
+| `POST` | `/categories/{id}/approve` | Approve a category suggestion (Admin only) |
+| `POST` | `/categories/{id}/reject` | Reject a category suggestion (Admin only) |
+
 ### Account / Auth
 | Method | Endpoint | Description |
 |---|---|---|
@@ -549,6 +559,11 @@ The React app starts at `http://localhost:3001`.
 - Mobile: top navbar with hamburger sheet drawer
 - Desktop: fixed left sidebar (navigation) + fixed right sidebar (upcoming events, top organisers, weather widget)
 - Lazy loading for Home and Create Event page bundles (code splitting)
+
+### 🛡️ Admin Portal
+- **Dashboard** with system-wide event statistics and data tables
+- **Category Management** — create new categories via the right-side widget
+- **Review Suggestions** — review, approve, or reject user-submitted category suggestions
 
 ---
 
