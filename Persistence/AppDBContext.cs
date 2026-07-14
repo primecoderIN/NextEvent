@@ -16,6 +16,10 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
     public DbSet<Organization> Organizations { get; set; }
     public DbSet<OrganizationMember> OrganizationMembers { get; set; }
 
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<OrganizationRole> OrganizationRoles { get; set; }
+    public DbSet<OrganizationRolePermission> OrganizationRolePermissions { get; set; }
+    public DbSet<OrganizationMemberRole> OrganizationMemberRoles { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -291,6 +295,85 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
                 .IsUnique()
                 .HasFilter("[Status] = 1 AND [IsDeleted] = 0")
                 .HasDatabaseName("UX_OrganizationMembers_Active");
+        });
+
+        // Permission entity configuration
+        modelBuilder.Entity<Permission>(b =>
+        {
+            b.HasKey(p => p.Id);
+
+            b.Property(p => p.Code).IsRequired().HasMaxLength(120).HasColumnType("varchar(120)");
+            b.Property(p => p.Name).IsRequired().HasMaxLength(120).HasColumnType("varchar(120)");
+            b.Property(p => p.Category).IsRequired().HasMaxLength(80).HasColumnType("varchar(80)");
+
+            b.HasIndex(p => p.Code).IsUnique().HasDatabaseName("UX_Permissions_Code");
+        });
+
+        // OrganizationRole entity configuration
+        modelBuilder.Entity<OrganizationRole>(b =>
+        {
+            b.HasKey(r => r.Id);
+
+            b.Property(r => r.Name).IsRequired().HasMaxLength(80).HasColumnType("varchar(80)");
+            
+            b.Property(r => r.IsSystemRole).HasDefaultValue(false);
+            b.Property(r => r.IsDeleted).HasDefaultValue(false);
+
+            // Organization FK
+            b.HasOne(r => r.Organization)
+                .WithMany()
+                .HasForeignKey(r => r.OrganizationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // User FKs
+            b.HasOne(r => r.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(r => r.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            b.HasOne(r => r.UpdatedByUser)
+                .WithMany()
+                .HasForeignKey(r => r.UpdatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            // Unique index per organization for role name
+            b.HasIndex(r => new { r.OrganizationId, r.Name })
+                .IsUnique()
+                .HasDatabaseName("UX_OrganizationRoles_OrganizationId_Name");
+        });
+
+        // OrganizationRolePermission entity configuration
+        modelBuilder.Entity<OrganizationRolePermission>(b =>
+        {
+            b.HasKey(rp => new { rp.OrganizationRoleId, rp.PermissionId });
+
+            b.HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions)
+                .HasForeignKey(rp => rp.OrganizationRoleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(rp => rp.Permission)
+                .WithMany(p => p.RolePermissions)
+                .HasForeignKey(rp => rp.PermissionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // OrganizationMemberRole entity configuration
+        modelBuilder.Entity<OrganizationMemberRole>(b =>
+        {
+            b.HasKey(mr => new { mr.OrganizationMemberId, mr.OrganizationRoleId });
+
+            b.HasOne(mr => mr.Member)
+                .WithMany(m => m.MemberRoles)
+                .HasForeignKey(mr => mr.OrganizationMemberId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(mr => mr.Role)
+                .WithMany(r => r.MemberRoles)
+                .HasForeignKey(mr => mr.OrganizationRoleId)
+                // If a role is deleted, we cascade delete the member assignments
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

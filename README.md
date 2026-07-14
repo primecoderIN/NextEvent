@@ -1,16 +1,16 @@
-# NextEvent
+﻿# NextEvent
 
-A full-stack event discovery and management platform. Browse upcoming events, view detailed event pages, create new events, and manage them — all in a clean, modern interface.
+A full-stack event discovery and management platform. Browse upcoming events, view detailed event pages, create new events, and manage them â€” all in a clean, modern interface.
 
 ---
 
 ## Tech Stack
 
-### Backend — ASP.NET Core Web API
+### Backend â€” ASP.NET Core Web API
 | Layer | Technology |
 |---|---|
 | API | ASP.NET Core 10 |
-| Architecture | Clean Architecture — Domain / Application / Persistence / API |
+| Architecture | Clean Architecture â€” Domain / Application / Persistence / API |
 | CQRS | MediatR |
 | Validation | FluentValidation + MediatR pipeline behavior |
 | ORM | Entity Framework Core |
@@ -18,7 +18,7 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 | Serialisation | `System.Text.Json` with camelCase naming policy |
 | URL style | Lowercase route generation |
 
-### Frontend — React SPA
+### Frontend â€” React SPA
 | Concern | Technology |
 |---|---|
 | Framework | React 19 + TypeScript |
@@ -39,73 +39,76 @@ We strictly use `DateTimeOffset` across the entire solution. This architectural 
 - **Improved Database Indexing**: By storing as native `datetimeoffset` rather than strings, SQL Server can build more efficient indexes and perform faster range queries (e.g. finding upcoming events).
 - **Seamless Serialization**: Generates standard ISO-8601 strings during `System.Text.Json` serialization (e.g., `+00:00`), which the frontend JavaScript `Date` object parses natively without needing custom date converters on the backend or parsing logic on the frontend.
 
+**Tenant-Specific RBAC**  
+Unlike ASP.NET Identity roles which are platform-wide (e.g., a user is an "Admin" everywhere), we implemented a custom Organization RBAC model. Users hold OrganizationRoles tied specifically to an OrganizationId, composed of granular Permissions (like events.create). This isolates authorization boundaries, preventing role-bleeding across different organizations the user might belong to.
+
 ---
 
 ## Project Structure
 
 ```
 NextEvent/
-├── API/                        # ASP.NET Core Web API host
-│   ├── Common/
-│   │   └── ApiResponse.cs      # Generic response envelope + static factory
-│   ├── Controllers/
-│   │   ├── AccountController.cs  # Auth endpoints
-│   │   ├── AiController.cs       # AI integration endpoints
-│   │   ├── BaseApiController.cs  # OkResponse<T> / CreatedResponse<T> helpers
-│   │   └── EventsController.cs   # Events CRUD endpoints
-│   ├── Middleware/
-│   │   └── ExceptionMiddleware.cs  # Centralised exception → ApiResponse mapping
-│   ├── Program.cs              # DI setup, middleware, DB migration on startup
-│
-├── Application/                # Business logic (CQRS with MediatR)
-│   ├── Authentication/         # Auth feature folders
-│   │   ├── Commands/
-│   │   ├── DTOs/
-│   │   └── Interfaces/
-│   ├── Core/
-│   │   ├── Exceptions/
-│   │   │   ├── NotFoundException.cs       # → HTTP 404
-│   │   │   └── BusinessRuleException.cs   # → HTTP 409
-│   │   ├── Interfaces/
-│   │   │   └── IAppDBContext.cs           # Dependency Inversion for EF Core
-│   │   └── ValidationBehavior.cs          # MediatR pipeline: runs FluentValidation
-│   └── Events/                 # Event feature folders
-│       ├── Commands/
-│       │   ├── CreateEvent/
-│       │   ├── DeleteEvent/
-│       │   └── EditEvent/
-│       ├── Constants/
-│       │   └── ValidationErrors.cs        # Centralised validation error codes
-│       ├── DTOs/
-│       └── Queries/
-│           ├── GetEventDetailsById/
-│           └── GetEventsList/
-│
-├── Domain/                     # Core domain entity
-│   ├── Event.cs                # Event entity with PATCH-friendly update methods (Guid PK)
-│   └── User.cs                 # ASP.NET Core Identity user entity
-│
-├── Persistence/                # EF Core DbContext + data seeding
-│   ├── AppDBContext.cs         # Implements IAppDBContext
-│   └── DBInitializer.cs        # Seeds initial Events and Roles
-│
-└── client/                     # React frontend (Vite)
-    └── src/
-        ├── app/                # App-level configurations and routing portals
-        │   ├── (public)/       # Public routes and views (Home, Event Details)
-        │   ├── admin/          # Admin portal routes and dashboard
-        │   ├── organizer/      # Organizer portal routes and tools
-        │   ├── layout/         # Root layout providers and shells
-        │   └── router/         # Centralized React Router v6 Data Router configuration
-        ├── authorization/      # Auth logic, route guards, and session management
-        ├── features/           # Feature-sliced domain modules (auth, events, categories...)
-        ├── i18n/               # Internationalization setup and translation files
-        ├── shared/             # Reusable layer decoupled from specific features
-        │   ├── constants/      # App-wide constants
-        │   ├── hooks/          # Reusable custom React hooks
-        │   ├── lib/            # Utility functions (e.g., tailwind merge helpers)
-        │   └── ui/             # Base UI components (Radix/shadcn-style wrappers)
-        └── types/              # Global TypeScript types
+â”œâ”€â”€ API/                        # ASP.NET Core Web API host
+â”‚   â”œâ”€â”€ Common/
+â”‚   â”‚   â””â”€â”€ ApiResponse.cs      # Generic response envelope + static factory
+â”‚   â”œâ”€â”€ Controllers/
+â”‚   â”‚   â”œâ”€â”€ AccountController.cs  # Auth endpoints
+â”‚   â”‚   â”œâ”€â”€ AiController.cs       # AI integration endpoints
+â”‚   â”‚   â”œâ”€â”€ BaseApiController.cs  # OkResponse<T> / CreatedResponse<T> helpers
+â”‚   â”‚   â””â”€â”€ EventsController.cs   # Events CRUD endpoints
+â”‚   â”œâ”€â”€ Middleware/
+â”‚   â”‚   â””â”€â”€ ExceptionMiddleware.cs  # Centralised exception â†’ ApiResponse mapping
+â”‚   â”œâ”€â”€ Program.cs              # DI setup, middleware, DB migration on startup
+â”‚
+â”œâ”€â”€ Application/                # Business logic (CQRS with MediatR)
+â”‚   â”œâ”€â”€ Authentication/         # Auth feature folders
+â”‚   â”‚   â”œâ”€â”€ Commands/
+â”‚   â”‚   â”œâ”€â”€ DTOs/
+â”‚   â”‚   â””â”€â”€ Interfaces/
+â”‚   â”œâ”€â”€ Core/
+â”‚   â”‚   â”œâ”€â”€ Exceptions/
+â”‚   â”‚   â”‚   â”œâ”€â”€ NotFoundException.cs       # â†’ HTTP 404
+â”‚   â”‚   â”‚   â””â”€â”€ BusinessRuleException.cs   # â†’ HTTP 409
+â”‚   â”‚   â”œâ”€â”€ Interfaces/
+â”‚   â”‚   â”‚   â””â”€â”€ IAppDBContext.cs           # Dependency Inversion for EF Core
+â”‚   â”‚   â””â”€â”€ ValidationBehavior.cs          # MediatR pipeline: runs FluentValidation
+â”‚   â””â”€â”€ Events/                 # Event feature folders
+â”‚       â”œâ”€â”€ Commands/
+â”‚       â”‚   â”œâ”€â”€ CreateEvent/
+â”‚       â”‚   â”œâ”€â”€ DeleteEvent/
+â”‚       â”‚   â””â”€â”€ EditEvent/
+â”‚       â”œâ”€â”€ Constants/
+â”‚       â”‚   â””â”€â”€ ValidationErrors.cs        # Centralised validation error codes
+â”‚       â”œâ”€â”€ DTOs/
+â”‚       â””â”€â”€ Queries/
+â”‚           â”œâ”€â”€ GetEventDetailsById/
+â”‚           â””â”€â”€ GetEventsList/
+â”‚
+â”œâ”€â”€ Domain/                     # Core domain entity
+â”‚   â”œâ”€â”€ Event.cs                # Event entity with PATCH-friendly update methods (Guid PK)
+â”‚   â””â”€â”€ User.cs                 # ASP.NET Core Identity user entity
+â”‚
+â”œâ”€â”€ Persistence/                # EF Core DbContext + data seeding
+â”‚   â”œâ”€â”€ AppDBContext.cs         # Implements IAppDBContext
+â”‚   â””â”€â”€ DBInitializer.cs        # Seeds initial Events and Roles
+â”‚
+â””â”€â”€ client/                     # React frontend (Vite)
+    â””â”€â”€ src/
+        â”œâ”€â”€ app/                # App-level configurations and routing portals
+        â”‚   â”œâ”€â”€ (public)/       # Public routes and views (Home, Event Details)
+        â”‚   â”œâ”€â”€ admin/          # Admin portal routes and dashboard
+        â”‚   â”œâ”€â”€ organizer/      # Organizer portal routes and tools
+        â”‚   â”œâ”€â”€ layout/         # Root layout providers and shells
+        â”‚   â””â”€â”€ router/         # Centralized React Router v6 Data Router configuration
+        â”œâ”€â”€ authorization/      # Auth logic, route guards, and session management
+        â”œâ”€â”€ features/           # Feature-sliced domain modules (auth, events, categories...)
+        â”œâ”€â”€ i18n/               # Internationalization setup and translation files
+        â”œâ”€â”€ shared/             # Reusable layer decoupled from specific features
+        â”‚   â”œâ”€â”€ constants/      # App-wide constants
+        â”‚   â”œâ”€â”€ hooks/          # Reusable custom React hooks
+        â”‚   â”œâ”€â”€ lib/            # Utility functions (e.g., tailwind merge helpers)
+        â”‚   â””â”€â”€ ui/             # Base UI components (Radix/shadcn-style wrappers)
+        â””â”€â”€ types/              # Global TypeScript types
 
 ---
 
@@ -117,7 +120,7 @@ This section explains the core architectural decisions made in the NextEvent pla
 
 The backend is structured using **Clean Architecture** combined with the **CQRS (Command Query Responsibility Segregation)** pattern.
 
-#### 1.1 Clean Architecture Layers & Dependency Flow
+* **1.1 Clean Architecture Layers & Dependency Flow**
 
 The core principle of Clean Architecture is **Dependency Inversion**: the inner layers (containing business rules) must never depend on outer layers (containing infrastructure, frameworks, or databases). Source code dependencies can only point *inward*.
 
@@ -146,7 +149,7 @@ The core principle of Clean Architecture is **Dependency Inversion**: the inner 
 
 **The Ultimate Benefit:** Separation of Concerns. By strictly enforcing this dependency rule, our business logic is highly testable, completely ignorant of the database, and insulated from volatile UI/Framework changes.
 
-#### 1.2 CQRS with MediatR
+* **1.2 CQRS with MediatR**
 
 Instead of traditional fat controllers or sprawling service classes, we use **CQRS** implemented via **MediatR**.
 
@@ -163,7 +166,7 @@ Instead of traditional fat controllers or sprawling service classes, we use **CQ
 2. **Feature Folders:** Code is organized by feature (e.g., `Application/Events/Commands/CreateEvent/`) rather than by technical concern. The Command, Handler, and Validator all sit side-by-side.
 3. **Cross-Cutting Concerns:** MediatR allows us to inject pipeline behaviors (like global validation).
 
-#### 1.3 Validation Pipeline Behavior
+* **1.3 Validation Pipeline Behavior**
 
 We use **FluentValidation** to validate requests. However, validators are *never* explicitly invoked inside the handlers.
 
@@ -171,7 +174,7 @@ We use **FluentValidation** to validate requests. However, validators are *never
 
 **Why:** Handlers remain pure. They assume the data is valid by the time it reaches them.
 
-#### 1.4 Global Exception Handling (ExceptionMiddleware)
+* **1.4 Global Exception Handling (ExceptionMiddleware)**
 
 The API uses a custom middleware (`ExceptionMiddleware.cs`) that wraps the entire HTTP pipeline in a `try/catch` block.
 
@@ -183,13 +186,13 @@ The API uses a custom middleware (`ExceptionMiddleware.cs`) that wraps the entir
 
 **Why:** Controllers do not need to contain `try/catch` blocks or return `BadRequest()` manually. Handlers simply throw domain-specific exceptions, and the middleware guarantees a standardized JSON response envelope (`ApiResponse<T>`) is returned to the client.
 
-#### 1.5 Explicit Routing & Controller Base
+* **1.5 Explicit Routing & Controller Base**
 
 Controllers inherit from `BaseApiController`, but routing is explicitly defined on each class (e.g., `[Route("api/events")]`).
 
 **Why:** Implicit routing (e.g., `[Route("api/[controller]")]`) is brittle. If a developer refactors the class name from `EventsController` to `NextEventsController`, the API contract silently breaks, instantly breaking the client apps. Explicit routing ensures URLs are decoupled from C# class names.
 
-#### 1.6 Entity Framework & Guid Primary Keys
+* **1.6 Entity Framework & Guid Primary Keys**
 
 The `Event` entity uses a `Guid` as its primary key (`Id`).
 
@@ -202,12 +205,12 @@ The `Event` entity uses a `Guid` as its primary key (`Id`).
 
 The frontend is a Single Page Application (SPA) built for performance, modularity, and modern aesthetics.
 
-#### 2.1 Core Framework (React 19 + Vite)
+* **2.1 Core Framework (React 19 + Vite)**
 
 * **React 19**: Used for building the UI component tree.
 * **Vite**: Replaces Create React App/Webpack. It uses native ES modules for near-instant dev server startup and extremely fast Hot Module Replacement (HMR).
 
-#### 2.2 Routing (React Router v6 Data Router)
+* **2.2 Routing (React Router v6 Data Router)**
 
 We use the **React Router v6 Data Router** (`createBrowserRouter`) to manage client-side navigation. 
 
@@ -215,7 +218,7 @@ We use the **React Router v6 Data Router** (`createBrowserRouter`) to manage cli
 
 **Why:** It allows users to transition between pages without full page reloads. The object-based Data Router unlocks advanced features like parallel data loading, actions, and strict error boundary isolation, while the decentralized setup ensures maximum scalability as the app grows.
 
-#### 2.3 Styling Strategy (Tailwind CSS v4 + Radix UI)
+* **2.3 Styling Strategy (Tailwind CSS v4 + Radix UI)**
 
 The project eschews heavy component libraries (like Material UI) in favor of a **hand-rolled, utility-first** approach.
 
@@ -225,13 +228,13 @@ The project eschews heavy component libraries (like Material UI) in favor of a *
 
 **Why:** Maximum customizability. We own the component code entirely. If we want a button to look exactly a certain way, we just edit `components/ui/button.tsx` instead of fighting against a vendor library's internal CSS specificity.
 
-#### 2.4 State Management & Data Fetching (React Query)
+* **2.4 State Management & Data Fetching (React Query)**
 
 **TanStack React Query** is the primary driver for fetching, caching, and updating asynchronous data from the API.
 
 **Why:** Traditional React `useEffect` + `useState` fetching is prone to race conditions, lacks caching, and forces manual loading/error state management. React Query abstracts this away. It automatically caches identical requests, deduplicates network calls, and handles background refetching.
 
-#### 2.5 Form Handling (React Hook Form + Zod)
+* **2.5 Form Handling (React Hook Form + Zod)**
 
 Forms (like Create/Edit Event) are managed using **React Hook Form** coupled with **Zod** schema validation.
 
@@ -241,7 +244,7 @@ Forms (like Create/Edit Event) are managed using **React Hook Form** coupled wit
 * React Hook Form minimizes re-renders compared to traditional controlled inputs, making forms highly performant.
 * Zod provides strict TypeScript type-safety. The form data is guaranteed to match the expected shape before it ever touches the network.
 
-#### 2.6 Localization (i18next)
+* **2.6 Localization (i18next)**
 
 The client uses `react-i18next` for internationalization.
 
@@ -312,7 +315,7 @@ All URLs are **lowercase**. All responses use **camelCase** JSON property names 
 
 ## Validation
 
-Validation is handled automatically via a **MediatR pipeline behavior** (`ValidationBehavior<TRequest, TResponse>`). Every command/query is validated against its registered FluentValidation validator before reaching the handler — no manual wiring needed in individual handlers.
+Validation is handled automatically via a **MediatR pipeline behavior** (`ValidationBehavior<TRequest, TResponse>`). Every command/query is validated against its registered FluentValidation validator before reaching the handler â€” no manual wiring needed in individual handlers.
 
 Validation error codes are centralised in `Application/Events/Constants/ValidationErrors.cs` as constants (e.g. `TITLE_REQUIRED`, `LATITUDE_OUT_OF_RANGE`) so the frontend can rely on stable, localisation-friendly keys rather than free-form messages.
 
@@ -330,12 +333,12 @@ This section documents every domain entity, its columns, foreign key relationshi
 
 | Table | PK type | Soft delete | Hard delete | Row-version | Notes |
 |---|---|---|---|---|---|
-| `AspNetUsers` | `nvarchar(450)` | ✗ | ✓ | ✗ | Managed by ASP.NET Identity |
-| `Events` | `uniqueidentifier` | ✗ | ✓ | ✗ | Core event listing |
-| `Categories` | `uniqueidentifier` | ✗ | ✓ | ✗ | Event taxonomy |
-| `CategorySuggestions` | `uniqueidentifier` | ✗ | ✓ | ✗ | Community proposals |
-| `Organizations` | `uniqueidentifier` | ✓ | ✗ | ✓ | Organizer entity |
-| `OrganizationMembers` | `uniqueidentifier` | ✓ | ✗ | ✗ | User ↔ Organization join |
+| `AspNetUsers` | `nvarchar(450)` | âœ— | âœ“ | âœ— | Managed by ASP.NET Identity |
+| `Events` | `uniqueidentifier` | âœ— | âœ“ | âœ— | Core event listing |
+| `Categories` | `uniqueidentifier` | âœ— | âœ“ | âœ— | Event taxonomy |
+| `CategorySuggestions` | `uniqueidentifier` | âœ— | âœ“ | âœ— | Community proposals |
+| `Organizations` | `uniqueidentifier` | âœ“ | âœ— | âœ“ | Organizer entity |
+| `OrganizationMembers` | `uniqueidentifier` | âœ“ | âœ— | âœ— | User â†” Organization join |
 
 ---
 
@@ -345,16 +348,16 @@ This section documents every domain entity, its columns, foreign key relationshi
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
-| `Id` | `uniqueidentifier` | ✗ | PK, client-generated |
-| `Title` | `nvarchar` | ✗ | Required |
-| `Description` | `nvarchar` | ✗ | Required |
-| `City` | `nvarchar` | ✗ | |
-| `Venue` | `nvarchar` | ✗ | |
-| `CategoryId` | `uniqueidentifier` | ✓ | FK → `Categories.Id` (`SetNull` on delete) |
-| `Date`, `Latitude`, `Longitude`, … | various | varies | |
+| `Id` | `uniqueidentifier` | âœ— | PK, client-generated |
+| `Title` | `nvarchar` | âœ— | Required |
+| `Description` | `nvarchar` | âœ— | Required |
+| `City` | `nvarchar` | âœ— | |
+| `Venue` | `nvarchar` | âœ— | |
+| `CategoryId` | `uniqueidentifier` | âœ“ | FK â†’ `Categories.Id` (`SetNull` on delete) |
+| `Date`, `Latitude`, `Longitude`, â€¦ | various | varies | |
 
 **Relationships:**
-- `CategoryId` → `Categories.Id` — `SetNull` (event stays valid if category is deleted)
+- `CategoryId` â†’ `Categories.Id` â€” `SetNull` (event stays valid if category is deleted)
 
 ---
 
@@ -362,14 +365,14 @@ This section documents every domain entity, its columns, foreign key relationshi
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
-| `Id` | `uniqueidentifier` | ✗ | PK |
-| `Name` | `nvarchar(200)` | ✗ | |
-| `Slug` | `varchar(200)` | ✗ | **Unique** (`UX_Categories_Slug`) |
-| `Description` | `nvarchar(2000)` | ✓ | |
-| `IsActive` | `bit` | ✗ | Default `true` |
-| `SortOrder` | `int` | ✗ | Default `0` |
-| `CreatedAtUtc` | `datetimeoffset` | ✗ | |
-| `UpdatedAtUtc` | `datetimeoffset` | ✗ | |
+| `Id` | `uniqueidentifier` | âœ— | PK |
+| `Name` | `nvarchar(200)` | âœ— | |
+| `Slug` | `varchar(200)` | âœ— | **Unique** (`UX_Categories_Slug`) |
+| `Description` | `nvarchar(2000)` | âœ“ | |
+| `IsActive` | `bit` | âœ— | Default `true` |
+| `SortOrder` | `int` | âœ— | Default `0` |
+| `CreatedAtUtc` | `datetimeoffset` | âœ— | |
+| `UpdatedAtUtc` | `datetimeoffset` | âœ— | |
 
 **Indexes:** `UX_Categories_Slug` (unique)
 
@@ -379,24 +382,24 @@ This section documents every domain entity, its columns, foreign key relationshi
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
-| `Id` | `uniqueidentifier` | ✗ | PK |
-| `Name` | `nvarchar(200)` | ✗ | |
-| `Slug` | `varchar(200)` | ✗ | |
-| `Description` | `nvarchar(2000)` | ✓ | |
-| `Status` | `int` | ✗ | Enum: `Pending=0`, `Approved=1`, `Rejected=2` |
-| `SuggestedById` | `nvarchar(450)` | ✗ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `ReviewedById` | `nvarchar(450)` | ✓ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `ReviewedAt` | `datetimeoffset` | ✓ | |
-| `RejectionReason` | `nvarchar` | ✓ | |
-| `ApprovedCategoryId` | `uniqueidentifier` | ✓ | FK → `Categories.Id` (`SetNull`) |
-| `OrganizationId` | `uniqueidentifier` | ✓ | Reserved for future use |
-| `CreatedAtUtc` | `datetimeoffset` | ✗ | |
-| `UpdatedAtUtc` | `datetimeoffset` | ✗ | |
+| `Id` | `uniqueidentifier` | âœ— | PK |
+| `Name` | `nvarchar(200)` | âœ— | |
+| `Slug` | `varchar(200)` | âœ— | |
+| `Description` | `nvarchar(2000)` | âœ“ | |
+| `Status` | `int` | âœ— | Enum: `Pending=0`, `Approved=1`, `Rejected=2` |
+| `SuggestedById` | `nvarchar(450)` | âœ— | FK â†’ `AspNetUsers.Id` (`Restrict`) |
+| `ReviewedById` | `nvarchar(450)` | âœ“ | FK â†’ `AspNetUsers.Id` (`Restrict`) |
+| `ReviewedAt` | `datetimeoffset` | âœ“ | |
+| `RejectionReason` | `nvarchar` | âœ“ | |
+| `ApprovedCategoryId` | `uniqueidentifier` | âœ“ | FK â†’ `Categories.Id` (`SetNull`) |
+| `OrganizationId` | `uniqueidentifier` | âœ“ | Reserved for future use |
+| `CreatedAtUtc` | `datetimeoffset` | âœ— | |
+| `UpdatedAtUtc` | `datetimeoffset` | âœ— | |
 
 **Relationships:**
-- `SuggestedById` → `AspNetUsers.Id` — `Restrict`
-- `ReviewedById` → `AspNetUsers.Id` — `Restrict` (nullable)
-- `ApprovedCategoryId` → `Categories.Id` — `SetNull` (nullable)
+- `SuggestedById` â†’ `AspNetUsers.Id` â€” `Restrict`
+- `ReviewedById` â†’ `AspNetUsers.Id` â€” `Restrict` (nullable)
+- `ApprovedCategoryId` â†’ `Categories.Id` â€” `SetNull` (nullable)
 
 **Indexes:** `IX_CategorySuggestions_Status`
 
@@ -406,39 +409,39 @@ This section documents every domain entity, its columns, foreign key relationshi
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
-| `Id` | `uniqueidentifier` | ✗ | PK, client-generated |
-| `Name` | `varchar(160)` | ✗ | |
-| `Slug` | `varchar(180)` | ✗ | **Unique** (`UX_Organizations_Slug`) |
-| `Description` | `nvarchar(max)` | ✓ | |
-| `LogoUrl` | `nvarchar(max)` | ✓ | |
-| `CoverImageUrl` | `nvarchar(max)` | ✓ | |
-| `WebsiteUrl` | `nvarchar(max)` | ✓ | |
-| `ContactEmail` | `varchar(256)` | ✓ | |
-| `ContactPhone` | `varchar(40)` | ✓ | |
-| `Status` | `varchar(30)` | ✗ | `pending_verification` \| `active` \| `suspended` \| `rejected` |
-| `OwnerUserId` | `nvarchar(450)` | ✗ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `VerifiedAtUtc` | `datetimeoffset` | ✓ | Set by Admin on approval |
-| `VerifiedByUserId` | `nvarchar(450)` | ✓ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `CreatedAtUtc` | `datetimeoffset` | ✗ | |
-| `CreatedByUserId` | `nvarchar(450)` | ✗ | FK → `AspNetUsers.Id` (`Restrict`) — immutable |
-| `UpdatedAtUtc` | `datetimeoffset` | ✓ | |
-| `UpdatedByUserId` | `nvarchar(max)` | ✓ | |
-| `IsDeleted` | `bit` | ✗ | Default `false` |
-| `DeletedAtUtc` | `datetimeoffset` | ✓ | |
-| `DeletedByUserId` | `nvarchar(max)` | ✓ | |
-| `RowVersion` | `rowversion` | ✗ | Auto-managed optimistic-concurrency token |
+| `Id` | `uniqueidentifier` | âœ— | PK, client-generated |
+| `Name` | `varchar(160)` | âœ— | |
+| `Slug` | `varchar(180)` | âœ— | **Unique** (`UX_Organizations_Slug`) |
+| `Description` | `nvarchar(max)` | âœ“ | |
+| `LogoUrl` | `nvarchar(max)` | âœ“ | |
+| `CoverImageUrl` | `nvarchar(max)` | âœ“ | |
+| `WebsiteUrl` | `nvarchar(max)` | âœ“ | |
+| `ContactEmail` | `varchar(256)` | âœ“ | |
+| `ContactPhone` | `varchar(40)` | âœ“ | |
+| `Status` | `varchar(30)` | âœ— | `pending_verification` \| `active` \| `suspended` \| `rejected` |
+| `OwnerUserId` | `nvarchar(450)` | âœ— | FK â†’ `AspNetUsers.Id` (`Restrict`) |
+| `VerifiedAtUtc` | `datetimeoffset` | âœ“ | Set by Admin on approval |
+| `VerifiedByUserId` | `nvarchar(450)` | âœ“ | FK â†’ `AspNetUsers.Id` (`Restrict`) |
+| `CreatedAtUtc` | `datetimeoffset` | âœ— | |
+| `CreatedByUserId` | `nvarchar(450)` | âœ— | FK â†’ `AspNetUsers.Id` (`Restrict`) â€” immutable |
+| `UpdatedAtUtc` | `datetimeoffset` | âœ“ | |
+| `UpdatedByUserId` | `nvarchar(max)` | âœ“ | |
+| `IsDeleted` | `bit` | âœ— | Default `false` |
+| `DeletedAtUtc` | `datetimeoffset` | âœ“ | |
+| `DeletedByUserId` | `nvarchar(max)` | âœ“ | |
+| `RowVersion` | `rowversion` | âœ— | Auto-managed optimistic-concurrency token |
 
 **Relationships:**
-- `OwnerUserId` → `AspNetUsers.Id` — `Restrict`
-- `VerifiedByUserId` → `AspNetUsers.Id` — `Restrict` (nullable)
-- `CreatedByUserId` → `AspNetUsers.Id` — `Restrict`
+- `OwnerUserId` â†’ `AspNetUsers.Id` â€” `Restrict`
+- `VerifiedByUserId` â†’ `AspNetUsers.Id` â€” `Restrict` (nullable)
+- `CreatedByUserId` â†’ `AspNetUsers.Id` â€” `Restrict`
 
 **Indexes:**
 | Name | Columns | Unique |
 |---|---|---|
-| `UX_Organizations_Slug` | `Slug` | ✓ |
-| `IX_Organizations_OwnerUserId` | `OwnerUserId` | ✗ |
-| `IX_Organizations_Status` | `Status` | ✗ |
+| `UX_Organizations_Slug` | `Slug` | âœ“ |
+| `IX_Organizations_OwnerUserId` | `OwnerUserId` | âœ— |
+| `IX_Organizations_Status` | `Status` | âœ— |
 
 ---
 
@@ -446,32 +449,32 @@ This section documents every domain entity, its columns, foreign key relationshi
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
-| `Id` | `uniqueidentifier` | ✗ | PK, client-generated |
-| `OrganizationId` | `uniqueidentifier` | ✗ | FK → `Organizations.Id` (`Cascade`) |
-| `UserId` | `nvarchar(450)` | ✗ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `Status` | `int` | ✗ | Enum: `Invited=0`, `Active=1`, `Declined=2`, `Removed=3`. Default `0` |
-| `JoinedAtUtc` | `datetimeoffset` | ✓ | Set when `Status` transitions to `Active` |
-| `CreatedAtUtc` | `datetimeoffset` | ✗ | |
-| `CreatedByUserId` | `nvarchar(450)` | ✗ | FK → `AspNetUsers.Id` (`Restrict`) — immutable |
-| `IsDeleted` | `bit` | ✗ | Default `false` |
-| `DeletedAtUtc` | `datetimeoffset` | ✓ | |
-| `DeletedByUserId` | `nvarchar(max)` | ✓ | |
+| `Id` | `uniqueidentifier` | âœ— | PK, client-generated |
+| `OrganizationId` | `uniqueidentifier` | âœ— | FK â†’ `Organizations.Id` (`Cascade`) |
+| `UserId` | `nvarchar(450)` | âœ— | FK â†’ `AspNetUsers.Id` (`Restrict`) |
+| `Status` | `int` | âœ— | Enum: `Invited=0`, `Active=1`, `Declined=2`, `Removed=3`. Default `0` |
+| `JoinedAtUtc` | `datetimeoffset` | âœ“ | Set when `Status` transitions to `Active` |
+| `CreatedAtUtc` | `datetimeoffset` | âœ— | |
+| `CreatedByUserId` | `nvarchar(450)` | âœ— | FK â†’ `AspNetUsers.Id` (`Restrict`) â€” immutable |
+| `IsDeleted` | `bit` | âœ— | Default `false` |
+| `DeletedAtUtc` | `datetimeoffset` | âœ“ | |
+| `DeletedByUserId` | `nvarchar(max)` | âœ“ | |
 
 **Relationships:**
-- `OrganizationId` → `Organizations.Id` — `Cascade` (safety net; orgs are soft-deleted)
-- `UserId` → `AspNetUsers.Id` — `Restrict`
-- `CreatedByUserId` → `AspNetUsers.Id` — `Restrict`
+- `OrganizationId` â†’ `Organizations.Id` â€” `Cascade` (safety net; orgs are soft-deleted)
+- `UserId` â†’ `AspNetUsers.Id` â€” `Restrict`
+- `CreatedByUserId` â†’ `AspNetUsers.Id` â€” `Restrict`
 
 **Indexes:**
 | Name | Columns | Unique | Filter | Purpose |
 |---|---|---|---|---|
-| `IX_OrganizationMembers_OrganizationId` | `OrganizationId` | ✗ | — | List all members of an org |
-| `IX_OrganizationMembers_UserId` | `UserId` | ✗ | — | List all orgs a user belongs to |
-| `UX_OrganizationMembers_Active` | `(OrganizationId, UserId)` | ✓ | `[Status]=1 AND [IsDeleted]=0` | **One active membership per user per org** |
+| `IX_OrganizationMembers_OrganizationId` | `OrganizationId` | âœ— | â€” | List all members of an org |
+| `IX_OrganizationMembers_UserId` | `UserId` | âœ— | â€” | List all orgs a user belongs to |
+| `UX_OrganizationMembers_Active` | `(OrganizationId, UserId)` | âœ“ | `[Status]=1 AND [IsDeleted]=0` | **One active membership per user per org** |
 
-**Uniqueness rule — `UX_OrganizationMembers_Active` (filtered unique index)**
+**Uniqueness rule â€” `UX_OrganizationMembers_Active` (filtered unique index)**
 
-A user may hold **at most one `Active` membership** per organization at any point in time. This is enforced at the database level by the filtered unique index above — not a composite primary key — for two reasons:
+A user may hold **at most one `Active` membership** per organization at any point in time. This is enforced at the database level by the filtered unique index above â€” not a composite primary key â€” for two reasons:
 
 1. **Audit trail:** Historical rows (`Declined`, `Removed`) must be retained. A composite PK on `(OrganizationId, UserId)` would permanently prevent re-inviting a user after they leave.
 2. **Soft deletes:** Soft-deleted rows (`IsDeleted = 1`) are excluded from the filter, so an archived record never blocks a new membership.
@@ -480,9 +483,58 @@ The filter `[Status] = 1 AND [IsDeleted] = 0` means only currently-active, non-d
 
 **State machine:**
 ```
-Invited (0) ──► Active (1) ──► Removed (3)
-          └───► Declined (2)
+Invited (0) â”€â”€â–º Active (1) â”€â”€â–º Removed (3)
+          â””â”€â”€â”€â–º Declined (2)
 ```
+
+---
+
+#### `Permissions`
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `Id` | `uniqueidentifier` | âŒ | PK |
+| `Code` | `varchar(120)` | âŒ | **Unique** (`UX_Permissions_Code`) |
+| `Name` | `varchar(120)` | âŒ | |
+| `Description` | `nvarchar` | âœ… | |
+| `Category` | `varchar(80)` | âŒ | |
+
+---
+
+#### `OrganizationRoles`
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `Id` | `uniqueidentifier` | âŒ | PK |
+| `OrganizationId` | `uniqueidentifier` | âŒ | FK â†’ `Organizations.Id` (`Cascade`) |
+| `Name` | `varchar(80)` | âŒ | |
+| `Description` | `nvarchar` | âœ… | |
+| `IsSystemRole` | `bit` | âŒ | Default `false` |
+| `CreatedAtUtc` | `datetimeoffset` | âŒ | |
+| `CreatedByUserId` | `nvarchar(450)` | âŒ | FK â†’ `AspNetUsers.Id` (`Restrict`) |
+| `UpdatedAtUtc` | `datetimeoffset` | âœ… | |
+| `UpdatedByUserId` | `nvarchar(450)` | âœ… | FK â†’ `AspNetUsers.Id` (`Restrict`) |
+| `IsDeleted` | `bit` | âŒ | Default `false` |
+
+**Indexes:** `UX_OrganizationRoles_OrganizationId_Name` (unique composite)
+
+---
+
+#### `OrganizationRolePermissions`
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `OrganizationRoleId` | `uniqueidentifier` | âŒ | PK Part, FK â†’ `OrganizationRoles.Id` (`Cascade`) |
+| `PermissionId` | `uniqueidentifier` | âŒ | PK Part, FK â†’ `Permissions.Id` (`Cascade`) |
+
+---
+
+#### `OrganizationMemberRoles`
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `OrganizationMemberId` | `uniqueidentifier` | âŒ | PK Part, FK â†’ `OrganizationMembers.Id` (`Cascade`) |
+| `OrganizationRoleId` | `uniqueidentifier` | âŒ | PK Part, FK â†’ `OrganizationRoles.Id` (`Cascade`) |
 
 ---
 
@@ -513,7 +565,7 @@ cd API
 dotnet watch
 ```
 
-The API starts at `https://localhost:5001`. The SQL Server database is **auto-created and seeded** on first run (via `Program.cs`) — no manual migration step needed.
+The API starts at `https://localhost:5001`. The SQL Server database is **auto-created and seeded** on first run (via `Program.cs`) â€” no manual migration step needed.
 
 ### 2. Run the Client
 
@@ -531,28 +583,28 @@ The React app starts at `http://localhost:3001`.
 
 ## Features
 
-### 🏠 Home Page
+### ðŸ  Home Page
 - **Greeting header** with time-aware message (Good Morning / Afternoon / Evening)
-- **Category filter** bar — filter events by Music, Sports, Nightlife, etc.
-- **Featured carousel** — auto-cycling hero carousel with navigation controls
-- **Recommended For You** — horizontally scrollable event card strip (filtered by category)
-- **Trending This Week** — latest events sorted by date
+- **Category filter** bar â€” filter events by Music, Sports, Nightlife, etc.
+- **Featured carousel** â€” auto-cycling hero carousel with navigation controls
+- **Recommended For You** â€” horizontally scrollable event card strip (filtered by category)
+- **Trending This Week** â€” latest events sorted by date
 
-### 🗓️ Event Detail Page
+### ðŸ—“ï¸ Event Detail Page
 - **Hero banner** with category badge, date, location and rating chips
-- **Tab panel** — About, Schedule, and Venue tabs
-- **Ticket panel** (desktop sidebar) — pricing tiers and booking CTA
+- **Tab panel** â€” About, Schedule, and Venue tabs
+- **Ticket panel** (desktop sidebar) â€” pricing tiers and booking CTA
 - **Organiser card** with follow button
 - **Location card** with coordinates
-- **Delete Event** — confirmation dialog with title, warning, Cancel and "Yes, Delete Event" buttons; navigates home on success
+- **Delete Event** â€” confirmation dialog with title, warning, Cancel and "Yes, Delete Event" buttons; navigates home on success
 
-### ✏️ Create / Edit Event Page
+### âœï¸ Create / Edit Event Page
 - Multi-section form: **Basic Info**, **Date & Time**, **Location**, **GPS Coordinates**
 - Live preview card updates as you type
 - Client-side validation with inline field errors; server-side validation errors surfaced from the `ApiResponse.errors` map
 - **Publish Event** button POSTs to the API; shows success screen on completion
 
-### 📱 Responsive Layout
+### ðŸ“± Responsive Layout
 - Mobile: top navbar with hamburger sheet drawer
 - Desktop: fixed left sidebar (navigation) + fixed right sidebar (upcoming events, top organisers, weather widget)
 - Lazy loading for Home and Create Event page bundles (code splitting)
@@ -580,4 +632,5 @@ npm run preview       # Preview production build locally
 
 ## License
 
-This project is licensed under the MIT License — see [LICENSE](./LICENSE) for details.
+This project is licensed under the MIT License â€” see [LICENSE](./LICENSE) for details.
+

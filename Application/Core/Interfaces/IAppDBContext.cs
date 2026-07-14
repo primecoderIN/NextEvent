@@ -36,6 +36,26 @@ public interface IAppDBContext
     DbSet<OrganizationMember> OrganizationMembers { get; set; }
 
     /// <summary>
+    /// Gets or sets the Permissions dataset for RBAC.
+    /// </summary>
+    DbSet<Permission> Permissions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the OrganizationRoles dataset for RBAC.
+    /// </summary>
+    DbSet<OrganizationRole> OrganizationRoles { get; set; }
+
+    /// <summary>
+    /// Gets or sets the OrganizationRolePermissions dataset for RBAC.
+    /// </summary>
+    DbSet<OrganizationRolePermission> OrganizationRolePermissions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the OrganizationMemberRoles dataset for RBAC.
+    /// </summary>
+    DbSet<OrganizationMemberRole> OrganizationMemberRoles { get; set; }
+
+    /// <summary>
     /// Saves all changes made in this context to the underlying database.
     /// </summary>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

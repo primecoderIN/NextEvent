@@ -128,4 +128,11 @@ public class OrganizationMember
     /// FK → AspNetUsers.Id. The user who performed the soft delete. Nullable.
     /// </summary>
     public string? DeletedByUserId { get; set; }
+
+    // -------------------------------------------------------------------------
+    // Navigation properties for RBAC
+    // -------------------------------------------------------------------------
+
+    /// <summary>Roles assigned to this member within the organization.</summary>
+    public ICollection<OrganizationMemberRole> MemberRoles { get; set; } = [];
 }
