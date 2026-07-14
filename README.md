@@ -386,12 +386,12 @@ This section documents every domain entity, its columns, foreign key relationshi
 | `Status` | `int` | ✗ | Enum: `Pending=0`, `Approved=1`, `Rejected=2` |
 | `SuggestedById` | `nvarchar(450)` | ✗ | FK → `AspNetUsers.Id` (`Restrict`) |
 | `ReviewedById` | `nvarchar(450)` | ✓ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `ReviewedAt` | `datetime` | ✓ | |
+| `ReviewedAt` | `datetimeoffset` | ✓ | |
 | `RejectionReason` | `nvarchar` | ✓ | |
 | `ApprovedCategoryId` | `uniqueidentifier` | ✓ | FK → `Categories.Id` (`SetNull`) |
 | `OrganizationId` | `uniqueidentifier` | ✓ | Reserved for future use |
-| `CreatedAtUtc` | `datetime` | ✗ | |
-| `UpdatedAtUtc` | `datetime` | ✗ | |
+| `CreatedAtUtc` | `datetimeoffset` | ✗ | |
+| `UpdatedAtUtc` | `datetimeoffset` | ✗ | |
 
 **Relationships:**
 - `SuggestedById` → `AspNetUsers.Id` — `Restrict`
