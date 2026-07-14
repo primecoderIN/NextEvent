@@ -31,6 +31,14 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 | Icons | Lucide React |
 | Variant styles | class-variance-authority + clsx + tailwind-merge |
 
+### Key Design Decisions
+**DateTimeOffset over DateTime**  
+We strictly use `DateTimeOffset` across the entire solution. This architectural decision provides several critical benefits:
+- **Timezone Safety**: Exact points in time are unambiguous, explicitly storing the offset from UTC.
+- **Native SQL Mapping**: It natively maps to EF Core's `datetimeoffset` column type without the overhead of custom string value converters.
+- **Improved Database Indexing**: By storing as native `datetimeoffset` rather than strings, SQL Server can build more efficient indexes and perform faster range queries (e.g. finding upcoming events).
+- **Seamless Serialization**: Generates standard ISO-8601 strings during `System.Text.Json` serialization (e.g., `+00:00`), which the frontend JavaScript `Date` object parses natively without needing custom date converters on the backend or parsing logic on the frontend.
+
 ---
 
 ## Project Structure

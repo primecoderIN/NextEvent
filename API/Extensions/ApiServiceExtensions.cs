@@ -32,7 +32,7 @@ public static class ApiServiceExtensions
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-                options.JsonSerializerOptions.Converters.Add(new UtcDateTimeJsonConverter());
+
             });
 
         services.AddCors(options =>

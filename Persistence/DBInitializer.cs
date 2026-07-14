@@ -60,8 +60,8 @@ public class DBInitializer
             if (!exists)
             {
                 // Ensure timestamps are set correctly on insert
-                cat.CreatedAtUtc = DateTime.UtcNow;
-                cat.UpdatedAtUtc = DateTime.UtcNow;
+                cat.CreatedAtUtc = DateTimeOffset.UtcNow;
+                cat.UpdatedAtUtc = DateTimeOffset.UtcNow;
                 context.Categories.Add(cat);
             }
         }
@@ -104,7 +104,7 @@ public class DBInitializer
                 Title = "Tech Conference 2026",
                 Description = "Annual technology conference for developers and architects.",
                 CategoryId = categoriesInDb.Single(c => c.Slug == "business").Id,
-                Date = DateTime.UtcNow.AddDays(15),
+                Date = DateTimeOffset.UtcNow.AddDays(15),
                 City = "Bangalore",
                 Venue = "Bangalore International Exhibition Centre",
                 Latitude = 13.0280,
@@ -116,7 +116,7 @@ public class DBInitializer
                 Title = "Startup Networking Meetup",
                 Description = "Connect with founders, investors, and entrepreneurs.",
                 CategoryId = categoriesInDb.Single(c => c.Slug == "business").Id,
-                Date = DateTime.UtcNow.AddDays(30),
+                Date = DateTimeOffset.UtcNow.AddDays(30),
                 City = "Hyderabad",
                 Venue = "HITEX Convention Center",
                 Latitude = 17.4474,
@@ -128,7 +128,7 @@ public class DBInitializer
                 Title = "Music Festival",
                 Description = "Live performances from top artists across the country.",
                 CategoryId = categoriesInDb.Single(c => c.Slug == "music").Id,
-                Date = DateTime.UtcNow.AddDays(45),
+                Date = DateTimeOffset.UtcNow.AddDays(45),
                 City = "Mumbai",
                 Venue = "Jio World Garden",
                 Latitude = 19.0596,
@@ -140,7 +140,7 @@ public class DBInitializer
                 Title = "Marathon 2026",
                 Description = "A city-wide marathon open to runners of all levels.",
                 CategoryId = categoriesInDb.Single(c => c.Slug == "sports").Id,
-                Date = DateTime.UtcNow.AddDays(60),
+                Date = DateTimeOffset.UtcNow.AddDays(60),
                 City = "Delhi",
                 Venue = "Jawaharlal Nehru Stadium",
                 Latitude = 28.5823,
@@ -152,7 +152,7 @@ public class DBInitializer
                 Title = "Food Carnival",
                 Description = "Experience cuisines from around the world.",
                 CategoryId = categoriesInDb.Single(c => c.Slug == "other").Id,
-                Date = DateTime.UtcNow.AddDays(75),
+                Date = DateTimeOffset.UtcNow.AddDays(75),
                 City = "Chennai",
                 Venue = "Island Grounds",
                 Latitude = 13.0827,

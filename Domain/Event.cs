@@ -24,7 +24,7 @@ public class Event
     // Navigation property for the Category relationship.
     public Category? CategoryRef { get; set; }
 
-    public DateTime Date { get; set; }
+    public DateTimeOffset Date { get; set; }
     public required string City { get; set; }
     public required string Venue { get; set; }
 
@@ -55,7 +55,7 @@ public class Event
         if (value.HasValue) CategoryId = value.Value;
     }
 
-    public void ChangeDate(DateTime? value)
+    public void ChangeDate(DateTimeOffset? value)
     {
         if (value.HasValue) Date = value.Value;
     }

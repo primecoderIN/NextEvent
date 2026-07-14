@@ -500,6 +500,14 @@ Follow REST conventions:
 - Use `DELETE` for soft delete.
 - Return `ApiResponse<T>` consistently.
 
+### 3.5 Date and Time Convention
+
+We strictly use `DateTimeOffset` over `DateTime` across the entire solution. This architectural decision provides several critical benefits:
+- **Timezone Safety**: `DateTimeOffset` inherently stores the offset from UTC, ensuring that the exact point in time is unambiguous regardless of the server's local time zone or the database server's configuration.
+- **Native SQL Server Mapping**: Entity Framework Core maps `DateTimeOffset` directly to SQL Server's `datetimeoffset` column type. This preserves temporal accuracy natively at the database level without requiring custom string value converters.
+- **Improved Database Indexing**: By storing as native `datetimeoffset` rather than text, SQL Server can build much more efficient indexes and execute range queries (such as finding upcoming events) significantly faster.
+- **Seamless Serialization**: When serialized by `System.Text.Json`, `DateTimeOffset` natively produces standard ISO-8601 strings (e.g., `YYYY-MM-DDTHH:mm:ss.fff+00:00`). The JavaScript `Date` object parses `+00:00` identically to Zulu (`Z`) time, eliminating the need for custom JSON serialization converters on the backend or custom date parsing on the frontend.
+
 ## 4. Complete Database Design
 
 Important: the schema below is target planning for SQL Server. It reuses current Identity and Events concepts. Existing ASP.NET Identity tables should not be duplicated.

@@ -12,7 +12,7 @@ public class CreateEventDto
 
     public Guid CategoryId { get; set; }
 
-    public DateTime Date { get; set; }
+    public DateTimeOffset Date { get; set; }
 
     public string City { get; set; } = string.Empty;
 

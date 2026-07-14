@@ -15,7 +15,7 @@ public class LogoutCommandHandler(UserManager<User> userManager)
         if (user != null)
         {
             user.RefreshToken = null;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow;
+            user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow;
             await userManager.UpdateAsync(user);
         }
 

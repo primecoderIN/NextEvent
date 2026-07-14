@@ -33,7 +33,7 @@ public class CategorySuggestion
     /// <summary>Navigation property for the reviewing admin.</summary>
     public User? ReviewedBy { get; set; }
 
-    public DateTime? ReviewedAt { get; set; }
+    public DateTimeOffset? ReviewedAt { get; set; }
 
     public string? RejectionReason { get; set; }
 
@@ -43,7 +43,7 @@ public class CategorySuggestion
     public Category? ApprovedCategory { get; set; }
 
     // ─── Timestamps ───────────────────────────────────────────────────────────
-    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
 
-    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset UpdatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
 }

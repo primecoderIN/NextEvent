@@ -28,9 +28,9 @@ public class RejectCategoryCommandHandler(
 
         suggestion.Status           = CategorySuggestionStatus.Rejected;
         suggestion.ReviewedById     = reviewerId;
-        suggestion.ReviewedAt       = DateTime.UtcNow;
+        suggestion.ReviewedAt       = DateTimeOffset.UtcNow;
         suggestion.RejectionReason  = request.RejectionReason;
-        suggestion.UpdatedAtUtc     = DateTime.UtcNow;
+        suggestion.UpdatedAtUtc     = DateTimeOffset.UtcNow;
 
         await context.SaveChangesAsync(cancellationToken);
 

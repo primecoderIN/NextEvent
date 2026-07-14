@@ -14,7 +14,7 @@ public class CategorySuggestionDto
     /// <summary>Display name of the user who submitted the suggestion.</summary>
     public string SuggestedByDisplayName { get; set; } = string.Empty;
 
-    public DateTime CreatedAtUtc { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
 
     /// <summary>"Pending", "Approved", or "Rejected"</summary>
     public string Status { get; set; } = "Pending";

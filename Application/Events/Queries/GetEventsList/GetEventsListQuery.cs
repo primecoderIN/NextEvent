@@ -14,6 +14,6 @@ public class GetEventsListQuery : PaginationParams, IRequest<PagedList<EventResp
     public string? Q { get; init; }
     public Guid? CategoryId { get; init; }
     public string? City { get; init; }
-    public DateTime? DateFrom { get; init; }
-    public DateTime? DateTo { get; init; }
+    public DateTimeOffset? DateFrom { get; init; }
+    public DateTimeOffset? DateTo { get; init; }
 }

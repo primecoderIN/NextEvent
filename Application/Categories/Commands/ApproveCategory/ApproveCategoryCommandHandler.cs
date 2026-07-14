@@ -52,8 +52,8 @@ public class ApproveCategoryCommandHandler(
             Slug        = suggestion.Slug,
             Description = suggestion.Description,
             IsActive    = true,
-            CreatedAtUtc = DateTime.UtcNow,
-            UpdatedAtUtc = DateTime.UtcNow,
+            CreatedAtUtc = DateTimeOffset.UtcNow,
+            UpdatedAtUtc = DateTimeOffset.UtcNow,
         };
 
         context.Categories.Add(category);
@@ -61,9 +61,9 @@ public class ApproveCategoryCommandHandler(
         // Update suggestion metadata
         suggestion.Status             = CategorySuggestionStatus.Approved;
         suggestion.ReviewedById       = reviewerId;
-        suggestion.ReviewedAt         = DateTime.UtcNow;
+        suggestion.ReviewedAt         = DateTimeOffset.UtcNow;
         suggestion.ApprovedCategoryId = category.Id;
-        suggestion.UpdatedAtUtc       = DateTime.UtcNow;
+        suggestion.UpdatedAtUtc       = DateTimeOffset.UtcNow;
 
         await context.SaveChangesAsync(cancellationToken);
 

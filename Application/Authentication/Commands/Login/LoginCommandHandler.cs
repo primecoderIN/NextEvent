@@ -21,7 +21,7 @@ public class LoginCommandHandler(UserManager<User> userManager, ITokenService to
 
         var refreshToken = tokenService.GenerateRefreshToken();
         user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
         
         await userManager.UpdateAsync(user);
 
