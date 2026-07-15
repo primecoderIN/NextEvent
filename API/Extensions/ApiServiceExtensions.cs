@@ -50,6 +50,10 @@ public static class ApiServiceExtensions
         // This decouples handlers from HttpContext concerns.
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+        // Register the application-level abstraction for Identity role assignment.
+        // Keeps the Application layer free of direct UserManager dependencies.
+        services.AddScoped<IIdentityService, IdentityService>();
+
         return services;
     }
 }

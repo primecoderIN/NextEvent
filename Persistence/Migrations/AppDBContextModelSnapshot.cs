@@ -63,7 +63,7 @@ namespace Persistence.Migrations
                     b.HasIndex("Slug")
                         .IsUnique();
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Domain.CategorySuggestion", b =>
@@ -126,7 +126,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("SuggestedById");
 
-                    b.ToTable("CategorySuggestions");
+                    b.ToTable("CategorySuggestions", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Event", b =>
@@ -170,7 +170,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Events");
+                    b.ToTable("Events", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Organization", b =>
@@ -272,7 +272,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("VerifiedByUserId");
 
-                    b.ToTable("Organizations");
+                    b.ToTable("Organizations", (string)null);
                 });
 
             modelBuilder.Entity("Domain.OrganizationMember", b =>
@@ -329,7 +329,7 @@ namespace Persistence.Migrations
                         .HasDatabaseName("UX_OrganizationMembers_Active")
                         .HasFilter("[Status] = 1 AND [IsDeleted] = 0");
 
-                    b.ToTable("OrganizationMembers");
+                    b.ToTable("OrganizationMembers", (string)null);
                 });
 
             modelBuilder.Entity("Domain.OrganizationMemberRole", b =>
@@ -344,7 +344,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("OrganizationRoleId");
 
-                    b.ToTable("OrganizationMemberRoles");
+                    b.ToTable("OrganizationMemberRoles", (string)null);
                 });
 
             modelBuilder.Entity("Domain.OrganizationRole", b =>
@@ -397,7 +397,7 @@ namespace Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("UX_OrganizationRoles_OrganizationId_Name");
 
-                    b.ToTable("OrganizationRoles");
+                    b.ToTable("OrganizationRoles", (string)null);
                 });
 
             modelBuilder.Entity("Domain.OrganizationRolePermission", b =>
@@ -412,7 +412,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("OrganizationRolePermissions");
+                    b.ToTable("OrganizationRolePermissions", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Permission", b =>
@@ -445,7 +445,7 @@ namespace Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("UX_Permissions_Code");
 
-                    b.ToTable("Permissions");
+                    b.ToTable("Permissions", (string)null);
                 });
 
             modelBuilder.Entity("Domain.User", b =>

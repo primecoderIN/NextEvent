@@ -36,7 +36,8 @@ public static class ApiRouteConstants
 
     public static class Organizations
     {
-        public const string Base = "api/organizations";
-        public const string Id   = "{id:guid}";
+        public const string Base    = "api/organizations";
+        public const string Id      = "{id:guid}";
+        public const string Approve = "{id:guid}/approve";
     }
 }

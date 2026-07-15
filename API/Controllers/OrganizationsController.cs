@@ -1,5 +1,8 @@
 using API.Common;
+using Application.Organizations.Commands.ApproveOrganization;
 using Application.Organizations.Commands.CreateOrganization;
+using Application.Organizations.DTOs;
+using Application.Organizations.Queries.GetOrganizationById;
 using Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +19,7 @@ public class OrganizationsController : BaseApiController
     /// Five default system roles are seeded automatically.
     /// The organization starts with status <c>pending_verification</c>.
     /// </summary>
-    /// <response code="201">Organization created successfully. Returns the new organization Id.</response>
+    /// <response code="201">Organization created. Returns the new organization Id.</response>
     /// <response code="400">Validation failure (e.g. invalid slug format, missing name).</response>
     /// <response code="401">No valid JWT supplied.</response>
     /// <response code="409">Slug is already taken by another organization.</response>
@@ -42,11 +45,51 @@ public class OrganizationsController : BaseApiController
     }
 
     /// <summary>
-    /// Retrieves an organization by its Id.
-    /// Placeholder — query handler to be implemented in a future slice.
+    /// Retrieves a single organization by its Id.
+    /// Soft-deleted organizations return 404.
     /// </summary>
-    /// <response code="501">Not yet implemented.</response>
+    /// <response code="200">Organization found.</response>
+    /// <response code="404">No organization exists with the given Id.</response>
     [HttpGet(ApiRouteConstants.Organizations.Id)]
-    public IActionResult GetOrganizationById(Guid id) =>
-        StatusCode(StatusCodes.Status501NotImplemented);
+    [ProducesResponseType(typeof(ApiResponse<OrganizationDetailDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<OrganizationDetailDto>>> GetOrganizationById(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var org = await Mediator.Send(
+            new GetOrganizationByIdQuery { Id = id },
+            cancellationToken);
+
+        return OkResponse(org, "Organization retrieved successfully.");
+    }
+
+    /// <summary>
+    /// Approves a pending organization.
+    /// Sets status to <c>active</c> and grants the ASP.NET Identity
+    /// <c>Organizer</c> platform role to the organization's owner.
+    /// Restricted to platform Admins only.
+    /// </summary>
+    /// <response code="200">Organization approved successfully.</response>
+    /// <response code="400">Organization is already active, suspended, or rejected.</response>
+    /// <response code="401">No valid JWT supplied.</response>
+    /// <response code="403">Caller does not hold the Admin platform role.</response>
+    /// <response code="404">No organization exists with the given Id.</response>
+    [Authorize(Roles = RoleConstants.Admin)]
+    [HttpPost(ApiRouteConstants.Organizations.Approve)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<object>>> ApproveOrganization(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        await Mediator.Send(
+            new ApproveOrganizationCommand { OrganizationId = id },
+            cancellationToken);
+
+        return OkResponse<object>(null!, "Organization approved. Owner has been granted the Organizer role.");
+    }
 }
