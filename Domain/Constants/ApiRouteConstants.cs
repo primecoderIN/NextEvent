@@ -41,4 +41,9 @@ public static class ApiRouteConstants
         public const string Approve = "{id:guid}/approve";
         public const string Roles   = "{id:guid}/roles";
     }
+
+    public static class Permissions
+    {
+        public const string Base = "api/permissions";
+    }
 }
