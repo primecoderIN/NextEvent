@@ -372,8 +372,8 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
             b.HasOne(mr => mr.Role)
                 .WithMany(r => r.MemberRoles)
                 .HasForeignKey(mr => mr.OrganizationRoleId)
-                // If a role is deleted, we cascade delete the member assignments
-                .OnDelete(DeleteBehavior.Cascade);
+                // If a role is deleted, we cascade delete the member assignments (changed to Restrict to avoid SQL Server cycle error)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
