@@ -230,6 +230,20 @@ Base URL: `https://localhost:5001/api`
 | `PUT` | `/events/{id}` | `200 OK` | Edit an existing event (partial update supported) |
 | `DELETE` | `/events/{id}` | `200 OK` | Delete an event |
 
+### Organizations
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/organizations` | Create a new organization (seeds default roles) |
+| `GET` | `/organizations/{id}` | Get organization details by ID |
+| `POST` | `/organizations/{id}/approve` | Approve a pending organization (Admin only) |
+| `POST` | `/organizations/{id}/roles` | Create a custom organization role |
+| `PUT` | `/organizations/{id}/roles/{roleId}` | Update an organization role (name, description, permissions) |
+
+### Permissions
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/permissions` | Get catalogue of system permissions available for roles |
+
 ### Categories
 | Method | Endpoint | Description |
 |---|---|---|
@@ -251,8 +265,7 @@ Base URL: `https://localhost:5001/api`
 ### AI
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/ai/generate-description` | GPT-4o-mini generates description from details |
-| `POST` | `/ai/suggest-category` | GPT-4o-mini categorizes event based on title |
+| `POST` | `/ai/generate-description` | Gemini Pro generates description from details |
 
 All URLs are **lowercase**. All responses use **camelCase** JSON property names and the `ApiResponse<T>` envelope.
 
