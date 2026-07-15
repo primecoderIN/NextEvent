@@ -37,6 +37,59 @@ public class DBInitializer
             await userManager.AddToRoleAsync(member, RoleConstants.Member);
         }
 
+        // -----------------------------------------------------------------
+        // Seed organization permissions (idempotent)
+        //
+        // Code is the stable machine key — it is used as the idempotency
+        // anchor. If a row with the same Code already exists we upsert the
+        // human-readable fields (Name, Description, Category) so that display
+        // label changes in PermissionConstants are picked up automatically on
+        // the next app restart, without requiring a new migration.
+        //
+        // We do NOT create organizations here; this table is global and
+        // organization-independent — it is the catalogue every org draws from.
+        // -----------------------------------------------------------------
+        var existingCodes = await context.Permissions
+            .AsNoTracking()
+            .Select(p => p.Code)
+            .ToHashSetAsync();
+
+        bool permissionsChanged = false;
+
+        foreach (var (code, name, description, category) in PermissionConstants.All)
+        {
+            if (!existingCodes.Contains(code))
+            {
+                // New permission — insert it
+                context.Permissions.Add(new Permission
+                {
+                    Code        = code,
+                    Name        = name,
+                    Description = description,
+                    Category    = category
+                });
+                permissionsChanged = true;
+            }
+            else
+            {
+                // Existing permission — upsert display fields so label changes
+                // in PermissionConstants propagate without a manual DB edit.
+                var existing = await context.Permissions.SingleAsync(p => p.Code == code);
+                if (existing.Name != name || existing.Description != description || existing.Category != category)
+                {
+                    existing.Name        = name;
+                    existing.Description = description;
+                    existing.Category    = category;
+                    permissionsChanged   = true;
+                }
+            }
+        }
+
+        if (permissionsChanged)
+        {
+            await context.SaveChangesAsync();
+        }
+
         if (await context.Events.AnyAsync())
         {
             return; // If events already exist, do not seed
