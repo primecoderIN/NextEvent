@@ -39,6 +39,10 @@ public class ExceptionMiddleware(
         {
             await HandleUnauthorizedExceptionAsync(context, ex);
         }
+        catch (ForbiddenAccessException ex)
+        {
+            await HandleForbiddenAccessExceptionAsync(context, ex);
+        }
         catch (Exception ex)
         {
             await HandleUnexpectedExceptionAsync(context, ex);
@@ -54,6 +58,17 @@ public class ExceptionMiddleware(
         UnauthorizedException ex)
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        context.Response.ContentType = "application/json";
+
+        var response = ApiResponse.Fail(ex.Message);
+        await context.Response.WriteAsJsonAsync(response);
+    }
+
+    private static async Task HandleForbiddenAccessExceptionAsync(
+        HttpContext context,
+        ForbiddenAccessException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
         context.Response.ContentType = "application/json";
 
         var response = ApiResponse.Fail(ex.Message);
