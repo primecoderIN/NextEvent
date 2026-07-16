@@ -77,15 +77,15 @@ export function DesktopSidebar() {
         ))}
       </nav>
 
-      {/* Create Event CTA */}
+      {/* CTA */}
       <div className="px-3 mb-3 shrink-0">
         <button
-          onClick={() => navigate(RoutePaths.CreateEvent)}
+          onClick={() => navigate(user?.roles?.includes(Roles.Organizer) ? RoutePaths.CreateEvent : RoutePaths.StartOrganizer)}
           className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
           style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
         >
           <Plus className="h-4 w-4" />
-          {t("createEvent", { ns: "common" })}
+          {user?.roles?.includes(Roles.Organizer) ? t("createEvent", { ns: "common" }) : "Become Organizer"}
         </button>
         {user?.roles?.includes(Roles.Admin) && (
           <button

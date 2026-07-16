@@ -4,6 +4,7 @@ import { RoutePaths } from "@/shared/constants/routePaths"
 
 const CreateEventPage = lazy(() => import("./create-event/page").then((m) => ({ default: m.CreateEventPage })))
 const UpdateEventPage = lazy(() => import("./update-event/page").then((m) => ({ default: m.UpdateEventPage })))
+const StartOrganizerPage = lazy(() => import("./start/page").then((m) => ({ default: m.StartOrganizerPage })))
 
 function PageLoader() {
   return (
@@ -27,6 +28,14 @@ export const organizerRoutes: RouteObject[] = [
     element: (
       <Suspense fallback={<PageLoader />}>
         <UpdateEventPage />
+      </Suspense>
+    )
+  },
+  {
+    path: RoutePaths.StartOrganizer,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <StartOrganizerPage />
       </Suspense>
     )
   }

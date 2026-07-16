@@ -19,6 +19,7 @@ import { BottomSheet } from "@/shared/ui/sheet"
 import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher"
 import { useAuth } from "@/features/auth/context/AuthContext"
 import { RoutePaths } from "@/shared/constants/routePaths"
+import { Roles } from "@/shared/constants/roles"
 
 const navItems = [
   { icon: Home, labelKey: "home", href: "#" },
@@ -62,6 +63,17 @@ export const Navbar = () => {
             <LanguageSwitcher className="mr-2" />
             {user ? (
               <div className="flex items-center gap-4">
+                {user.roles?.includes(Roles.Organizer) ? (
+                  <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.CreateEvent)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
+                    <Plus className="h-4 w-4" />
+                    {t("createEvent", { ns: "common" })}
+                  </Button>
+                ) : (
+                  <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.StartOrganizer)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
+                    <Plus className="h-4 w-4" />
+                    Become Organizer
+                  </Button>
+                )}
                 <span className="text-sm font-semibold">{user.displayName}</span>
                 <Button variant="outline" size="sm" onClick={logout}>
                   {t("logout", { ns: "common" })}
@@ -174,21 +186,26 @@ export const Navbar = () => {
             ))}
           </nav>
 
-          {/* Create Event CTA */}
-          <div className="mt-2 mb-2">
-            <button
-              className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-80"
-              style={{
-                background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
-              }}
-              onClick={() => { setSheetOpen(false); navigate(RoutePaths.CreateEvent) }}
-            >
-              <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
-                <Plus className="h-4 w-4" />
-              </div>
-              {t("createEvent", { ns: "common" })}
-            </button>
-          </div>
+          {/* CTA */}
+          {user && (
+            <div className="mt-2 mb-2">
+              <button
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-80"
+                style={{
+                  background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                }}
+                onClick={() => { 
+                  setSheetOpen(false) 
+                  navigate(user.roles?.includes(Roles.Organizer) ? RoutePaths.CreateEvent : RoutePaths.StartOrganizer) 
+                }}
+              >
+                <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
+                  <Plus className="h-4 w-4" />
+                </div>
+                {user.roles?.includes(Roles.Organizer) ? t("createEvent", { ns: "common" }) : "Become Organizer"}
+              </button>
+            </div>
+          )}
 
           {/* Logout */}
           {user && (

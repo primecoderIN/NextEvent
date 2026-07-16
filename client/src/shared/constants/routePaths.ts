@@ -10,8 +10,13 @@ export const RoutePaths = {
   EventEditLink: (id: string) => `/events/${id}/edit`,
   Profile: "/profile",
 
+  // ─── Organizer ──────────────────────────────────────────────────────────────
+  OrganizerDashboard: "/organizer/dashboard",
+  StartOrganizer: "/organizer/start",
+
   // ─── Admin ──────────────────────────────────────────────────────────────────
   Admin: "/admin",
+
   AdminDashboard: "/admin/dashboard",
   AdminEvents: "/admin/events",
   AdminCategories: "/admin/categories",
