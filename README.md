@@ -235,6 +235,7 @@ Base URL: `https://localhost:5001/api`
 |---|---|---|
 | `POST` | `/organizations` | Create a new organization (seeds default roles) |
 | `GET` | `/organizations/{id}` | Get organization details by ID |
+| `GET` | `/organizations/{slug}` | Get public organization profile + upcoming events (AllowAnonymous) |
 | `POST` | `/organizations/{id}/approve` | Approve a pending organization (Admin only) |
 | `POST` | `/organizations/{id}/roles` | Create a custom organization role |
 | `PUT` | `/organizations/{id}/roles/{roleId}` | Update an organization role (name, description, permissions) |
@@ -311,6 +312,7 @@ This section documents every domain entity, its columns, foreign key relationshi
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
 | `Id` | `uniqueidentifier` | ❌ | PK, client-generated |
+| `OrganizationId` | `uniqueidentifier` | ✅ | FK → `Organizations.Id` (`Restrict`). Required via Validation if created by Organizer |
 | `Title` | `nvarchar` | ❌ | Required |
 | `Description` | `nvarchar` | ❌ | Required |
 | `City` | `nvarchar` | ❌ | |
@@ -319,7 +321,14 @@ This section documents every domain entity, its columns, foreign key relationshi
 | `Date`, `Latitude`, `Longitude`, … | various | varies | |
 
 **Relationships:**
+- `OrganizationId` → `Organizations.Id` — `Restrict` (cannot delete org if it has events)
 - `CategoryId` → `Categories.Id` — `SetNull` (event stays valid if category is deleted)
+
+> **Design Note:** Why is `OrganizationId` nullable in the DB if it is mandatory to provide one when creating an event?
+> 1. **Backward Compatibility:** Older events existed in the database before the Organizations feature was built. A `NOT NULL` constraint would have broken the database migration.
+> 2. **Future Flexibility:** Allows the system administrators to create global, platform-level events that do not belong to any specific third-party organization.
+> The API layer (`CreateEventCommandValidator`) strictly enforces that all user-created events must have an organization.
+
 
 ---
 
@@ -513,6 +522,8 @@ Invited (0) ──► Active (1) ──► Removed (3)
 | `AddOrganizationMember` | 2026-07-13 | `OrganizationMembers` table + filtered unique index |
 | `UpdateToDateTimeOffset` | 2026-07-14 | Migrated DateTime to DateTimeOffset globally |
 | `AddOrganizationRBAC` | 2026-07-14 | `Permissions`, `OrganizationRoles`, and RBAC join tables |
+| `AddOrganizationIdToEvents` | 2026-07-16 | Added `OrganizationId` FK to `Events` table |
+
 
 ---
 

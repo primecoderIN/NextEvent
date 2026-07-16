@@ -53,6 +53,22 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
                 .WithMany()
                 .HasForeignKey(e => e.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // Configure the optional relationship to Organization.
+            // OrganizationId is nullable: existing events without an org remain valid.
+            // Restrict delete: an Organization cannot be deleted while it still owns events —
+            // events must be transferred or removed first (prevents silent data loss).
+            b.Property(e => e.OrganizationId)
+                .IsRequired(false);
+
+            b.HasOne(e => e.Organization)
+                .WithMany()
+                .HasForeignKey(e => e.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Index for fast lookup of all events belonging to an organization.
+            b.HasIndex(e => e.OrganizationId)
+                .HasDatabaseName("IX_Events_OrganizationId");
         });
 
         // Category entity configuration

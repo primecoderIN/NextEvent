@@ -2,6 +2,7 @@ namespace Application.Events.Constants;
 
 public static class ValidationErrors
 {
+    public const string OrganizationRequired = "ORGANIZATION_REQUIRED";
     public const string TitleRequired = "TITLE_REQUIRED";
     public const string DescriptionRequired = "DESCRIPTION_REQUIRED";
     public const string CategoryRequired = "CATEGORY_REQUIRED";

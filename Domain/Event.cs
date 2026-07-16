@@ -24,6 +24,16 @@ public class Event
     // Navigation property for the Category relationship.
     public Category? CategoryRef { get; set; }
 
+    /// <summary>
+    /// Optional FK → Organizations.Id.
+    /// Nullable so existing events without an organization remain valid.
+    /// When set, this event appears on the organization's public profile page.
+    /// </summary>
+    public Guid? OrganizationId { get; set; }
+
+    /// <summary>Navigation property for the owning organization.</summary>
+    public Organization? Organization { get; set; }
+
     public DateTimeOffset Date { get; set; }
     public required string City { get; set; }
     public required string Venue { get; set; }

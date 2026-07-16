@@ -7,6 +7,10 @@ public class CreateEventCommandValidator : AbstractValidator<CreateEventCommand>
 {
     public CreateEventCommandValidator()
     {
+        RuleFor(x => x.Event.OrganizationId)
+            .NotEmpty()
+            .WithMessage(ValidationErrors.OrganizationRequired);
+
         RuleFor(x => x.Event.Title)
             .NotEmpty()
             .WithMessage(ValidationErrors.TitleRequired);

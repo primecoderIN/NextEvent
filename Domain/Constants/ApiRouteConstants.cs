@@ -36,10 +36,11 @@ public static class ApiRouteConstants
 
     public static class Organizations
     {
-        public const string Base    = "api/organizations";
-        public const string Id      = "{id:guid}";
-        public const string Approve = "{id:guid}/approve";
-        public const string Roles   = "{id:guid}/roles";
+        public const string Base      = "api/organizations";
+        public const string Id        = "{id:guid}";
+        public const string Slug      = "{slug}";
+        public const string Approve   = "{id:guid}/approve";
+        public const string Roles     = "{id:guid}/roles";
     }
 
     public static class Permissions

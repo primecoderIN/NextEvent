@@ -3,6 +3,7 @@ using Application.Organizations.Commands.ApproveOrganization;
 using Application.Organizations.Commands.CreateOrganization;
 using Application.Organizations.DTOs;
 using Application.Organizations.Queries.GetOrganizationById;
+using Application.Organizations.Queries.GetOrganizationBySlug;
 using Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -91,5 +92,31 @@ public class OrganizationsController : BaseApiController
             cancellationToken);
 
         return OkResponse<object>(null!, "Organization approved. Owner has been granted the Organizer role.");
+    }
+
+    /// <summary>
+    /// Returns the public profile of an organization identified by its slug,
+    /// along with its upcoming (future, non-cancelled) events.
+    /// No authentication required — this is a public, unauthenticated endpoint.
+    /// Only organizations with status <c>active</c> are returned; pending, suspended,
+    /// and rejected organizations respond with 404 to avoid information leakage.
+    /// </summary>
+    /// <param name="slug">The URL-friendly slug, e.g. "acme-events".</param>
+    /// <param name="cancellationToken">Propagates notification that the operation should be cancelled.</param>
+    /// <response code="200">Public profile found.</response>
+    /// <response code="404">No active organization exists with the given slug.</response>
+    [AllowAnonymous]
+    [HttpGet(ApiRouteConstants.Organizations.Slug)]
+    [ProducesResponseType(typeof(ApiResponse<OrganizationPublicProfileDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<OrganizationPublicProfileDto>>> GetOrganizationBySlug(
+        string slug,
+        CancellationToken cancellationToken)
+    {
+        var profile = await Mediator.Send(
+            new GetOrganizationBySlugQuery { Slug = slug },
+            cancellationToken);
+
+        return OkResponse(profile, "Organization profile retrieved successfully.");
     }
 }

@@ -3,6 +3,11 @@ using System.ComponentModel.DataAnnotations;
 namespace Application.Events.DTOs;
 public class CreateEventDto
 {
+    /// <summary>
+    /// The organization this event is being created under.
+    /// The caller must be an active member with the 'events.create' permission.
+    /// </summary>
+    public Guid OrganizationId { get; set; }
 
     public string Title { get; set; } = string.Empty;
 
@@ -22,4 +27,4 @@ public class CreateEventDto
     public double Latitude { get; set; }
 
     public double Longitude { get; set; }
-}
+}
