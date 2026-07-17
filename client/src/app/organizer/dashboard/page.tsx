@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import { useMyOrganization } from "@/shared/hooks/useMyOrganization"
 import { useEvents } from "@/shared/hooks/useEvents"
 import { Building2, CalendarPlus, Settings, LayoutDashboard, MapPin, CalendarDays, ExternalLink, Shield } from "lucide-react"
