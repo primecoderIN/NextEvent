@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useMyOrganization } from "@/shared/hooks/useMyOrganization"
-import { useEvents } from "@/shared/hooks/useEvents"
+import { useMyEvents } from "@/shared/hooks/useMyEvents"
 import { Building2, CalendarPlus, Settings, LayoutDashboard, MapPin, CalendarDays, ExternalLink, Shield } from "lucide-react"
 import { Button } from "@/shared/ui/button"
 import { Badge } from "@/shared/ui/badge"
@@ -11,7 +11,7 @@ export function OrganizerDashboardPage() {
   const { data: organization, isLoading: isLoadingOrg, isError: isErrorOrg } = useMyOrganization()
   
   // We only fetch events if we know the organization ID
-  const { events, loading: isLoadingEvents } = useEvents(
+  const { events, loading: isLoadingEvents } = useMyEvents(
     { organizationId: organization?.id },
     { enabled: !!organization?.id }
   )

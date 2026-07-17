@@ -30,7 +30,7 @@ const fetchAdminEvents = async ({
   if (categoryId) params.set("categoryId", categoryId)
 
   const res = await axiosHttpAgent.get<ApiResponse<PagedList<Event>>>(
-    `/events?${params.toString()}`
+    `/events/admin?${params.toString()}`
   )
   return res.data.data!
 }

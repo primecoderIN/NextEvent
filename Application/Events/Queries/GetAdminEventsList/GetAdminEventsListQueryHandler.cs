@@ -3,90 +3,57 @@ using Application.Core.Pagination;
 using Application.Events.DTOs;
 using Dapper;
 using MediatR;
-// using Microsoft.EntityFrameworkCore;
 
-using Domain.Constants;
+namespace Application.Events.Queries.GetAdminEventsList;
 
-namespace Application.Events.Queries.GetEventsList;
-
-/// <summary>
-/// Handles the GetEventsListQuery for public events.
-/// Only returns non-cancelled events.
-/// </summary>
-public class GetEventsListQueryHandler(ISqlConnectionFactory connectionFactory) : IRequestHandler<GetEventsListQuery, PagedList<EventResponseDto>>
+public class GetAdminEventsListQueryHandler(ISqlConnectionFactory connectionFactory) : IRequestHandler<GetAdminEventsListQuery, PagedList<EventResponseDto>>
 {
-    public async Task<PagedList<EventResponseDto>> Handle(GetEventsListQuery request, CancellationToken cancellationToken)
+    public async Task<PagedList<EventResponseDto>> Handle(GetAdminEventsListQuery request, CancellationToken cancellationToken)
     {
         using var connection = connectionFactory.CreateConnection();
         
         var offset = (request.PageNumber - 1) * request.PageSize;
-        
-        // Initialize a list to hold all the dynamic WHERE conditions.
-        // We only append to this list if the client provided a specific filter parameter.
         var whereClauses = new List<string>();
-        
-        // Initialize Dapper's DynamicParameters to securely map query arguments
-        // and prevent SQL injection vulnerabilities.
         var parameters = new DynamicParameters();
         
-        // Always include Offset and PageSize for the pagination FETCH logic
         parameters.Add("Offset", offset);
         parameters.Add("PageSize", request.PageSize);
 
-        // General Search (Q): If the user provides a search string, 
-        // filter events where the title or description contains the string.
         if (!string.IsNullOrWhiteSpace(request.Q))
         {
             whereClauses.Add("(e.Title LIKE @Q OR e.Description LIKE @Q)");
             parameters.Add("Q", $"%{request.Q}%");
         }
-        
-        // Exact match on CategoryId if provided
         if (request.CategoryId.HasValue)
         {
             whereClauses.Add("e.CategoryId = @CategoryId");
             parameters.Add("CategoryId", request.CategoryId.Value);
         }
-        
-        // Partial text match on City name if provided
         if (!string.IsNullOrWhiteSpace(request.City))
         {
             whereClauses.Add("e.City LIKE @City");
             parameters.Add("City", $"%{request.City}%");
         }
-        
-        // DateRange logic: Only include events occurring ON or AFTER DateFrom
         if (request.DateFrom.HasValue)
         {
             whereClauses.Add("e.Date >= @DateFrom");
             parameters.Add("DateFrom", request.DateFrom.Value);
         }
-        
-        // DateRange logic: Only include events occurring ON or BEFORE DateTo
         if (request.DateTo.HasValue)
         {
             whereClauses.Add("e.Date <= @DateTo");
             parameters.Add("DateTo", request.DateTo.Value);
         }
-
-        // Exact match on OrganizationId if provided
         if (request.OrganizationId.HasValue)
         {
             whereClauses.Add("e.OrganizationId = @OrganizationId");
             parameters.Add("OrganizationId", request.OrganizationId.Value);
         }
 
-        // Public events must not be cancelled
-        whereClauses.Add("e.IsCancelled = 0");
+        // Admin sees all events, so no IsCancelled filter is applied.
 
-        // Dynamically build the final WHERE string. 
-        // If there are no clauses, it stays empty (meaning return all events).
-        // Otherwise, it concatenates them with 'AND' so all conditions must be met.
         var whereSql = whereClauses.Count > 0 ? "WHERE " + string.Join(" AND ", whereClauses) : "";
 
-        // Execute two queries in a single database roundtrip using Dapper's QueryMultiple
-        // 1. Gets the absolute total count of events in the database (for TotalPages calculation)
-        // 2. Gets only the specific subset of events for the current page (using OFFSET/FETCH)
         var sql = $@"
             SELECT COUNT(e.Id) FROM Events e {whereSql};
 
@@ -109,8 +76,6 @@ public class GetEventsListQueryHandler(ISqlConnectionFactory connectionFactory) 
             FETCH NEXT @PageSize ROWS ONLY;";
             
         using var multi = await connection.QueryMultipleAsync(sql, parameters);
-        
-        // The results must be read in the exact order they were executed in the SQL string
         var totalCount = await multi.ReadFirstAsync<int>();
         var events = (await multi.ReadAsync<EventResponseDto>()).ToList();
         
