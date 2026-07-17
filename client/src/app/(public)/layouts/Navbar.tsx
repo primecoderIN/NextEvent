@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import {
   Menu,
@@ -22,7 +22,7 @@ import { RoutePaths } from "@/shared/constants/routePaths"
 import { Roles } from "@/shared/constants/roles"
 
 const navItems = [
-  { icon: Home, labelKey: "home", href: "#" },
+  { icon: Home, labelKey: "home", href: RoutePaths.Home },
   { icon: Search, labelKey: "exploreEvents", href: "#" },
   { icon: Ticket, labelKey: "myTickets", href: "#" },
   { icon: Heart, labelKey: "following", href: "#" },
@@ -48,13 +48,13 @@ export const Navbar = () => {
           {/* Desktop nav links */}
           <nav className="hidden md:flex items-center gap-6 flex-1">
             {navItems.map(({ labelKey, href }) => (
-              <a
+              <Link
                 key={labelKey}
-                href={href}
+                to={href}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 {t(labelKey, { ns: "nav" })}
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -64,10 +64,15 @@ export const Navbar = () => {
             {user ? (
               <div className="flex items-center gap-4">
                 {user.roles?.includes(Roles.Organizer) ? (
-                  <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.CreateEvent)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
-                    <Plus className="h-4 w-4" />
-                    {t("createEvent", { ns: "common" })}
-                  </Button>
+                  <>
+                    <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.OrganizerDashboard)} className="gap-2 bg-primary/10 text-primary hover:bg-primary/20 border-0">
+                      Organizer Dashboard
+                    </Button>
+                    <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.CreateEvent)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
+                      <Plus className="h-4 w-4" />
+                      {t("createEvent", { ns: "common" })}
+                    </Button>
+                  </>
                 ) : (
                   <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.StartOrganizer)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
                     <Plus className="h-4 w-4" />
@@ -168,9 +173,9 @@ export const Navbar = () => {
           {/* Primary nav */}
           <nav className="mt-2 flex flex-col">
             {navItems.map(({ icon: Icon, labelKey, href }) => (
-              <a
+              <Link
                 key={labelKey}
-                href={href}
+                to={href}
                 onClick={() => setSheetOpen(false)}
                 className="flex items-center justify-between px-2 py-3.5 rounded-xl text-sm font-medium text-foreground hover:bg-muted transition-colors group"
               >
@@ -181,13 +186,27 @@ export const Navbar = () => {
                   {t(labelKey, { ns: "nav" })}
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-              </a>
+              </Link>
             ))}
           </nav>
 
           {/* CTA */}
           {user && (
-            <div className="mt-2 mb-2">
+            <div className="mt-2 mb-2 flex flex-col gap-2">
+              {user.roles?.includes(Roles.Organizer) && (
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-primary bg-primary/10 transition-colors hover:bg-primary/20 active:bg-primary/30"
+                  onClick={() => { 
+                    setSheetOpen(false) 
+                    navigate(RoutePaths.OrganizerDashboard) 
+                  }}
+                >
+                  <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <CalendarDays className="h-4 w-4" />
+                  </div>
+                  Organizer Dashboard
+                </button>
+              )}
               <button
                 className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-80"
                 style={{

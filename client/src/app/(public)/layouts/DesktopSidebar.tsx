@@ -14,7 +14,7 @@ import {
   User,
   ChevronDown,
 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher"
 import { useAuth } from "@/features/auth/context/AuthContext"
@@ -22,7 +22,7 @@ import { Roles } from "@/shared/constants/roles"
 import { RoutePaths } from "@/shared/constants/routePaths"
 
 const navItems = [
-  { icon: Home, labelKey: "home", href: "#", active: true },
+  { icon: Home, labelKey: "home", href: RoutePaths.Home, active: true },
   { icon: Search, labelKey: "exploreEvents", href: "#" },
   { icon: Ticket, labelKey: "myTickets", href: "#" },
   { icon: Heart, labelKey: "following", href: "#" },
@@ -62,9 +62,9 @@ export function DesktopSidebar() {
       {/* Primary nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => (
-          <a
+          <Link
             key={item.labelKey}
-            href={item.href}
+            to={item.href}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
               item.active
                 ? "bg-primary/10 text-primary"
@@ -73,7 +73,7 @@ export function DesktopSidebar() {
           >
             <item.icon className="h-5 w-5 shrink-0" />
             {t(item.labelKey, { ns: "nav" })}
-          </a>
+          </Link>
         ))}
       </nav>
 
@@ -87,6 +87,17 @@ export function DesktopSidebar() {
           <Plus className="h-4 w-4" />
           {user?.roles?.includes(Roles.Organizer) ? t("createEvent", { ns: "common" }) : "Become Organizer"}
         </button>
+        
+        {user?.roles?.includes(Roles.Organizer) && (
+          <button
+            onClick={() => navigate(RoutePaths.OrganizerDashboard)}
+            className="w-full mt-2 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition-colors"
+          >
+            <CalendarDays className="h-4 w-4" />
+            Organizer Dashboard
+          </button>
+        )}
+
         {user?.roles?.includes(Roles.Admin) && (
           <button
             onClick={() => navigate(RoutePaths.AdminCategoryNew)}
@@ -95,7 +106,6 @@ export function DesktopSidebar() {
             {t("createCategory", { ns: "admin" })}
           </button>
         )}
-
       </div>
 
       {/* Secondary nav */}

@@ -1,9 +1,22 @@
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { axiosHttpAgent } from "@/shared/lib/axios"
 import type { ApiResponse } from "@/types/ApiResponse"
-import type { CreateOrganizationRoleDto, UpdateOrganizationRoleDto } from "@/types/Organization"
+import type { CreateOrganizationRoleDto, UpdateOrganizationRoleDto, OrganizationRole } from "@/types/Organization"
 import { OrganizationApiRoutes } from "@/shared/constants/apiRoutes"
 import { type AxiosError } from "axios"
+
+export const useOrganizationRolesList = (id: string) => {
+  return useQuery<OrganizationRole[], AxiosError<ApiResponse<unknown>>>({
+    queryKey: ["organization-roles", id],
+    queryFn: async () => {
+      const res = await axiosHttpAgent.get<ApiResponse<OrganizationRole[]>>(
+        OrganizationApiRoutes.Roles(id)
+      )
+      return res.data.data
+    },
+    enabled: !!id,
+  })
+}
 
 export const useCreateOrganizationRole = () => {
   return useMutation<

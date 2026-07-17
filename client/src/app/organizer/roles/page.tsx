@@ -2,14 +2,16 @@ import { useState } from "react"
 import { useParams } from "react-router-dom"
 import { Shield, Plus, Key, Pencil, Save, X } from "lucide-react"
 import { usePermissions } from "@/shared/hooks/usePermissions"
-import { useCreateOrganizationRole, useUpdateOrganizationRole } from "@/shared/hooks/useOrganizationRoles"
+import { useCreateOrganizationRole, useUpdateOrganizationRole, useOrganizationRolesList } from "@/shared/hooks/useOrganizationRoles"
 import { Button } from "@/shared/ui/button"
+import { Badge } from "@/shared/ui/badge"
 import { toast } from "sonner"
 import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
 
 export function OrganizerManageRolesPage() {
   const { id } = useParams<{ id: string }>()
+  const { data: roles, isLoading: isLoadingRoles, refetch: refetchRoles } = useOrganizationRolesList(id || "")
   const { data: permissions, isLoading: isLoadingPermissions } = usePermissions()
   const createRoleMutation = useCreateOrganizationRole()
   const updateRoleMutation = useUpdateOrganizationRole()
@@ -45,6 +47,7 @@ export function OrganizerManageRolesPage() {
         }
       })
       toast.success("Role created successfully")
+      refetchRoles()
       setIsCreating(false)
       setRoleName("")
       setRoleDesc("")
@@ -147,20 +150,59 @@ export function OrganizerManageRolesPage() {
         </div>
       )}
 
-      {/* Typically here we would list existing custom roles, 
-          but there is no GET /api/organizations/{id}/roles endpoint in the backend right now 
-          to retrieve custom roles list. We can just show a placeholder or notice. */}
-      
       {!isCreating && (
-        <div className="bg-muted/30 border rounded-xl p-8 text-center mt-6">
-          <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-          <h3 className="text-lg font-medium mb-2">Custom Roles</h3>
-          <p className="text-muted-foreground max-w-md mx-auto mb-6 text-sm">
-            You can create custom roles with specific permissions for your organization members.
-          </p>
-          <Button onClick={() => setIsCreating(true)} variant="outline">
-            Create your first custom role
-          </Button>
+        <div className="space-y-6 mt-6">
+          <h2 className="text-xl font-semibold tracking-tight">Existing Roles</h2>
+          
+          {isLoadingRoles ? (
+            <div className="flex justify-center py-8">
+              <div className="h-6 w-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            </div>
+          ) : roles && roles.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4">
+              {roles.map((role) => (
+                <div 
+                  key={role.id} 
+                  className="bg-card rounded-xl border p-5 shadow-sm flex flex-col md:flex-row md:items-start justify-between gap-4"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-lg leading-none">{role.name}</h3>
+                      {role.isSystemRole ? (
+                        <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10">System Role</Badge>
+                      ) : (
+                        <Badge variant="outline">Custom Role</Badge>
+                      )}
+                    </div>
+                    {role.description && (
+                      <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl">{role.description}</p>
+                    )}
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {role.permissions.map((pCode) => (
+                        <span 
+                          key={pCode} 
+                          className="text-[11px] bg-muted px-2 py-0.5 rounded-md font-mono text-muted-foreground border border-border/30"
+                        >
+                          {pCode}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-muted/30 border rounded-xl p-8 text-center">
+              <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium mb-2">No Roles Found</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6 text-sm">
+                There are no roles configured for this organization.
+              </p>
+              <Button onClick={() => setIsCreating(true)} variant="outline">
+                Create custom role
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

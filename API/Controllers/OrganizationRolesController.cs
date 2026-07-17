@@ -1,6 +1,8 @@
 using API.Common;
 using Application.Organizations.Commands.CreateOrganizationRole;
 using Application.Organizations.Commands.UpdateOrganizationRole;
+using Application.Organizations.DTOs;
+using Application.Organizations.Queries.GetOrganizationRoles;
 using Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +12,27 @@ namespace API.Controllers;
 [Route(ApiRouteConstants.Organizations.Base)]
 public class OrganizationRolesController : BaseApiController
 {
+    /// <summary>
+    /// Retrieves all roles for the organization.
+    /// Requires the user to be authenticated.
+    /// </summary>
+    /// <response code="200">Returns list of organization roles.</response>
+    /// <response code="401">No valid JWT supplied.</response>
+    [Authorize]
+    [HttpGet(ApiRouteConstants.Organizations.Roles)]
+    [ProducesResponseType(typeof(ApiResponse<List<OrganizationRoleDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<ApiResponse<List<OrganizationRoleDto>>>> GetRoles(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(
+            new GetOrganizationRolesListQuery { OrganizationId = id },
+            cancellationToken);
+
+        return OkResponse(result, "Roles retrieved successfully.");
+    }
+
     /// <summary>
     /// Creates a custom role within the organization.
     /// Requires the user to have the 'roles.manage' permission.

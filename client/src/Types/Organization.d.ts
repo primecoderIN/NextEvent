@@ -61,3 +61,11 @@ export type UpdateOrganizationRoleDto = {
   description?: string | null;
   permissions: string[];
 }
+
+export type OrganizationRole = {
+  id: string;
+  name: string;
+  description: string | null;
+  isSystemRole: boolean;
+  permissions: string[];
+}
