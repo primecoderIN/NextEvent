@@ -100,13 +100,17 @@ public class GetEventsListQueryHandler(ISqlConnectionFactory connectionFactory) 
                    e.Venue,
                    e.IsCancelled,
                    e.Latitude,
-                   e.Longitude
+                   e.Longitude,
+                   o.Id AS OrganizationId,
+                   o.Name AS OrganizationName,
+                   o.Slug AS OrganizationSlug,
+                   o.LogoUrl AS OrganizationLogoUrl
             FROM Events e
             LEFT JOIN Categories c ON e.CategoryId = c.Id
+            LEFT JOIN Organizations o ON e.OrganizationId = o.Id
             {whereSql}
-            ORDER BY e.Date DESC
-            OFFSET @Offset ROWS 
-            FETCH NEXT @PageSize ROWS ONLY;";
+            ORDER BY e.Date ASC
+            OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
             
         using var multi = await connection.QueryMultipleAsync(sql, parameters);
         

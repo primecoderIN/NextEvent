@@ -10,4 +10,8 @@ export type Event = {
   isCancelled: boolean;
   latitude: number;
   longitude: number;
+  organizationId?: string | null;
+  organizationName?: string | null;
+  organizationSlug?: string | null;
+  organizationLogoUrl?: string | null;
 }

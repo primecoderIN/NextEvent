@@ -13,4 +13,10 @@ public class EventResponseDto
     public bool IsCancelled { get; set; }
     public double Latitude { get; set; }
     public double Longitude { get; set; }
+    
+    // Organization Details
+    public Guid? OrganizationId { get; set; }
+    public string? OrganizationName { get; set; }
+    public string? OrganizationSlug { get; set; }
+    public string? OrganizationLogoUrl { get; set; }
 }

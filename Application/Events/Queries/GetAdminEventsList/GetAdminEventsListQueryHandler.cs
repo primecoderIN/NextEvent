@@ -67,9 +67,14 @@ public class GetAdminEventsListQueryHandler(ISqlConnectionFactory connectionFact
                    e.Venue,
                    e.IsCancelled,
                    e.Latitude,
-                   e.Longitude
+                   e.Longitude,
+                   o.Id AS OrganizationId,
+                   o.Name AS OrganizationName,
+                   o.Slug AS OrganizationSlug,
+                   o.LogoUrl AS OrganizationLogoUrl
             FROM Events e
             LEFT JOIN Categories c ON e.CategoryId = c.Id
+            LEFT JOIN Organizations o ON e.OrganizationId = o.Id
             {whereSql}
             ORDER BY e.Date DESC
             OFFSET @Offset ROWS 
