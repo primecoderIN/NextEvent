@@ -54,6 +54,8 @@ export function LoginPage() {
       // Other users go to the page they were trying to reach, or home.
       if (loggedInUser.roles?.includes(Roles.Admin)) {
         navigate(RoutePaths.AdminDashboard, { replace: true })
+      } else if (loggedInUser.roles?.includes(Roles.Organizer)) {
+        navigate(RoutePaths.OrganizerDashboard, { replace: true })
       } else {
         const from = (location.state as { from?: Location })?.from?.pathname ?? RoutePaths.Home
         navigate(from, { replace: true })
