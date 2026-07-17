@@ -16,6 +16,11 @@ public interface ICurrentUserService
     /// Returns null if no user is authenticated.
     /// </returns>
     string? GetCurrentUserId();
+
+    /// <summary>
+    /// Checks if the current authenticated user has the specified role.
+    /// </summary>
+    bool HasRole(string role);
 }
 
 // The application layer shouldn't know how to get the user ID (HttpContext, claims, headers, etc.)

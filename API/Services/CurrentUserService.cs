@@ -26,4 +26,10 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
         // If a custom user ID claim is used, update this accordingly.
         return user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
+
+    public bool HasRole(string role)
+    {
+        var user = httpContextAccessor.HttpContext?.User;
+        return user?.IsInRole(role) == true;
+    }
 }

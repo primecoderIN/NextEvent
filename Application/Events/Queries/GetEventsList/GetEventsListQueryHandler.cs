@@ -5,6 +5,8 @@ using Dapper;
 using MediatR;
 // using Microsoft.EntityFrameworkCore;
 
+using Domain.Constants;
+
 namespace Application.Events.Queries.GetEventsList;
 
 /// <summary>
@@ -12,7 +14,9 @@ namespace Application.Events.Queries.GetEventsList;
 /// Belongs to the Application layer, containing business logic and orchestrating data retrieval
 /// via the ISqlConnectionFactory interface to avoid Persistence coupling and use Dapper for faster queries.
 /// </summary>
-public class GetEventsListQueryHandler(ISqlConnectionFactory connectionFactory) : IRequestHandler<GetEventsListQuery, PagedList<EventResponseDto>>
+public class GetEventsListQueryHandler(
+    ISqlConnectionFactory connectionFactory,
+    ICurrentUserService currentUserService) : IRequestHandler<GetEventsListQuery, PagedList<EventResponseDto>>
 {
     public async Task<PagedList<EventResponseDto>> Handle(GetEventsListQuery request, CancellationToken cancellationToken)
     {
@@ -73,6 +77,26 @@ public class GetEventsListQueryHandler(ISqlConnectionFactory connectionFactory) 
         {
             whereClauses.Add("e.OrganizationId = @OrganizationId");
             parameters.Add("OrganizationId", request.OrganizationId.Value);
+        }
+
+        // Role-based visibility logic
+        if (!currentUserService.HasRole(RoleConstants.Admin))
+        {
+            if (currentUserService.HasRole(RoleConstants.Organizer))
+            {
+                var userId = currentUserService.GetCurrentUserId();
+                whereClauses.Add(@"(e.IsCancelled = 0 OR e.OrganizationId IN (
+                    SELECT o.Id FROM Organizations o WHERE o.OwnerUserId = @CurrentUserId
+                    UNION
+                    SELECT om.OrganizationId FROM OrganizationMembers om WHERE om.UserId = @CurrentUserId
+                ))");
+                parameters.Add("CurrentUserId", userId);
+            }
+            else
+            {
+                // Public or Members only see non-cancelled events
+                whereClauses.Add("e.IsCancelled = 0");
+            }
         }
 
         // Dynamically build the final WHERE string. 
