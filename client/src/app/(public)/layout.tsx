@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { Navigate, Outlet, useSearchParams } from "react-router-dom"
+import { Navigate, Outlet, useSearchParams, useLocation } from "react-router-dom"
 import { Navbar } from "@/app/(public)/layouts/Navbar"
 import { DesktopSidebar } from "@/app/(public)/layouts/DesktopSidebar"
 import { RightSidebar } from "@/app/(public)/layouts/RightSidebar"
@@ -27,7 +27,10 @@ export function PublicLayout() {
     dateTo: searchParams.get("dateTo")
   }), [searchParams])
 
-  const { events } = useEvents(filters)
+  const location = useLocation()
+  const isOrganizerRoute = location.pathname.startsWith("/organizer")
+
+  const { events } = useEvents(filters, { enabled: !isOrganizerRoute })
   const { user, loading } = useAuth()
 
   // While auth is resolving, keep layout stable to avoid shift
@@ -40,7 +43,7 @@ export function PublicLayout() {
         {isAuthenticated && <DesktopSidebar />}
 
         {/* Right sidebar — shown for all users on xl+ */}
-        <RightSidebar events={events} />
+        {!isOrganizerRoute && <RightSidebar events={events} />}
 
         {/* Main content area
             - Authenticated: offset by left sidebar (lg:ml-56) + right sidebar (xl:mr-80)
@@ -48,7 +51,7 @@ export function PublicLayout() {
         <div
           className={`${
             isAuthenticated ? "lg:ml-56" : ""
-          } xl:mr-80 flex flex-col min-h-screen`}
+          } ${!isOrganizerRoute ? "xl:mr-80" : ""} flex flex-col min-h-screen`}
         >
           {/* Top navbar:
               - Authenticated: mobile only (desktop uses DesktopSidebar)
