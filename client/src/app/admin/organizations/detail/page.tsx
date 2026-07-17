@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { useOrganizationDetail } from "@/shared/hooks/useOrganizationDetail"
 import { Building2, ArrowLeft } from "lucide-react"
 import { OrganizationDetailsView } from "@/features/organizations/components/OrganizationDetailsView"
