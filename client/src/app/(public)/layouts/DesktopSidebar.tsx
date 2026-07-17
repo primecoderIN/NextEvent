@@ -119,7 +119,6 @@ export function DesktopSidebar() {
 
       {/* User Auth Section */}
       <div className="px-3 py-3 border-t border-border/40 shrink-0">
-        {/* Mock auth state - set to false to show Login/Signup */}
         {user ? (
           <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted cursor-pointer transition-colors">
             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">

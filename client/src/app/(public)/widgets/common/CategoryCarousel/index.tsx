@@ -1,17 +1,50 @@
 import { useTranslation } from "react-i18next"
-import { CATEGORIES } from "@/app/(public)/widgets/common/helpers"
+import { useCategories } from "@/shared/hooks/useCategories"
+import {
+  LayoutGrid,
+  Music,
+  Wine,
+  GraduationCap,
+  Dumbbell,
+  Briefcase,
+  Tag
+} from "lucide-react"
 
 interface CategoryCarouselProps {
   active: string
   onChange: (cat: string) => void
 }
 
+const iconMap: Record<string, any> = {
+  music: Music,
+  nightlife: Wine,
+  workshop: GraduationCap,
+  workshops: GraduationCap,
+  sports: Dumbbell,
+  business: Briefcase,
+}
+
 export function CategoryCarousel({ active, onChange }: CategoryCarouselProps) {
   const { t } = useTranslation("home")
+  const { data: apiCategories, isLoading } = useCategories()
+
+  if (isLoading) {
+    return <div className="h-20 flex items-center justify-center animate-pulse bg-muted rounded-2xl w-full" />
+  }
+
+  // Combine "All" category with API categories
+  const categories = [
+    { id: "all", name: t("categories.all"), icon: LayoutGrid },
+    ...(apiCategories?.map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      icon: iconMap[cat.slug?.toLowerCase()] || Tag
+    })) || [])
+  ]
 
   return (
     <div className="flex gap-1 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-      {CATEGORIES.map((cat) => {
+      {categories.map((cat) => {
         const isActive = active === cat.id
         return (
           <button
@@ -24,7 +57,7 @@ export function CategoryCarousel({ active, onChange }: CategoryCarouselProps) {
             }`}
           >
             <cat.icon className="h-5 w-5" />
-            <span className="text-xs font-medium whitespace-nowrap">{t(`categories.${cat.id}`)}</span>
+            <span className="text-xs font-medium whitespace-nowrap">{cat.name}</span>
           </button>
         )
       })}

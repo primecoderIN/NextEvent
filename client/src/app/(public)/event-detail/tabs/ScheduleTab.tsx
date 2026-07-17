@@ -1,4 +1,4 @@
-import { addDays, format, parseISO } from "date-fns"
+import { format, parseISO } from "date-fns"
 import type { Event } from "@/types/Event"
 import { CalendarDays } from "lucide-react"
 
@@ -6,39 +6,17 @@ interface ScheduleTabProps {
   event: Event
 }
 
-/** Generate mock schedule items derived from the single event date */
 function buildSchedule(event: Event) {
-
-  const slots = [
-    {
-      time: "4:00 PM – 6:00 PM",
-      label: "Doors Open & Registration",
-      desc: "Welcome drinks and networking",
-    },
-    {
-      time: "6:00 PM – 8:00 PM",
-      label: "Opening Acts",
-      desc: "Warm-up performances & entertainment",
-    },
-    {
-      time: "8:00 PM – 11:00 PM",
-      label: "Main Event",
-      desc: "Headline performances",
-    },
-    {
-      time: "11:00 PM – 12:00 AM",
-      label: "Closing Ceremony",
-      desc: "Closing acts and wrap-up",
-    },
-  ]
-
-  // Parse the event's UTC date once; addDays handles month/year boundaries correctly.
   const base = parseISO(event.date)
-
-  return slots.map((slot, i) => ({
-    ...slot,
-    date: format(addDays(base, i), "d MMMM yyyy"),
-  }))
+  
+  return [
+    {
+      time: format(base, "h:mm a"),
+      label: "Main Event Starts",
+      desc: "Event begins",
+      date: format(base, "d MMMM yyyy")
+    }
+  ]
 }
 
 export function ScheduleTab({ event }: ScheduleTabProps) {

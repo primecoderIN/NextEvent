@@ -111,7 +111,6 @@ export const Navbar = () => {
         <div className="px-4 pb-8 max-h-[85dvh] overflow-y-auto">
           {/* User Auth Section */}
           <div className="py-4 border-b border-border/40">
-            {/* Mock auth state - set to false to show Login/Signup */}
             {user ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

@@ -1,12 +1,3 @@
-import {
-  LayoutGrid,
-  Music,
-  Wine,
-  GraduationCap,
-  Dumbbell,
-  Briefcase,
-  MoreHorizontal,
-} from "lucide-react"
 import { format, parseISO, getHours } from "date-fns"
 
 // ─── Date formatting ───────────────────────────────────
@@ -54,15 +45,4 @@ export function getGreeting(): string {
   return "greeting.evening"
 }
 
-// ─── Category list ─────────────────────────────────────
-// Labels are NOT stored here — components call t(`categories.${id}`) so that
-// the display text is always taken from the active i18n namespace.
-export const CATEGORIES = [
-  { id: "all",       icon: LayoutGrid },
-  { id: "music",     icon: Music },
-  { id: "nightlife", icon: Wine },
-  { id: "workshop",  icon: GraduationCap },
-  { id: "sports",    icon: Dumbbell },
-  { id: "business",  icon: Briefcase },
-  { id: "more",      icon: MoreHorizontal },
-]
+// Categories are now fetched from the API and mapped in the UI components directly.

@@ -7,12 +7,7 @@ import { Button } from "@/shared/ui/button"
 import { useNavigate } from "react-router-dom"
 import { RoutePaths } from "@/shared/constants/routePaths"
 
-const TOP_ORGANIZERS = [
-  { name: "BookMyShow Live", followers: "12.4K", initials: "BL", color: "bg-red-500" },
-  { name: "Paytm Insider", followers: "8.7K", initials: "PI", color: "bg-blue-600" },
-  { name: "Zomaland", followers: "6.1K", initials: "ZL", color: "bg-orange-500" },
-  { name: "District by Zomato", followers: "5.3K", initials: "DZ", color: "bg-red-700" },
-]
+
 
 function getThumb(category: string, index: number): string {
   return `https://picsum.photos/seed/${category}-${index}/120/120`
@@ -79,35 +74,7 @@ export function RightSidebar({ events = [] }: { events: Event[] }) {
           </div>
         </section>
 
-        {/* ── Top Organizers ── */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold">{t("topOrganizers")}</h3>
-            <a href="#" className="text-xs text-primary font-medium hover:underline">
-              {t("viewAll")}
-            </a>
-          </div>
-          <div className="space-y-3">
-            {TOP_ORGANIZERS.map((org) => (
-              <div key={org.name} className="flex items-center gap-3">
-                <div
-                  className={`h-10 w-10 rounded-full ${org.color} flex items-center justify-center text-white text-xs font-bold shrink-0`}
-                >
-                  {org.initials}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium leading-tight truncate">{org.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t("followers", { count: org.followers })}
-                  </p>
-                </div>
-                <Button variant="outline" size="sm" className="shrink-0 text-primary border-primary/50 hover:bg-primary/5">
-                  {t("follow")}
-                </Button>
-              </div>
-            ))}
-          </div>
-        </section>
+
 
         {/* ── Create Event CTA ── */}
         <section className="rounded-2xl bg-primary/5 border border-primary/20 p-4">

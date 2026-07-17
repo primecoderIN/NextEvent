@@ -5,7 +5,7 @@ interface StatCardProps {
   iconBg: string
   label: string
   value: string | number
-  subtext: React.ReactNode
+  subtext?: React.ReactNode
 }
 
 export function StatCard({ icon, iconBg, label, value, subtext }: StatCardProps) {

@@ -2,24 +2,6 @@
 import { z } from "zod"
 import type { TFunction } from "i18next"
 
-export const CATEGORIES = [
-  "Music",
-  "Technology",
-  "Sports",
-  "Art",
-  "Food & Drink",
-  "Business",
-  "Health",
-  "Education",
-  "Networking",
-  "Comedy",
-  "Theatre",
-  "Film",
-  "Gaming",
-  "Outdoor",
-  "Other",
-] as const
-
 // We define the base schema without messages to infer the type safely
 export const baseEventFormSchema = z.object({
   title: z.string(),
