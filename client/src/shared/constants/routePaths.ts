@@ -6,7 +6,7 @@ export const RoutePaths = {
   OrganizationProfile: "/organizations/:slug",
   EventDetail: "/events/:id",
   EventDetailLink: (id: string) => `/events/${id}`,
-  EventEditLink: (id: string) => `/events/${id}/edit`,
+  EventEditLink: (id: string) => `/organizer/events/${id}/edit`,
   Profile: "/profile",
 
   // ─── Organizer ──────────────────────────────────────────────────────────────
