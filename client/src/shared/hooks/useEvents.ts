@@ -33,13 +33,18 @@ export const fetchEvents = async ({ pageParam = 1, queryKey }: any): Promise<Pag
 
 export const EVENTS_QUERY_KEY = ["events"] as const
 
-export function useEvents(filters?: EventFilters) {
+export interface UseEventsOptions {
+  enabled?: boolean;
+}
+
+export function useEvents(filters?: EventFilters, options?: UseEventsOptions) {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending, isError } = useInfiniteQuery({
     queryKey: [...EVENTS_QUERY_KEY, filters],
     queryFn: fetchEvents,
     initialPageParam: 1,
     getNextPageParam: (lastPage) => 
       lastPage.currentPage < lastPage.totalPages ? lastPage.currentPage + 1 : undefined,
+    enabled: options?.enabled,
   })
 
   const events = data?.pages.flatMap(page => page.items) || []

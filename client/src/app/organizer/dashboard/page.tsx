@@ -11,9 +11,10 @@ export function OrganizerDashboardPage() {
   const { data: organization, isLoading: isLoadingOrg, isError: isErrorOrg } = useMyOrganization()
   
   // We only fetch events if we know the organization ID
-  const { events, loading: isLoadingEvents } = useEvents({ 
-    organizationId: organization?.id 
-  })
+  const { events, loading: isLoadingEvents } = useEvents(
+    { organizationId: organization?.id },
+    { enabled: !!organization?.id }
+  )
 
   if (isLoadingOrg) {
     return (
