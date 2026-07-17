@@ -7,11 +7,12 @@ import { useEvents } from "@/shared/hooks/useEvents"
 import { Roles } from "@/shared/constants/roles"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { useAuth } from "@/features/auth/context/AuthContext"
+import { useAuthorization } from "@/authorization"
 
 function AdminRedirect({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
-  if (loading) return null
-  if (user?.roles?.includes(Roles.Admin)) {
+  const { isLoading, hasRole } = useAuthorization()
+  if (isLoading) return null
+  if (hasRole(Roles.Admin)) {
     return <Navigate to={RoutePaths.AdminDashboard} replace />
   }
   return <>{children}</>

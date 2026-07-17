@@ -1,10 +1,13 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useMyOrganization } from "@/shared/hooks/useMyOrganization"
 import { useMyEvents } from "@/shared/hooks/useMyEvents"
-import { Building2, CalendarPlus, Settings, LayoutDashboard, MapPin, CalendarDays, ExternalLink, Shield } from "lucide-react"
+import { Building2, CalendarPlus, Settings, LayoutDashboard, MapPin, CalendarDays, ExternalLink } from "lucide-react"
 import { Button } from "@/shared/ui/button"
 import { Badge } from "@/shared/ui/badge"
 import { RoutePaths } from "@/shared/constants/routePaths"
+import { RequirePermission } from "@/authorization"
+import { getEventImage } from "@/app/(public)/widgets/common/helpers"
+import { Permissions } from "@/shared/constants/permissions"
 
 export function OrganizerDashboardPage() {
   const navigate = useNavigate()
@@ -83,14 +86,18 @@ export function OrganizerDashboardPage() {
         </div>
         
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigate(`/organizer/organizations/${organization.id}`)}>
-            <Settings className="w-4 h-4 mr-2" />
-            Organization Settings
-          </Button>
-          <Button onClick={() => navigate(RoutePaths.CreateEvent)}>
-            <CalendarPlus className="w-4 h-4 mr-2" />
-            Create Event
-          </Button>
+          <RequirePermission permission={Permissions.OrganizationView}>
+            <Button variant="outline" onClick={() => navigate(`/organizer/organizations/${organization.id}`)}>
+              <Settings className="w-4 h-4 mr-2" />
+              Organization Settings
+            </Button>
+          </RequirePermission>
+          <RequirePermission permission={Permissions.EventsCreate}>
+            <Button onClick={() => navigate(RoutePaths.CreateEvent)}>
+              <CalendarPlus className="w-4 h-4 mr-2" />
+              Create Event
+            </Button>
+          </RequirePermission>
         </div>
       </div>
 
@@ -107,13 +114,11 @@ export function OrganizerDashboardPage() {
             {events.map((event) => (
               <div key={event.id} className="group relative bg-card rounded-2xl border shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col">
                 <div className="aspect-video bg-muted relative">
-                  {event.imageUrl ? (
-                    <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary/5">
-                      <CalendarDays className="w-10 h-10 text-primary/20" />
-                    </div>
-                  )}
+                  <img
+                    src={getEventImage(event.category, event.id, "banner")}
+                    alt={event.title}
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute top-3 right-3 flex gap-2">
                     {event.isCancelled && (
                       <Badge variant="destructive" className="shadow-sm backdrop-blur-md">Cancelled</Badge>
@@ -138,9 +143,11 @@ export function OrganizerDashboardPage() {
                   </div>
                   
                   <div className="mt-auto flex items-center gap-2 pt-4 border-t">
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/organizer/events/${event.id}/edit`)}>
-                      Edit Event
-                    </Button>
+                    <RequirePermission permission={Permissions.EventsUpdate} resource={event}>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/organizer/events/${event.id}/edit`)}>
+                        Edit Event
+                      </Button>
+                    </RequirePermission>
                     <Button variant="ghost" size="icon" title="View Public Page" asChild>
                       <Link to={`/events/${event.id}`} target="_blank">
                         <ExternalLink className="w-4 h-4" />
@@ -160,10 +167,12 @@ export function OrganizerDashboardPage() {
             <p className="text-muted-foreground max-w-md mb-8 text-lg">
               You haven't created any events for your organization. Start hosting and engaging with your audience!
             </p>
-            <Button size="lg" onClick={() => navigate(RoutePaths.CreateEvent)} className="h-14 px-8 text-lg shadow-lg">
-              <CalendarPlus className="w-5 h-5 mr-2" />
-              Create Your First Event
-            </Button>
+            <RequirePermission permission={Permissions.EventsCreate}>
+              <Button size="lg" onClick={() => navigate(RoutePaths.CreateEvent)} className="h-14 px-8 text-lg shadow-lg">
+                <CalendarPlus className="w-5 h-5 mr-2" />
+                Create Your First Event
+              </Button>
+            </RequirePermission>
           </div>
         )}
       </div>

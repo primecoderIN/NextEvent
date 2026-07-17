@@ -1,6 +1,9 @@
 import { lazy, Suspense } from "react"
 import type { RouteObject } from "react-router-dom"
 import { RoutePaths } from "@/shared/constants/routePaths"
+import { RequirePermission, RequireRole } from "@/authorization"
+import { Roles } from "@/shared/constants/roles"
+import { Permissions } from "@/shared/constants/permissions"
 
 const CreateEventPage = lazy(() => import("./create-event/page").then((m) => ({ default: m.CreateEventPage })))
 const UpdateEventPage = lazy(() => import("./update-event/page").then((m) => ({ default: m.UpdateEventPage })))
@@ -22,7 +25,9 @@ export const organizerRoutes: RouteObject[] = [
     path: RoutePaths.CreateEvent,
     element: (
       <Suspense fallback={<PageLoader />}>
-        <CreateEventPage />
+        <RequirePermission permission={Permissions.EventsCreate} redirectTo={RoutePaths.Login}>
+          <CreateEventPage />
+        </RequirePermission>
       </Suspense>
     )
   },
@@ -30,7 +35,9 @@ export const organizerRoutes: RouteObject[] = [
     path: RoutePaths.EditEvent,
     element: (
       <Suspense fallback={<PageLoader />}>
-        <UpdateEventPage />
+        <RequirePermission permission={Permissions.EventsUpdate} redirectTo={RoutePaths.Login}>
+          <UpdateEventPage />
+        </RequirePermission>
       </Suspense>
     )
   },
@@ -38,7 +45,9 @@ export const organizerRoutes: RouteObject[] = [
     path: RoutePaths.StartOrganizer,
     element: (
       <Suspense fallback={<PageLoader />}>
-        <StartOrganizerPage />
+        <RequireRole role={[Roles.Member, Roles.Organizer, Roles.Admin]} redirectTo={RoutePaths.Login}>
+          <StartOrganizerPage />
+        </RequireRole>
       </Suspense>
     )
   },
@@ -46,7 +55,9 @@ export const organizerRoutes: RouteObject[] = [
     path: RoutePaths.OrganizerManageRoles,
     element: (
       <Suspense fallback={<PageLoader />}>
-        <OrganizerManageRolesPage />
+        <RequirePermission permission={Permissions.OrganizationRolesManage} redirectTo={RoutePaths.Login}>
+          <OrganizerManageRolesPage />
+        </RequirePermission>
       </Suspense>
     )
   },
@@ -54,7 +65,9 @@ export const organizerRoutes: RouteObject[] = [
     path: RoutePaths.OrganizerOrganizationDetail,
     element: (
       <Suspense fallback={<PageLoader />}>
-        <OrganizerOrganizationDetailPage />
+        <RequirePermission permission={Permissions.OrganizationView} redirectTo={RoutePaths.Login}>
+          <OrganizerOrganizationDetailPage />
+        </RequirePermission>
       </Suspense>
     )
   },
@@ -62,7 +75,9 @@ export const organizerRoutes: RouteObject[] = [
     path: RoutePaths.OrganizerDashboard,
     element: (
       <Suspense fallback={<PageLoader />}>
-        <OrganizerDashboardPage />
+        <RequireRole role={[Roles.Organizer, Roles.Admin]} redirectTo={RoutePaths.Login}>
+          <OrganizerDashboardPage />
+        </RequireRole>
       </Suspense>
     )
   }

@@ -1,5 +1,5 @@
 import type { Event } from "@/types/Event"
-import { BadgeCheck, Globe, Link2, X } from "lucide-react"
+import { BadgeCheck, Globe } from "lucide-react"
 import { getEventImage } from "@/app/(public)/widgets/common/helpers"
 import { Button } from "@/shared/ui/button"
 import { Link } from "react-router-dom"

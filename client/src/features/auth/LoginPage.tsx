@@ -11,7 +11,7 @@ import { getLoginFormSchema, type LoginFormValues } from "@/features/auth/types"
 import { useAuth } from "@/features/auth/context/AuthContext"
 import { FieldError } from "@/features/events/components/EventForm/components"
 import { RoutePaths } from "@/shared/constants/routePaths"
-import { Roles } from "@/shared/constants/roles"
+import { getPostLoginRoute } from "@/authorization"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -50,16 +50,8 @@ export function LoginPage() {
     try {
       const loggedInUser = await login(values)
       toast.success("Logged in successfully!")
-      // Admins always go to the admin dashboard.
-      // Other users go to the page they were trying to reach, or home.
-      if (loggedInUser.roles?.includes(Roles.Admin)) {
-        navigate(RoutePaths.AdminDashboard, { replace: true })
-      } else if (loggedInUser.roles?.includes(Roles.Organizer)) {
-        navigate(RoutePaths.OrganizerDashboard, { replace: true })
-      } else {
-        const from = (location.state as { from?: Location })?.from?.pathname ?? RoutePaths.Home
-        navigate(from, { replace: true })
-      }
+      const from = (location.state as { from?: Location })?.from?.pathname ?? RoutePaths.Home
+      navigate(getPostLoginRoute(loggedInUser.roles, from), { replace: true })
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed")
     } finally {

@@ -1,4 +1,4 @@
-import { Building2, Globe, Mail, Phone, CalendarDays, Key, MapPin, User, FileText, CheckCircle, Clock } from "lucide-react"
+import { Building2, Globe, Mail, Phone, User, FileText, CheckCircle, Clock } from "lucide-react"
 import type { Organization } from "@/types/Organization"
 import { Badge } from "@/shared/ui/badge"
 

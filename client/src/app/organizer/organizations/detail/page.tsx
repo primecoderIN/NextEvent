@@ -3,6 +3,8 @@ import { useOrganizationDetail } from "@/shared/hooks/useOrganizationDetail"
 import { Building2, ArrowLeft, Shield } from "lucide-react"
 import { OrganizationDetailsView } from "@/features/organizations/components/OrganizationDetailsView"
 import { Button } from "@/shared/ui/button"
+import { RequirePermission } from "@/authorization"
+import { Permissions } from "@/shared/constants/permissions"
 
 export function OrganizerOrganizationDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -49,10 +51,12 @@ export function OrganizerOrganizationDetailPage() {
         </div>
         
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate(`/organizer/organizations/${id}/roles`)}>
-            <Shield className="w-4 h-4 mr-2" />
-            Manage Roles
-          </Button>
+          <RequirePermission permission={Permissions.OrganizationRolesManage}>
+            <Button variant="outline" onClick={() => navigate(`/organizer/organizations/${id}/roles`)}>
+              <Shield className="w-4 h-4 mr-2" />
+              Manage Roles
+            </Button>
+          </RequirePermission>
         </div>
       </div>
 

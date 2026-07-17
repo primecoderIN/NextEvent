@@ -12,7 +12,7 @@ export const useOrganizationRolesList = (id: string) => {
       const res = await axiosHttpAgent.get<ApiResponse<OrganizationRole[]>>(
         OrganizationApiRoutes.Roles(id)
       )
-      return res.data.data
+      return res.data.data ?? []
     },
     enabled: !!id,
   })

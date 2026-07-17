@@ -8,6 +8,7 @@ import { Badge } from "@/shared/ui/badge"
 import { toast } from "sonner"
 import { Input } from "@/shared/ui/input"
 import { Label } from "@/shared/ui/label"
+import type { OrganizationRole } from "@/types/Organization"
 
 export function OrganizerManageRolesPage() {
   const { id } = useParams<{ id: string }>()

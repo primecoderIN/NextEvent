@@ -1,5 +1,5 @@
 import React, { type ReactNode } from "react";
-import { useAuthorization } from "./useAuthorization";
+import { RequirePermission } from "./RequirePermission";
 import type { Permission } from "./types";
 
 interface CanProps {
@@ -14,10 +14,8 @@ export const Can: React.FC<CanProps> = ({
   resource, 
   children, 
   fallback = null 
-}) => {
-  const { can } = useAuthorization();
-  if (can(permission, resource)) {
-    return <>{children}</>;
-  }
-  return <>{fallback}</>;
-};
+}) => (
+  <RequirePermission permission={permission} resource={resource} fallback={fallback}>
+    {children}
+  </RequirePermission>
+);

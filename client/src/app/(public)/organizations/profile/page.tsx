@@ -1,4 +1,4 @@
-import { useParams } from "react"
+import { useParams } from "react-router-dom"
 import { useOrganizationProfile } from "@/shared/hooks/useOrganizationProfile"
 import { Building2, Globe, Mail, Phone, CalendarDays, MapPin } from "lucide-react"
 

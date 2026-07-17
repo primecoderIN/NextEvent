@@ -1,8 +1,8 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom"
-import { useAuth } from "@/features/auth/context/AuthContext"
+import { Outlet } from "react-router-dom"
 import { Roles } from "@/shared/constants/roles"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { ShieldOff } from "lucide-react"
+import { RequireRole } from "@/authorization"
 
 function UnauthorizedPage() {
   return (
@@ -45,18 +45,14 @@ function PageLoader() {
  * Vite's code-splitting ensures their chunks are never downloaded by non-admins.
  */
 export function AdminRouteGuard() {
-  const { user, loading } = useAuth()
-  const location = useLocation()
-
-  if (loading) return <PageLoader />
-
-  if (!user) {
-    return <Navigate to={RoutePaths.Login} state={{ from: location }} replace />
-  }
-
-  if (!user.roles?.includes(Roles.Admin)) {
-    return <UnauthorizedPage />
-  }
-
-  return <Outlet />
+  return (
+    <RequireRole
+      role={Roles.Admin}
+      redirectTo={RoutePaths.Login}
+      fallback={<UnauthorizedPage />}
+      loadingFallback={<PageLoader />}
+    >
+      <Outlet />
+    </RequireRole>
+  )
 }

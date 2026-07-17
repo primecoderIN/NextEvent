@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom"
 import { Pencil, Trash2, Ban, Eye } from "lucide-react"
 import { Button } from "@/shared/ui/button"
-import { Can } from "@/authorization"
+import { RequirePermission } from "@/authorization"
 import { RoutePaths } from "@/shared/constants/routePaths"
+import { Permissions } from "@/shared/constants/permissions"
 import type { Event } from "@/types/Event"
 
 interface ActionProps {
@@ -16,7 +17,7 @@ interface ActionProps {
 export function EventEditAction({ event, iconOnly, label = "Edit", onClick, className }: ActionProps) {
   const navigate = useNavigate()
   return (
-    <Can permission="events.edit" resource={event}>
+    <RequirePermission permission={Permissions.EventsUpdate} resource={event}>
       <Button
         variant="outline"
         size={iconOnly ? "icon" : "sm"}
@@ -30,13 +31,13 @@ export function EventEditAction({ event, iconOnly, label = "Edit", onClick, clas
         <Pencil className="h-4 w-4" />
         {!iconOnly && label}
       </Button>
-    </Can>
+    </RequirePermission>
   )
 }
 
 export function EventDeleteAction({ event, iconOnly, label = "Delete", onClick, className }: ActionProps) {
   return (
-    <Can permission="events.delete" resource={event}>
+    <RequirePermission permission={Permissions.EventsCancel} resource={event}>
       <Button
         variant="outline"
         size={iconOnly ? "icon" : "sm"}
@@ -47,13 +48,13 @@ export function EventDeleteAction({ event, iconOnly, label = "Delete", onClick, 
         <Trash2 className="h-4 w-4" />
         {!iconOnly && label}
       </Button>
-    </Can>
+    </RequirePermission>
   )
 }
 
 export function EventBanAction({ event, iconOnly, label = "Ban", onClick, className }: ActionProps) {
   return (
-    <Can permission="events.ban" resource={event}>
+    <RequirePermission permission={Permissions.EventsBan} resource={event}>
       <Button
         variant="outline"
         size={iconOnly ? "icon" : "sm"}
@@ -64,7 +65,7 @@ export function EventBanAction({ event, iconOnly, label = "Ban", onClick, classN
         <Ban className="h-4 w-4" />
         {!iconOnly && label}
       </Button>
-    </Can>
+    </RequirePermission>
   )
 }
 

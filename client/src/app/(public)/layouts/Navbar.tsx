@@ -20,6 +20,8 @@ import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher"
 import { useAuth } from "@/features/auth/context/AuthContext"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { Roles } from "@/shared/constants/roles"
+import { RequireRole, useAuthorization } from "@/authorization"
+import { Permissions } from "@/shared/constants/permissions"
 
 const navItems = [
   { icon: Home, labelKey: "home", href: RoutePaths.Home },
@@ -34,6 +36,8 @@ export const Navbar = () => {
   const navigate = useNavigate()
   const { t } = useTranslation(["nav", "common"])
   const { user, logout } = useAuth()
+  const { can } = useAuthorization()
+  const canCreateEvents = can(Permissions.EventsCreate)
 
   return (
     <>
@@ -63,11 +67,13 @@ export const Navbar = () => {
             <LanguageSwitcher className="mr-2" />
             {user ? (
               <div className="flex items-center gap-4">
-                {user.roles?.includes(Roles.Organizer) ? (
+                {canCreateEvents ? (
                   <>
-                    <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.OrganizerDashboard)} className="gap-2 bg-primary/10 text-primary hover:bg-primary/20 border-0">
-                      Organizer Dashboard
-                    </Button>
+                    <RequireRole role={Roles.Organizer}>
+                      <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.OrganizerDashboard)} className="gap-2 bg-primary/10 text-primary hover:bg-primary/20 border-0">
+                        Organizer Dashboard
+                      </Button>
+                    </RequireRole>
                     <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.CreateEvent)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
                       <Plus className="h-4 w-4" />
                       {t("createEvent", { ns: "common" })}
@@ -193,7 +199,7 @@ export const Navbar = () => {
           {/* CTA */}
           {user && (
             <div className="mt-2 mb-2 flex flex-col gap-2">
-              {user.roles?.includes(Roles.Organizer) && (
+              <RequireRole role={Roles.Organizer}>
                 <button
                   className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-primary bg-primary/10 transition-colors hover:bg-primary/20 active:bg-primary/30"
                   onClick={() => { 
@@ -206,7 +212,7 @@ export const Navbar = () => {
                   </div>
                   Organizer Dashboard
                 </button>
-              )}
+              </RequireRole>
               <button
                 className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-80"
                 style={{
@@ -214,13 +220,13 @@ export const Navbar = () => {
                 }}
                 onClick={() => { 
                   setSheetOpen(false) 
-                  navigate(user.roles?.includes(Roles.Organizer) ? RoutePaths.CreateEvent : RoutePaths.StartOrganizer) 
+                  navigate(canCreateEvents ? RoutePaths.CreateEvent : RoutePaths.StartOrganizer) 
                 }}
               >
                 <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
                   <Plus className="h-4 w-4" />
                 </div>
-                {user.roles?.includes(Roles.Organizer) ? t("createEvent", { ns: "common" }) : "Become Organizer"}
+                {canCreateEvents ? t("createEvent", { ns: "common" }) : "Become Organizer"}
               </button>
             </div>
           )}

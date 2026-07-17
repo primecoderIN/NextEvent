@@ -20,6 +20,8 @@ import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher"
 import { useAuth } from "@/features/auth/context/AuthContext"
 import { Roles } from "@/shared/constants/roles"
 import { RoutePaths } from "@/shared/constants/routePaths"
+import { RequireRole, useAuthorization } from "@/authorization"
+import { Permissions } from "@/shared/constants/permissions"
 
 const navItems = [
   { icon: Home, labelKey: "home", href: RoutePaths.Home, active: true },
@@ -41,6 +43,8 @@ export function DesktopSidebar() {
   const navigate = useNavigate()
   const { t } = useTranslation(["nav", "common"])
   const { user } = useAuth()
+  const { can } = useAuthorization()
+  const canCreateEvents = can(Permissions.EventsCreate)
 
   return (
     <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-56 border-r border-border/40 bg-background z-40">
@@ -80,15 +84,15 @@ export function DesktopSidebar() {
       {/* CTA */}
       <div className="px-3 mb-3 shrink-0">
         <button
-          onClick={() => navigate(user?.roles?.includes(Roles.Organizer) ? RoutePaths.CreateEvent : RoutePaths.StartOrganizer)}
+          onClick={() => navigate(canCreateEvents ? RoutePaths.CreateEvent : RoutePaths.StartOrganizer)}
           className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
           style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
         >
           <Plus className="h-4 w-4" />
-          {user?.roles?.includes(Roles.Organizer) ? t("createEvent", { ns: "common" }) : "Become Organizer"}
+          {canCreateEvents ? t("createEvent", { ns: "common" }) : "Become Organizer"}
         </button>
         
-        {user?.roles?.includes(Roles.Organizer) && (
+        <RequireRole role={Roles.Organizer}>
           <button
             onClick={() => navigate(RoutePaths.OrganizerDashboard)}
             className="w-full mt-2 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition-colors"
@@ -96,16 +100,16 @@ export function DesktopSidebar() {
             <CalendarDays className="h-4 w-4" />
             Organizer Dashboard
           </button>
-        )}
+        </RequireRole>
 
-        {user?.roles?.includes(Roles.Admin) && (
+        <RequireRole role={Roles.Admin}>
           <button
             onClick={() => navigate(RoutePaths.AdminCategoryNew)}
             className="w-full mt-2 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-border/50"
           >
             {t("createCategory", { ns: "admin" })}
           </button>
-        )}
+        </RequireRole>
       </div>
 
       {/* Secondary nav */}

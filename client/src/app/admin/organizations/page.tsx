@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { Building2, CheckCircle, Clock } from "lucide-react"
 import { useOrganizations } from "@/shared/hooks/useOrganizations"
 import { useApproveOrganization } from "@/shared/hooks/useApproveOrganization"
@@ -9,7 +8,7 @@ import { useNavigate } from "react-router-dom"
 
 export function AdminOrganizationsPage() {
   const navigate = useNavigate()
-  const [page, setPage] = useState(1)
+  const page = 1
   const { data: orgsPage, isFetching } = useOrganizations(page, 10)
   const approveMutation = useApproveOrganization()
 

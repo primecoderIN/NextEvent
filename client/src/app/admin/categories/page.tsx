@@ -5,18 +5,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getCreateCategorySchema, type CreateCategoryFormValues } from "@/app/admin/types";
 import { useCreateCategory } from "@/shared/hooks/useCreateCategory";
-import { useAuth } from "@/features/auth/context/AuthContext";
 import { Roles } from "@/shared/constants/roles";
+import { RequireRole } from "@/authorization";
 import { toast } from "sonner";
 
 export default function CreateCategoryPage() {
-  const { t } = useTranslation(["admin", "common"]);
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  return (
+    <RequireRole role={Roles.Admin} fallback={<div className="p-6">Not authorized</div>}>
+      <CreateCategoryForm />
+    </RequireRole>
+  );
+}
 
-  if (!user || !user.roles?.includes(Roles.Admin)) {
-    return <div className="p-6">Not authorized</div>;
-  }
+function CreateCategoryForm() {
+  const { t } = useTranslation(["admin", "common"]);
+  const navigate = useNavigate();
 
   const schema = getCreateCategorySchema(t);
   const { register, handleSubmit, formState: { errors } } = useForm<CreateCategoryFormValues>({ resolver: zodResolver(schema) });
