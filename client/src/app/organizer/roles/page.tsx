@@ -21,6 +21,7 @@ export function OrganizerManageRolesPage() {
   const [selectedPerms, setSelectedPerms] = useState<Set<string>>(new Set())
 
   const [isCreating, setIsCreating] = useState(false)
+  const [editingRole, setEditingRole] = useState<OrganizationRole | null>(null)
 
   const togglePermission = (code: string) => {
     setSelectedPerms((prev) => {
@@ -31,29 +32,55 @@ export function OrganizerManageRolesPage() {
     })
   }
 
-  const handleCreate = async () => {
+  const handleStartEdit = (role: OrganizationRole) => {
+    setEditingRole(role)
+    setRoleName(role.name)
+    setRoleDesc(role.description || "")
+    setSelectedPerms(new Set(role.permissions))
+    setIsCreating(true)
+  }
+
+  const handleCancel = () => {
+    setIsCreating(false)
+    setEditingRole(null)
+    setRoleName("")
+    setRoleDesc("")
+    setSelectedPerms(new Set())
+  }
+
+  const handleSave = async () => {
     if (!id || !roleName.trim()) {
       toast.error("Role name is required")
       return
     }
     
     try {
-      await createRoleMutation.mutateAsync({
-        id,
-        payload: {
-          name: roleName,
-          description: roleDesc,
-          permissions: Array.from(selectedPerms),
-        }
-      })
-      toast.success("Role created successfully")
+      if (editingRole) {
+        await updateRoleMutation.mutateAsync({
+          id,
+          roleId: editingRole.id,
+          payload: {
+            name: roleName,
+            description: roleDesc,
+            permissions: Array.from(selectedPerms),
+          }
+        })
+        toast.success("Role updated successfully")
+      } else {
+        await createRoleMutation.mutateAsync({
+          id,
+          payload: {
+            name: roleName,
+            description: roleDesc,
+            permissions: Array.from(selectedPerms),
+          }
+        })
+        toast.success("Role created successfully")
+      }
       refetchRoles()
-      setIsCreating(false)
-      setRoleName("")
-      setRoleDesc("")
-      setSelectedPerms(new Set())
+      handleCancel()
     } catch {
-      toast.error("Failed to create role")
+      toast.error(editingRole ? "Failed to update role" : "Failed to create role")
     }
   }
 
@@ -78,9 +105,9 @@ export function OrganizerManageRolesPage() {
         <div className="bg-card rounded-xl border p-6 mb-8 shadow-sm">
           <div className="flex justify-between items-center border-b pb-4 mb-6">
             <h2 className="text-xl font-semibold flex items-center gap-2">
-              <Key className="w-5 h-5 text-primary" /> Create New Role
+              <Key className="w-5 h-5 text-primary" /> {editingRole ? `Edit Role: ${editingRole.name}` : "Create New Role"}
             </h2>
-            <Button variant="ghost" size="icon" onClick={() => setIsCreating(false)}>
+            <Button variant="ghost" size="icon" onClick={handleCancel}>
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -94,6 +121,7 @@ export function OrganizerManageRolesPage() {
                   placeholder="e.g. Event Manager"
                   value={roleName}
                   onChange={(e) => setRoleName(e.target.value)}
+                  disabled={editingRole?.isSystemRole}
                 />
               </div>
               <div className="space-y-2">
@@ -103,6 +131,7 @@ export function OrganizerManageRolesPage() {
                   placeholder="What can this role do?"
                   value={roleDesc}
                   onChange={(e) => setRoleDesc(e.target.value)}
+                  disabled={editingRole?.isSystemRole}
                 />
               </div>
             </div>
@@ -136,10 +165,10 @@ export function OrganizerManageRolesPage() {
             
             <div className="flex justify-end pt-4 mt-2 border-t">
               <Button 
-                onClick={handleCreate} 
-                disabled={createRoleMutation.isPending || !roleName.trim()}
+                onClick={handleSave} 
+                disabled={createRoleMutation.isPending || updateRoleMutation.isPending || !roleName.trim()}
               >
-                {createRoleMutation.isPending ? "Creating..." : (
+                {createRoleMutation.isPending || updateRoleMutation.isPending ? "Saving..." : (
                   <>
                     <Save className="w-4 h-4 mr-2" /> Save Role
                   </>
@@ -165,7 +194,7 @@ export function OrganizerManageRolesPage() {
                   key={role.id} 
                   className="bg-card rounded-xl border p-5 shadow-sm flex flex-col md:flex-row md:items-start justify-between gap-4"
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-lg leading-none">{role.name}</h3>
                       {role.isSystemRole ? (
@@ -188,6 +217,15 @@ export function OrganizerManageRolesPage() {
                       ))}
                     </div>
                   </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="shrink-0"
+                    onClick={() => handleStartEdit(role)}
+                  >
+                    <Pencil className="w-4 h-4 mr-2" />
+                    {role.isSystemRole ? "Edit Permissions" : "Edit Role"}
+                  </Button>
                 </div>
               ))}
             </div>
