@@ -5,8 +5,10 @@ import { useApproveOrganization } from "@/shared/hooks/useApproveOrganization"
 import { Button } from "@/shared/ui/button"
 import { Badge } from "@/shared/ui/badge"
 import { toast } from "sonner"
+import { useNavigate } from "react-router-dom"
 
 export function AdminOrganizationsPage() {
+  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const { data: orgsPage, isFetching } = useOrganizations(page, 10)
   const approveMutation = useApproveOrganization()
@@ -76,7 +78,14 @@ export function AdminOrganizationsPage() {
                     <td className="px-6 py-4 text-muted-foreground">
                       {new Date(org.createdAtUtc).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right space-x-2">
+                      <Button 
+                        size="sm" 
+                        variant="secondary"
+                        onClick={() => navigate(`/admin/organizations/${org.id}`)}
+                      >
+                        View
+                      </Button>
                       {org.status === "pending_verification" && (
                         <Button 
                           size="sm" 

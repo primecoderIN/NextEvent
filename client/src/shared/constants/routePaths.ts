@@ -14,6 +14,7 @@ export const RoutePaths = {
   EditEvent: "/organizer/events/:id/edit",
   StartOrganizer: "/organizer/start",
   OrganizerManageRoles: "/organizer/organizations/:id/roles",
+  OrganizerOrganizationDetail: "/organizer/organizations/:id",
   OrganizerDashboard: "/organizer/dashboard",
 
   // ─── Admin ──────────────────────────────────────────────────────────────────
@@ -26,6 +27,7 @@ export const RoutePaths = {
   AdminCategorySuggestions: "/admin/categories/suggestions",
   AdminUsers: "/admin/users",
   AdminOrganizations: "/admin/organizations",
+  AdminOrganizationDetail: "/admin/organizations/:id",
   AdminReports: "/admin/reports",
   AdminSettings: "/admin/settings",
   AdminActivityLogs: "/admin/activity-logs",
