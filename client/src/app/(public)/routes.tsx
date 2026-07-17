@@ -6,6 +6,7 @@ import { useEvents } from "@/shared/hooks/useEvents"
 
 const HomePage = lazy(() => import("./home/page").then((m) => ({ default: m.HomePage })))
 const EventDetailPage = lazy(() => import("./event-detail/page").then((m) => ({ default: m.EventDetailPage })))
+const OrganizationProfilePage = lazy(() => import("./organizations/profile/page").then((m) => ({ default: m.OrganizationProfilePage })))
 
 // Auth pages (technically public as they are non-gated)
 const LoginPage = lazy(() => import("@/features/auth/index").then((m) => ({ default: m.LoginPage })))
@@ -54,6 +55,14 @@ export const publicRoutes: RouteObject[] = [
     element: (
       <Suspense fallback={<PageLoader />}>
         <EventDetailPage />
+      </Suspense>
+    )
+  },
+  {
+    path: RoutePaths.OrganizationProfile,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <OrganizationProfilePage />
       </Suspense>
     )
   },

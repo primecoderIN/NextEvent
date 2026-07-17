@@ -1,9 +1,11 @@
 using API.Common;
+using Application.Core.Pagination;
 using Application.Organizations.Commands.ApproveOrganization;
 using Application.Organizations.Commands.CreateOrganization;
 using Application.Organizations.DTOs;
 using Application.Organizations.Queries.GetOrganizationById;
 using Application.Organizations.Queries.GetOrganizationBySlug;
+using Application.Organizations.Queries.GetOrganizationsList;
 using Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +15,33 @@ namespace API.Controllers;
 [Route(ApiRouteConstants.Organizations.Base)]
 public class OrganizationsController : BaseApiController
 {
+    /// <summary>
+    /// Retrieves a paginated list of all organizations.
+    /// Restricted to platform Admins only.
+    /// </summary>
+    /// <response code="200">Organizations retrieved successfully.</response>
+    /// <response code="401">No valid JWT supplied.</response>
+    /// <response code="403">Caller does not hold the Admin platform role.</response>
+    [Authorize(Roles = RoleConstants.Admin)]
+    [HttpGet]
+    [ProducesResponseType(typeof(ApiResponse<PagedList<OrganizationDetailDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<ApiResponse<PagedList<OrganizationDetailDto>>>> GetOrganizationsList(
+        [FromQuery] PaginationParams paginationParams,
+        CancellationToken cancellationToken)
+    {
+        var organizations = await Mediator.Send(
+            new GetOrganizationsListQuery 
+            { 
+                PageNumber = paginationParams.PageNumber, 
+                PageSize = paginationParams.PageSize 
+            }, 
+            cancellationToken);
+
+        return OkResponse(organizations, "Organizations retrieved successfully.");
+    }
+
     /// <summary>
     /// Creates a new organization.
     /// The requesting user becomes the owner, is added as an active member,

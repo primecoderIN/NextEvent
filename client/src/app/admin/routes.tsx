@@ -5,6 +5,7 @@ import { RoutePaths } from "@/shared/constants/routePaths"
 
 const AdminLayout = lazy(() => import("./layout").then((m) => ({ default: m.AdminLayout })))
 const AdminDashboardPage = lazy(() => import("./dashboard/page").then((m) => ({ default: m.AdminDashboardPage })))
+const AdminOrganizationsPage = lazy(() => import("./organizations/page").then((m) => ({ default: m.AdminOrganizationsPage })))
 const CreateCategoryPage = lazy(() => import("./categories/page").then((m) => ({ default: m.default })))
 
 function AdminPageLoader() {
@@ -48,6 +49,14 @@ export const adminRoutes: RouteObject[] = [
             element: (
               <Suspense fallback={<PageLoader />}>
                 <AdminDashboardPage />
+              </Suspense>
+            )
+          },
+          {
+            path: "organizations",
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <AdminOrganizationsPage />
               </Suspense>
             )
           },

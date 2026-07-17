@@ -3,16 +3,18 @@ export const RoutePaths = {
   Home: "/",
   Login: "/login",
   Register: "/register",
-  CreateEvent: "/events/new",
+  OrganizationProfile: "/organizations/:slug",
   EventDetail: "/events/:id",
-  EditEvent: "/events/:id/edit",
   EventDetailLink: (id: string) => `/events/${id}`,
   EventEditLink: (id: string) => `/events/${id}/edit`,
   Profile: "/profile",
 
   // ─── Organizer ──────────────────────────────────────────────────────────────
-  OrganizerDashboard: "/organizer/dashboard",
+  CreateEvent: "/organizer/events/new",
+  EditEvent: "/organizer/events/:id/edit",
   StartOrganizer: "/organizer/start",
+  OrganizerManageRoles: "/organizer/organizations/:id/roles",
+  OrganizerDashboard: "/organizer/dashboard",
 
   // ─── Admin ──────────────────────────────────────────────────────────────────
   Admin: "/admin",

@@ -5,3 +5,16 @@ export const CategoryApiRoutes = {
   Approve: (id: string) => `/categories/${id}/approve`,
   Reject: (id: string) => `/categories/${id}/reject`,
 };
+
+export const OrganizationApiRoutes = {
+  Base: "/organizations",
+  Id: (id: string) => `/organizations/${id}`,
+  Slug: (slug: string) => `/organizations/${slug}`,
+  Approve: (id: string) => `/organizations/${id}/approve`,
+  Roles: (id: string) => `/organizations/${id}/roles`,
+  RoleUpdate: (id: string, roleId: string) => `/organizations/${id}/roles/${roleId}`
+};
+
+export const PermissionApiRoutes = {
+  Base: "/permissions"
+};
