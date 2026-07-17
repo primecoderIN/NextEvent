@@ -10,6 +10,7 @@ export interface EventFilters {
   city?: string | null;
   dateFrom?: string | null;
   dateTo?: string | null;
+  organizationId?: string | null;
 }
 
 export const fetchEvents = async ({ pageParam = 1, queryKey }: any): Promise<PagedList<Event>> => {
@@ -24,6 +25,7 @@ export const fetchEvents = async ({ pageParam = 1, queryKey }: any): Promise<Pag
   if (filters?.city) params.append("city", filters.city);
   if (filters?.dateFrom) params.append("dateFrom", filters.dateFrom);
   if (filters?.dateTo) params.append("dateTo", filters.dateTo);
+  if (filters?.organizationId) params.append("organizationId", filters.organizationId);
 
   const response = await axiosHttpAgent.get<ApiResponse<PagedList<Event>>>(`/events?${params.toString()}`);
   return response.data.data!

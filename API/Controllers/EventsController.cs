@@ -30,6 +30,7 @@ public class EventsController : BaseApiController
         [FromQuery] string? city = null,
         [FromQuery] DateTime? dateFrom = null,
         [FromQuery] DateTime? dateTo = null,
+        [FromQuery] Guid? organizationId = null,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
@@ -41,6 +42,7 @@ public class EventsController : BaseApiController
             City = city,
             DateFrom = dateFrom,
             DateTo = dateTo,
+            OrganizationId = organizationId,
             PageNumber = pageNumber, 
             PageSize = pageSize 
         };

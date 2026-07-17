@@ -68,6 +68,13 @@ public class GetEventsListQueryHandler(ISqlConnectionFactory connectionFactory) 
             parameters.Add("DateTo", request.DateTo.Value);
         }
 
+        // Exact match on OrganizationId if provided
+        if (request.OrganizationId.HasValue)
+        {
+            whereClauses.Add("e.OrganizationId = @OrganizationId");
+            parameters.Add("OrganizationId", request.OrganizationId.Value);
+        }
+
         // Dynamically build the final WHERE string. 
         // If there are no clauses, it stays empty (meaning return all events).
         // Otherwise, it concatenates them with 'AND' so all conditions must be met.

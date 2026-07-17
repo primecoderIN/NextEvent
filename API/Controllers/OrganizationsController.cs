@@ -6,6 +6,7 @@ using Application.Organizations.DTOs;
 using Application.Organizations.Queries.GetOrganizationById;
 using Application.Organizations.Queries.GetOrganizationBySlug;
 using Application.Organizations.Queries.GetOrganizationsList;
+using Application.Organizations.Queries.GetMyOrganization;
 using Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -91,6 +92,22 @@ public class OrganizationsController : BaseApiController
             new GetOrganizationByIdQuery { Id = id },
             cancellationToken);
 
+        return OkResponse(org, "Organization retrieved successfully.");
+    }
+
+    /// <summary>
+    /// Retrieves the active organization owned by the current authenticated user.
+    /// </summary>
+    /// <response code="200">Organization found.</response>
+    /// <response code="404">User does not own any organization.</response>
+    [Authorize]
+    [HttpGet("my")]
+    [ProducesResponseType(typeof(ApiResponse<OrganizationDetailDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<OrganizationDetailDto>>> GetMyOrganization(
+        CancellationToken cancellationToken)
+    {
+        var org = await Mediator.Send(new GetMyOrganizationQuery(), cancellationToken);
         return OkResponse(org, "Organization retrieved successfully.");
     }
 
