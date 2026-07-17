@@ -176,6 +176,7 @@ The frontend is a Single Page Application (SPA) built for performance, modularit
 * **2.4 State Management & Data Fetching (React Query)**
   **TanStack React Query** is the primary driver for fetching, caching, and updating asynchronous data from the API.
   * **Why:** It abstract away race conditions, manual caching, and loading/error state management inherent in traditional `useEffect` fetching.
+  * **Note on isolation:** Data fetching hooks are strictly isolated by bounded context (e.g., `useEvents` for public, `useMyEvents` for organizers, `useAdminEvents` for admins). This prevents data leakage and ensures clean frontend components that don't juggle roles.
 
 * **2.5 Form Handling (React Hook Form + Zod)**
   Forms are managed using **React Hook Form** coupled with **Zod** schema validation.
@@ -224,7 +225,9 @@ Base URL: `https://localhost:5001/api`
 
 | Method | Endpoint | Status | Description |
 |---|---|---|---|
-| `GET` | `/events` | `200 OK` | List all events |
+| `GET` | `/events` | `200 OK` | List public active events (IsCancelled = 0) |
+| `GET` | `/events/my` | `200 OK` | List events for current organizer (Organizer only) |
+| `GET` | `/events/admin` | `200 OK` | List all events across the platform (Admin only) |
 | `GET` | `/events/{id}` | `200 OK` | Get event by ID |
 | `POST` | `/events` | `201 Created` | Create a new event |
 | `PUT` | `/events/{id}` | `200 OK` | Edit an existing event (partial update supported) |
