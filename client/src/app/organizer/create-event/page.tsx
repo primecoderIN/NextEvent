@@ -13,11 +13,13 @@ import { LocationSection } from "@/features/events/components/EventForm/Location
 import { EventPreviewCard } from "@/features/events/components/EventForm/EventPreviewCard"
 import { CreateEventSuccess } from "@/app/organizer/create-event/CreateEventSuccess"
 import { getEventFormSchema, type EventFormValues } from "@/features/events/components/EventForm/types"
+import { useMyOrganization } from "@/shared/hooks/useMyOrganization"
 
 export function CreateEventPage() {
   const navigate = useNavigate()
   const { t } = useTranslation(["createEvent", "common"])
   const { createEvent, loading: apiLoading, error: apiError } = useCreateEvent()
+  const { data: organization } = useMyOrganization()
   const [newEventId, setNewEventId] = useState<string | null>(null)
 
   // ── Schema is recreated automatically by React Compiler whenever `t` changes.
@@ -99,6 +101,7 @@ export function CreateEventPage() {
     )
 
     const id = await createEvent({
+      organizationId: organization?.id || "",
       title: values.title.trim(),
       description: values.description.trim(),
       categoryId: values.categoryId,

@@ -5,6 +5,7 @@ import { axiosHttpAgent } from "@/shared/lib/axios"
 import type { ApiResponse } from "@/types/ApiResponse"
 
 export interface CreateEventPayload {
+  organizationId: string
   title: string
   description: string
   categoryId: string
