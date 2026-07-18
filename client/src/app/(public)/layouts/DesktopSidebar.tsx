@@ -13,7 +13,10 @@ import {
   HelpCircle,
   User,
   ChevronDown,
+  LogOut,
+  RefreshCw
 } from "lucide-react"
+import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui/popover"
 import { useNavigate, Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher"
@@ -42,7 +45,7 @@ const secondaryItems = [
 export function DesktopSidebar() {
   const navigate = useNavigate()
   const { t } = useTranslation(["nav", "common"])
-  const { user } = useAuth()
+  const { user, switchProfile, logout } = useAuth()
   const { can } = useAuthorization()
   const canCreateEvents = can(Permissions.EventsCreate)
 
@@ -92,15 +95,7 @@ export function DesktopSidebar() {
           {canCreateEvents ? t("createEvent", { ns: "common" }) : "Become Organizer"}
         </button>
         
-        <RequireRole role={Roles.Organizer}>
-          <button
-            onClick={() => navigate(RoutePaths.OrganizerDashboard)}
-            className="w-full mt-2 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition-colors"
-          >
-            <CalendarDays className="h-4 w-4" />
-            Organizer Dashboard
-          </button>
-        </RequireRole>
+        {/* Removed redundant organizer button because popover switcher exists */}
 
         <RequireRole role={Roles.Admin}>
           <button
@@ -134,16 +129,53 @@ export function DesktopSidebar() {
       {/* User Auth Section */}
       <div className="px-3 py-3 border-t border-border/40 shrink-0">
         {user ? (
-          <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted cursor-pointer transition-colors">
-            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <User className="h-4 w-4 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold leading-tight truncate">{user.displayName}</p>
-              <p className="text-xs text-muted-foreground">{t("viewProfile", { ns: "common" })} →</p>
-            </div>
-            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted cursor-pointer transition-colors">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-semibold leading-tight truncate">{user.displayName}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {user.activeProfile} {t("viewProfile", { ns: "common" })}
+                  </p>
+                </div>
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-2" align="end" side="top">
+              <div className="flex flex-col gap-1">
+                <div className="px-2 py-1.5 mb-1 border-b border-border/40">
+                  <p className="text-sm font-medium">{user.displayName}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                </div>
+                {user.availableProfiles?.map((profile: string) => (
+                  <button
+                    key={profile}
+                    onClick={async () => {
+                      if (user.activeProfile !== profile) {
+                        await switchProfile(profile as "Member" | "Organizer");
+                        if (profile === "Organizer") navigate(RoutePaths.OrganizerDashboard);
+                        else navigate(RoutePaths.Home);
+                      }
+                    }}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors ${user.activeProfile === profile ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-muted text-foreground'}`}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    Switch to {profile}
+                  </button>
+                ))}
+                <button
+                  onClick={() => logout()}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-red-500 hover:bg-red-500/10 transition-colors mt-1 border-t border-border/40 pt-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         ) : (
           <div className="flex flex-col gap-2">
             <button

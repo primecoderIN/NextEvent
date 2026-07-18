@@ -10,13 +10,14 @@ namespace API.Services;
 
 public class TokenService(IConfiguration config) : ITokenService
 {
-    public string CreateToken(User user, IList<string> roles)
+    public string CreateToken(User user, IList<string> roles, string activeProfile)
     {
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Email, user.Email!),
-            new Claim(ClaimTypes.Name, user.UserName!)
+            new Claim(ClaimTypes.Name, user.UserName!),
+            new Claim("ActiveProfile", activeProfile)
         };
 
         foreach (var role in roles)

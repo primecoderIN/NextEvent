@@ -75,9 +75,7 @@ export const organizerRoutes: RouteObject[] = [
     path: RoutePaths.OrganizerDashboard,
     element: (
       <Suspense fallback={<PageLoader />}>
-        <RequireRole role={[Roles.Organizer, Roles.Admin]} redirectTo={RoutePaths.Login}>
-          <OrganizerDashboardPage />
-        </RequireRole>
+        <OrganizerDashboardPage />
       </Suspense>
     )
   }

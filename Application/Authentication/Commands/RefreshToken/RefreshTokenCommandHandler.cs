@@ -6,9 +6,11 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+using Application.Core.Interfaces;
+
 namespace Application.Authentication.Commands.RefreshToken;
 
-public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenService tokenService) 
+public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenService tokenService, IAppDBContext appDbContext) 
     : IRequestHandler<RefreshTokenCommand, AuthResult<LoginResponseDto>>
 {
     public async Task<AuthResult<LoginResponseDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
@@ -23,9 +25,20 @@ public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenSer
         var newRefreshToken = tokenService.GenerateRefreshToken();
         user.RefreshToken = newRefreshToken;
         user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
+        
+        // Heal legacy accounts (seeded before ActiveProfile existed) where DB contains NULL or empty string
+        if (string.IsNullOrEmpty(user.ActiveProfile))
+        {
+            user.ActiveProfile = "Member";
+        }
+        
         await userManager.UpdateAsync(user);
 
         var roles = await userManager.GetRolesAsync(user);
+
+        var isOrganizer = roles.Contains(Domain.Constants.RoleConstants.Organizer) || await appDbContext.Organizations.AnyAsync(o => o.OwnerUserId == user.Id, cancellationToken) || await appDbContext.OrganizationMembers.AnyAsync(m => m.UserId == user.Id && m.Status == Domain.OrganizationMemberStatus.Active, cancellationToken);
+        var availableProfiles = new List<string> { "Member" };
+        if (isOrganizer) availableProfiles.Add("Organizer");
 
         return new AuthResult<LoginResponseDto>
         {
@@ -34,10 +47,11 @@ public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenSer
             {
                 DisplayName = user.DisplayName ?? user.UserName!,
                 Image = user.ImageUrl,
-                // Pass roles to CreateToken so they are embedded in the refreshed JWT claims
-                Token = tokenService.CreateToken(user, roles),
+                Token = tokenService.CreateToken(user, roles, user.ActiveProfile),
                 Username = user.UserName!,
-                Roles = roles
+                Roles = roles,
+                ActiveProfile = user.ActiveProfile,
+                AvailableProfiles = availableProfiles
             }
         };
     }

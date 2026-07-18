@@ -5,17 +5,34 @@ import { adminRoutes } from "@/app/admin/routes"
 import { publicRoutes } from "@/app/(public)/routes"
 import { organizerRoutes } from "@/app/organizer/routes"
 
+import { OrganizerLayout } from "@/app/organizer/layout"
+import { RequireProfile } from "@/authorization"
+import { NotFoundPage } from "@/app/not-found/page"
+
 export const router = createBrowserRouter([
   {
     element: <AppRoot />,
     children: [
       ...adminRoutes,
       {
-        element: <PublicLayout />,
-        children: [
-          ...organizerRoutes,
-          ...publicRoutes,
-        ]
+        element: (
+          <RequireProfile profile="Organizer" redirectTo="/login">
+            <OrganizerLayout />
+          </RequireProfile>
+        ),
+        children: organizerRoutes
+      },
+      {
+        element: (
+          <RequireProfile profile="Member" allowGuests={true}>
+            <PublicLayout />
+          </RequireProfile>
+        ),
+        children: publicRoutes
+      },
+      {
+        path: "*",
+        element: <NotFoundPage />
       }
     ]
   }

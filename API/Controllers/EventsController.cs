@@ -53,7 +53,7 @@ public class EventsController : BaseApiController
     /// <summary>
     /// Retrieves a paginated list of events for the current organizer.
     /// </summary>
-    [Authorize(Roles = RoleConstants.Organizer)]
+    [Authorize(Policy = "ActiveOrganizer")]
     [HttpGet("my")]
     [ProducesResponseType(typeof(ApiResponse<PagedList<EventResponseDto>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<PagedList<EventResponseDto>>>> GetMyEvents(

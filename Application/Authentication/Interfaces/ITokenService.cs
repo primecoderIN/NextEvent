@@ -4,6 +4,6 @@ namespace Application.Authentication.Interfaces;
 
 public interface ITokenService
 {
-    string CreateToken(User user, IList<string> roles);
+    string CreateToken(User user, IList<string> roles, string activeProfile);
     string GenerateRefreshToken();
 }

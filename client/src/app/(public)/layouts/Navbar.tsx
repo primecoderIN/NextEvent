@@ -13,6 +13,7 @@ import {
   ChevronRight,
   User,
   Pencil,
+  RefreshCw,
 } from "lucide-react"
 import { Button } from "@/shared/ui/button"
 import { BottomSheet } from "@/shared/ui/sheet"
@@ -35,7 +36,7 @@ export const Navbar = () => {
   const [sheetOpen, setSheetOpen] = useState(false)
   const navigate = useNavigate()
   const { t } = useTranslation(["nav", "common"])
-  const { user, logout } = useAuth()
+  const { user, logout, switchProfile } = useAuth()
   const { can } = useAuthorization()
   const canCreateEvents = can(Permissions.EventsCreate)
 
@@ -69,10 +70,8 @@ export const Navbar = () => {
               <div className="flex items-center gap-4">
                 {canCreateEvents ? (
                   <>
-                    <RequireRole role={Roles.Organizer}>
-                      <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.OrganizerDashboard)} className="gap-2 bg-primary/10 text-primary hover:bg-primary/20 border-0">
-                        Organizer Dashboard
-                      </Button>
+                    <RequireRole role={Roles.Admin}>
+                      {/* Placeholder for admin if needed, otherwise just empty */}
                     </RequireRole>
                     <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.CreateEvent)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
                       <Plus className="h-4 w-4" />
@@ -199,20 +198,25 @@ export const Navbar = () => {
           {/* CTA */}
           {user && (
             <div className="mt-2 mb-2 flex flex-col gap-2">
-              <RequireRole role={Roles.Organizer}>
-                <button
-                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-primary bg-primary/10 transition-colors hover:bg-primary/20 active:bg-primary/30"
-                  onClick={() => { 
-                    setSheetOpen(false) 
-                    navigate(RoutePaths.OrganizerDashboard) 
-                  }}
-                >
-                  <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                    <CalendarDays className="h-4 w-4" />
-                  </div>
-                  Organizer Dashboard
-                </button>
-              </RequireRole>
+              {user.availableProfiles?.map(profile => (
+                  <button
+                    key={profile}
+                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm transition-colors ${user.activeProfile === profile ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-foreground'}`}
+                    onClick={async () => { 
+                      setSheetOpen(false);
+                      if (user.activeProfile !== profile) {
+                        await switchProfile(profile as "Member" | "Organizer");
+                        if (profile === "Organizer") navigate(RoutePaths.OrganizerDashboard);
+                        else navigate(RoutePaths.Home);
+                      }
+                    }}
+                  >
+                    <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${user.activeProfile === profile ? 'bg-primary/20' : 'bg-muted'}`}>
+                      <RefreshCw className="h-4 w-4" />
+                    </div>
+                    Switch to {profile}
+                  </button>
+              ))}
               <button
                 className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-80"
                 style={{

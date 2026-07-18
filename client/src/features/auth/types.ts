@@ -5,6 +5,8 @@ export interface UserDTO {
   displayName: string;
   token: string;
   email: string;
+  activeProfile: "Member" | "Organizer";
+  availableProfiles: string[];
 }
 
 export interface UserDTOWithRoles extends UserDTO {

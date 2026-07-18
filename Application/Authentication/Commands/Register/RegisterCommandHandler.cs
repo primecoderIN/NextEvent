@@ -59,7 +59,7 @@ public class RegisterCommandHandler(UserManager<User> userManager, ITokenService
             DisplayName = user.DisplayName ?? user.UserName!,
             Image = user.ImageUrl,
             // Pass roles to CreateToken so they are embedded in the JWT claims
-            Token = tokenService.CreateToken(user, roles),
+            Token = tokenService.CreateToken(user, roles, user.ActiveProfile),
             Username = user.UserName!,
             Roles = roles
         };

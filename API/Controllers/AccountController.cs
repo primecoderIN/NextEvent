@@ -90,6 +90,23 @@ public class AccountController : BaseApiController
         return OkResponse<object>(null!, "Logged out successfully");
     }
 
+    /// <summary>
+    /// Switches the active profile of the current user.
+    /// </summary>
+    /// <param name="command">Profile switch details.</param>
+    /// <response code="200">Profile switched successfully.</response>
+    /// <response code="401">User is not authorized to switch to this profile.</response>
+    [Authorize]
+    [HttpPost("switch-profile")]
+    [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<ApiResponse<LoginResponseDto>>> SwitchProfile([FromBody] Application.Authentication.Commands.SwitchProfile.SwitchProfileCommand command)
+    {
+        var result = await Mediator.Send(command);
+        SetRefreshTokenCookie(result.RefreshToken);
+        return OkResponse(result.User, $"Switched to {command.Profile} profile");
+    }
+
     private void SetRefreshTokenCookie(string refreshToken)
     {
         var cookieOptions = new CookieOptions

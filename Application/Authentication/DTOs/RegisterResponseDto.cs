@@ -7,4 +7,6 @@ public class RegisterResponseDto
     public required string DisplayName { get; set; }
     public string? Image { get; set; }
     public IEnumerable<string>? Roles { get; set; }
+    public string ActiveProfile { get; set; } = "Member";
+    public IEnumerable<string> AvailableProfiles { get; set; } = new List<string> { "Member" };
 }

@@ -10,6 +10,7 @@ interface AuthContextType {
   loading: boolean;
   login: (data: LoginFormValues) => Promise<UserDTOWithRoles>;
   register: (data: RegisterFormValues) => Promise<UserDTOWithRoles>;
+  switchProfile: (profile: "Member" | "Organizer") => Promise<void>;
   logout: () => Promise<void>;
   setToken: (token: string) => void;
 }
@@ -69,6 +70,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return user;
   };
 
+  const switchProfile = async (profile: "Member" | "Organizer") => {
+    const response = await axiosHttpAgent.post<ApiResponse<UserDTOWithRoles>>("/account/switch-profile", { profile });
+    const updatedUser = response.data.data!;
+    setToken(updatedUser.token);
+    setUser(updatedUser);
+  };
+
   const logout = async () => {
     try {
       await axiosHttpAgent.post("/account/logout");
@@ -83,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, setToken }}>
+    <AuthContext.Provider value={{ user, loading, login, register, switchProfile, logout, setToken }}>
       {children}
     </AuthContext.Provider>
   );

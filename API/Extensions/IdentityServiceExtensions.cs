@@ -41,6 +41,15 @@ public static class IdentityServiceExtensions
                 };
             });
 
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("ActiveOrganizer", policy =>
+            {
+                policy.RequireRole(Domain.Constants.RoleConstants.Organizer);
+                policy.RequireClaim("ActiveProfile", "Organizer");
+            });
+        });
+
         services.AddScoped<ITokenService, TokenService>();
 
         return services;

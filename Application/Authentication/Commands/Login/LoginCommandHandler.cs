@@ -4,10 +4,12 @@ using Application.Authentication.Interfaces;
 using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Application.Core.Interfaces;
 
 namespace Application.Authentication.Commands.Login;
 
-public class LoginCommandHandler(UserManager<User> userManager, ITokenService tokenService) 
+public class LoginCommandHandler(UserManager<User> userManager, ITokenService tokenService, IAppDBContext appDbContext) 
     : IRequestHandler<LoginCommand, AuthResult<LoginResponseDto>>
 {
     public async Task<AuthResult<LoginResponseDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -23,18 +25,29 @@ public class LoginCommandHandler(UserManager<User> userManager, ITokenService to
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
         
+        // Heal legacy accounts (seeded before ActiveProfile existed) where DB contains NULL or empty string
+        if (string.IsNullOrEmpty(user.ActiveProfile))
+        {
+            user.ActiveProfile = "Member";
+        }
+        
         await userManager.UpdateAsync(user);
 
         var roles = await userManager.GetRolesAsync(user);
 
+        var isOrganizer = roles.Contains(Domain.Constants.RoleConstants.Organizer) || await appDbContext.Organizations.AnyAsync(o => o.OwnerUserId == user.Id, cancellationToken) || await appDbContext.OrganizationMembers.AnyAsync(m => m.UserId == user.Id && m.Status == Domain.OrganizationMemberStatus.Active, cancellationToken);
+        var availableProfiles = new List<string> { "Member" };
+        if (isOrganizer) availableProfiles.Add("Organizer");
+
         var userDto = new LoginResponseDto
         {
             DisplayName = user.DisplayName ?? user.UserName!,
-            // Pass roles to CreateToken so they are embedded in the JWT claims
-            Token = tokenService.CreateToken(user, roles),
+            Token = tokenService.CreateToken(user, roles, user.ActiveProfile),
             Username = user.UserName!,
             Image = user.ImageUrl,
-            Roles = roles
+            Roles = roles,
+            ActiveProfile = user.ActiveProfile,
+            AvailableProfiles = availableProfiles
         };
 
         return new AuthResult<LoginResponseDto>
