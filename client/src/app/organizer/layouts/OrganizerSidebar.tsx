@@ -19,11 +19,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard",             to: RoutePaths.OrganizerDashboard },
-  { icon: Building2,       label: "My Organizations",      to: RoutePaths.OrganizerOrganizationDetail },
-  { icon: Calendar,        label: "Events",                to: RoutePaths.EditEvent }, // or some organizer events list if exists
-  { icon: Users,           label: "Attendees",             to: "#" },
-  { icon: BarChart3,       label: "Analytics",             to: "#" },
-  { icon: Settings,        label: "Settings",              to: "#" },
+  { icon: Building2,       label: "My Organizations",      to: "/organizer/organizations" },
+  { icon: Calendar,        label: "Events",                to: RoutePaths.OrganizerEvents }, 
+  { icon: Users,           label: "Attendees",             to: "/organizer/attendees" },
+  { icon: BarChart3,       label: "Analytics",             to: "/organizer/analytics" },
+  { icon: Settings,        label: "Settings",              to: "/organizer/settings" },
 ]
 
 export function OrganizerSidebar() {

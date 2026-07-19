@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type { UserDTOWithRoles, LoginFormValues, RegisterFormValues } from "../types";
 import type { ApiResponse } from "@/types/ApiResponse";
 import { axiosHttpAgent } from "@/shared/lib/axios";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -21,6 +22,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserDTOWithRoles | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const loadUser = useCallback(async () => {
     try {
@@ -75,6 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const updatedUser = response.data.data!;
     setToken(updatedUser.token);
     setUser(updatedUser);
+    queryClient.clear();
   };
 
   const logout = async () => {
@@ -85,6 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       localStorage.removeItem("token");
       setUser(null);
+      queryClient.clear();
       navigate("/");
       toast.success("Logged out successfully");
     }
