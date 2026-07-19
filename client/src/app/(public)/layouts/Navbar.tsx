@@ -71,7 +71,7 @@ export const Navbar = () => {
                 {canCreateEvents ? (
                   <>
                     <RequireRole role={Roles.Admin}>
-                      {/* Placeholder for admin if needed, otherwise just empty */}
+                      <>{/* Placeholder for admin if needed, otherwise just empty */}</>
                     </RequireRole>
                     <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.CreateEvent)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
                       <Plus className="h-4 w-4" />
