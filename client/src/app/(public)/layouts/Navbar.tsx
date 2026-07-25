@@ -78,12 +78,12 @@ export const Navbar = () => {
                       {t("createEvent", { ns: "common" })}
                     </Button>
                   </>
-                ) : (
+                ) : !user?.availableProfiles?.includes("Organizer") ? (
                   <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.StartOrganizer)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
                     <Plus className="h-4 w-4" />
                     Become Organizer
                   </Button>
-                )}
+                ) : null}
                 <span className="text-sm font-semibold">{user.displayName}</span>
                 <Button variant="outline" size="sm" onClick={logout}>
                   {t("logout", { ns: "common" })}
@@ -217,21 +217,39 @@ export const Navbar = () => {
                     Switch to {profile}
                   </button>
               ))}
-              <button
-                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-80"
-                style={{
-                  background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
-                }}
-                onClick={() => { 
-                  setSheetOpen(false) 
-                  navigate(canCreateEvents ? RoutePaths.CreateEvent : RoutePaths.StartOrganizer) 
-                }}
-              >
-                <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
-                  <Plus className="h-4 w-4" />
-                </div>
-                {canCreateEvents ? t("createEvent", { ns: "common" }) : "Become Organizer"}
-              </button>
+              {canCreateEvents ? (
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-80"
+                  style={{
+                    background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                  }}
+                  onClick={() => { 
+                    setSheetOpen(false) 
+                    navigate(RoutePaths.CreateEvent) 
+                  }}
+                >
+                  <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
+                    <Plus className="h-4 w-4" />
+                  </div>
+                  {t("createEvent", { ns: "common" })}
+                </button>
+              ) : !user?.availableProfiles?.includes("Organizer") ? (
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-80"
+                  style={{
+                    background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                  }}
+                  onClick={() => { 
+                    setSheetOpen(false) 
+                    navigate(RoutePaths.StartOrganizer) 
+                  }}
+                >
+                  <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center">
+                    <Plus className="h-4 w-4" />
+                  </div>
+                  Become Organizer
+                </button>
+              ) : null}
             </div>
           )}
 

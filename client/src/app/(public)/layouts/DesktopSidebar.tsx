@@ -86,14 +86,25 @@ export function DesktopSidebar() {
 
       {/* CTA */}
       <div className="px-3 mb-3 shrink-0">
-        <button
-          onClick={() => navigate(canCreateEvents ? RoutePaths.CreateEvent : RoutePaths.StartOrganizer)}
-          className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-          style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
-        >
-          <Plus className="h-4 w-4" />
-          {canCreateEvents ? t("createEvent", { ns: "common" }) : "Become Organizer"}
-        </button>
+        {canCreateEvents ? (
+          <button
+            onClick={() => navigate(RoutePaths.CreateEvent)}
+            className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+            style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
+          >
+            <Plus className="h-4 w-4" />
+            {t("createEvent", { ns: "common" })}
+          </button>
+        ) : !user?.availableProfiles?.includes("Organizer") ? (
+          <button
+            onClick={() => navigate(RoutePaths.StartOrganizer)}
+            className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+            style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
+          >
+            <Plus className="h-4 w-4" />
+            Become Organizer
+          </button>
+        ) : null}
         
         {/* Removed redundant organizer button because popover switcher exists */}
 
