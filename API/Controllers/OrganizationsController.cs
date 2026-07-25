@@ -81,6 +81,7 @@ public class OrganizationsController : BaseApiController
     /// </summary>
     /// <response code="200">Organization found.</response>
     /// <response code="404">No organization exists with the given Id.</response>
+    [Authorize]
     [HttpGet(ApiRouteConstants.Organizations.Id)]
     [ProducesResponseType(typeof(ApiResponse<OrganizationDetailDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]

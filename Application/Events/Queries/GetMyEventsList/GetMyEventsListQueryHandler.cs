@@ -55,13 +55,12 @@ public class GetMyEventsListQueryHandler(
 
         var userId = currentUserService.GetCurrentUserId();
         
-        // Organizers can see all events in their orgs (including cancelled)
-        // But for other orgs, only see active events.
-        whereClauses.Add(@"(e.IsCancelled = 0 OR e.OrganizationId IN (
-            SELECT o.Id FROM Organizations o WHERE o.OwnerUserId = @CurrentUserId
+        // Organizers can only see events for organizations they own or are an active member of.
+        whereClauses.Add(@"e.OrganizationId IN (
+            SELECT o.Id FROM Organizations o WHERE o.OwnerUserId = @CurrentUserId AND o.IsDeleted = 0
             UNION
-            SELECT om.OrganizationId FROM OrganizationMembers om WHERE om.UserId = @CurrentUserId
-        ))");
+            SELECT om.OrganizationId FROM OrganizationMembers om WHERE om.UserId = @CurrentUserId AND om.Status = 1 AND om.IsDeleted = 0
+        )");
         parameters.Add("CurrentUserId", userId);
 
         var whereSql = whereClauses.Count > 0 ? "WHERE " + string.Join(" AND ", whereClauses) : "";

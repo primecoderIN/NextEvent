@@ -12,7 +12,9 @@ namespace Application.Organizations.Queries.GetOrganizationById;
 /// JOINs AspNetUsers to surface the owner's display name without a second round-trip.
 /// Soft-deleted organizations are excluded.
 /// </summary>
-public class GetOrganizationByIdQueryHandler(ISqlConnectionFactory connectionFactory)
+public class GetOrganizationByIdQueryHandler(
+    ISqlConnectionFactory connectionFactory,
+    ICurrentUserService currentUserService)
     : IRequestHandler<GetOrganizationByIdQuery, OrganizationDetailDto>
 {
     public async Task<OrganizationDetailDto> Handle(
@@ -20,6 +22,7 @@ public class GetOrganizationByIdQueryHandler(ISqlConnectionFactory connectionFac
         CancellationToken cancellationToken)
     {
         using var connection = connectionFactory.CreateConnection();
+        var userId = currentUserService.GetCurrentUserId();
 
         const string sql = """
             SELECT o.Id,
@@ -39,10 +42,15 @@ public class GetOrganizationByIdQueryHandler(ISqlConnectionFactory connectionFac
             INNER JOIN AspNetUsers u ON u.Id = o.OwnerUserId
             WHERE  o.Id        = @Id
               AND  o.IsDeleted = 0
+              AND (
+                  EXISTS (SELECT 1 FROM AspNetUserRoles ur INNER JOIN AspNetRoles r ON ur.RoleId = r.Id WHERE ur.UserId = @UserId AND r.Name = 'Admin')
+                  OR o.OwnerUserId = @UserId
+                  OR EXISTS (SELECT 1 FROM OrganizationMembers om WHERE om.OrganizationId = o.Id AND om.UserId = @UserId AND om.Status = 1 AND om.IsDeleted = 0)
+              )
             """;
 
         var dto = await connection.QueryFirstOrDefaultAsync<OrganizationDetailDto>(
-            sql, new { request.Id });
+            sql, new { request.Id, UserId = userId });
 
         if (dto is null)
             throw new NotFoundException(nameof(Organization), request.Id);
