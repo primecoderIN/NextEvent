@@ -3,15 +3,21 @@ using Application.Permissions.DTOs;
 using Dapper;
 using MediatR;
 
+using Domain.Constants;
+
 namespace Application.Permissions.Queries.GetAllPermissions;
 
-public class GetAllPermissionsQueryHandler(ISqlConnectionFactory connectionFactory) 
+public class GetAllPermissionsQueryHandler(
+    ISqlConnectionFactory connectionFactory,
+    IOrganizationAuthorizationService authorizationService) 
     : IRequestHandler<GetAllPermissionsQuery, List<PermissionDto>>
 {
     public async Task<List<PermissionDto>> Handle(
         GetAllPermissionsQuery request, 
         CancellationToken cancellationToken)
     {
+        // Require the 'roles.manage' permission to view available permissions
+        await authorizationService.AuthorizeAsync(request.OrganizationId, PermissionConstants.RolesManage, cancellationToken);
         using var connection = connectionFactory.CreateConnection();
 
         const string sql = """

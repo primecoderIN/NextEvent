@@ -13,7 +13,7 @@ import type { OrganizationRole } from "@/types/Organization"
 export function OrganizerManageRolesPage() {
   const { id } = useParams<{ id: string }>()
   const { data: roles, isLoading: isLoadingRoles, refetch: refetchRoles } = useOrganizationRolesList(id || "")
-  const { data: permissions, isLoading: isLoadingPermissions } = usePermissions()
+  const { data: permissions, isLoading: isLoadingPermissions } = usePermissions(id || "")
   const createRoleMutation = useCreateOrganizationRole()
   const updateRoleMutation = useUpdateOrganizationRole()
 

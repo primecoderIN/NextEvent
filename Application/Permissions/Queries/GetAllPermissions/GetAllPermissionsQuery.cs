@@ -9,4 +9,5 @@ namespace Application.Permissions.Queries.GetAllPermissions;
 /// </summary>
 public class GetAllPermissionsQuery : IRequest<List<PermissionDto>>
 {
+    public Guid OrganizationId { get; set; }
 }
