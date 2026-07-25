@@ -232,15 +232,15 @@ Every endpoint returns the same JSON shape regardless of outcome:
 
 Base URL: `https://localhost:5001/api`
 
-| Method | Endpoint | Status | Description |
+| Method | Endpoint | Authorization | Description |
 |---|---|---|---|
-| `GET` | `/events` | `200 OK` | List public active events (IsCancelled = 0) |
-| `GET` | `/events/my` | `200 OK` | List events for current organizer (Organizer only) |
-| `GET` | `/events/admin` | `200 OK` | List all events across the platform (Admin only) |
-| `GET` | `/events/{id}` | `200 OK` | Get event by ID |
-| `POST` | `/events` | `201 Created` | Create a new event |
-| `PUT` | `/events/{id}` | `200 OK` | Edit an existing event (partial update supported) |
-| `DELETE` | `/events/{id}` | `200 OK` | Delete an event |
+| `GET` | `/events` | Anonymous | List public active events (IsCancelled = 0) |
+| `GET` | `/events/my` | Platform `Organizer` | List events for current organizer |
+| `GET` | `/events/admin` | Platform `Admin` | List all events across the platform |
+| `GET` | `/events/{id}` | Anonymous | Get event by ID |
+| `POST` | `/events` | Authenticated | Create a new event |
+| `PUT` | `/events/{id}` | Authenticated | Edit an existing event (partial update supported) |
+| `DELETE` | `/events/{id}` | Authenticated | Delete an event |
 
 ### Organizations
 | Method | Endpoint | Authorization | Description |
@@ -255,32 +255,32 @@ Base URL: `https://localhost:5001/api`
 | `POST` | `/organizations/{id}/members/accept-invite`| Authenticated | Accept a pending organization invitation |
 
 ### Permissions
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/permissions` | Get catalogue of system permissions available for roles |
+| Method | Endpoint | Authorization | Description |
+|---|---|---|---|
+| `GET` | `/permissions` | Authenticated | Get catalogue of system permissions available for roles |
 
 ### Categories
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/categories` | Get all categories |
-| `POST` | `/categories` | Create a new category (Admin only) |
-| `GET` | `/categories/suggestions` | Get category suggestions (Admin only) |
-| `POST` | `/categories/suggest` | Suggest a new category (Authenticated users) |
-| `POST` | `/categories/{id}/approve` | Approve a category suggestion (Admin only) |
-| `POST` | `/categories/{id}/reject` | Reject a category suggestion (Admin only) |
+| Method | Endpoint | Authorization | Description |
+|---|---|---|---|
+| `GET` | `/categories` | Anonymous | Get all categories |
+| `POST` | `/categories` | Platform `Admin` | Create a new category |
+| `GET` | `/categories/suggestions` | Platform `Admin` | Get category suggestions |
+| `POST` | `/categories/suggest` | Authenticated | Suggest a new category |
+| `POST` | `/categories/{id}/approve` | Platform `Admin` | Approve a category suggestion |
+| `POST` | `/categories/{id}/reject` | Platform `Admin` | Reject a category suggestion |
 
 ### Account / Auth
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/account/register` | Register a new user |
-| `POST` | `/account/login` | Login user |
-| `POST` | `/account/refresh-token` | Get new access token using httpOnly cookie |
-| `POST` | `/account/logout` | Logout user |
+| Method | Endpoint | Authorization | Description |
+|---|---|---|---|
+| `POST` | `/account/register` | Anonymous | Register a new user |
+| `POST` | `/account/login` | Anonymous | Login user |
+| `POST` | `/account/refresh-token` | Anonymous | Get new access token using httpOnly cookie |
+| `POST` | `/account/logout` | Authenticated | Logout user |
 
 ### AI
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/ai/generate-description` | Gemini Pro generates description from details |
+| Method | Endpoint | Authorization | Description |
+|---|---|---|---|
+| `POST` | `/ai/generate-description` | Anonymous | Gemini Pro generates description from details |
 
 All URLs are **lowercase**. All responses use **camelCase** JSON property names and the `ApiResponse<T>` envelope.
 
