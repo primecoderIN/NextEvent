@@ -28,8 +28,17 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 | UI primitives | Radix UI (Dialog, Select, Slot) |
 | Component system | shadcn-style components (hand-rolled) |
 | HTTP client | Axios |
+| Data fetching & caching | TanStack Query (React Query v5) |
+| Form management | React Hook Form |
+| Validation | Zod |
+| Internationalization (i18n)| `react-i18next` + `i18next` |
+| Theming | `next-themes` (Dark/Light mode) |
+| Location Autocomplete | `@geoapify/react-geocoder-autocomplete` |
+| Date Picking | `react-day-picker` + `date-fns` |
+| Toast notifications | Sonner |
 | Icons | Lucide React |
 | Variant styles | class-variance-authority + clsx + tailwind-merge |
+| Animations | `tw-animate-css` |
 
 ### Key Design Decisions
 
@@ -51,6 +60,40 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 
 - **Profile Isolation (ActiveProfile)**  
   To provide a clean UX separation between "Member" (event attendee) and "Organizer" experiences, the `User` entity maintains an `ActiveProfile` state. This state is embedded into the JWT as a claim. The backend defines an `ActiveOrganizer` policy (requiring both the Organizer role AND the Organizer active profile claim) to protect organizer endpoints. The frontend mirrors this using a smart `<RequireProfile>` guard that prevents accidental cross-profile navigation, forcing explicit mode switching via the new `POST /api/account/switch-profile` endpoint without requiring multiple accounts.
+
+- **Optimized Partial Updates (Frontend Diffing)**
+  To minimize network payload size and reduce the risk of overwriting concurrent changes, frontend forms (like Event Updates and Role Management) are designed to perform a diff between the user's modifications and the original `defaultValues`. The client constructs a sparse payload containing *only* the explicitly modified fields, and the backend elegantly handles these via true partial updates (treating omitted fields as "do not update").
+
+- **First-Class Internationalization (i18n)**
+  The frontend is built from the ground up to support multiple languages using `i18next`. Language switching is seamless, and validation schemas (like Zod) are dynamically regenerated upon language change to instantly reflect localized error messages.
+
+- **Dynamic Theming**
+  The UI supports a dynamic Dark/Light mode toggle powered by `next-themes` and Tailwind CSS, seamlessly adjusting the aesthetic to the user's system preferences.
+
+---
+
+## Core Experiences (Frontend Screens)
+
+The platform is strictly partitioned into three distinct user experiences, each with its own layout, navigation, and features:
+
+### 1. Public / Member Experience
+The default view for guests and logged-in members. Focuses on discovery and consumption.
+- **Home/Discovery Feed**: Browse upcoming public events globally.
+- **Event Details Screen**: View rich details, dates, and locations about a specific event.
+- **Organization Public Profile**: A dedicated landing page for each organization showing their cover image, logo, description, contact details, and a feed of all their upcoming active events. 
+
+### 2. Organizer Dashboard
+Accessible only if the user is an active member of an organization and has switched their profile to "Organizer".
+- **Dashboard Home**: Overview of the organization's events and status.
+- **Event Management**: Dedicated forms to create, edit, cancel, and publish events. Integrates location autocomplete (Geoapify) and AI-assisted description generation.
+- **Role Management**: Define custom RBAC roles with specific permissions (e.g., `events.create`, `roles.manage`).
+- **Organization Settings**: Update the organization's public profile data (description, website, contact info).
+
+### 3. Platform Admin Dashboard
+Accessible only to global platform Administrators.
+- **Pending Organizations**: Review, approve, or reject new organizations that have registered to use the platform.
+- **Category Management**: Create and manage global event categories.
+- **Platform Analytics**: Global view of the entire ecosystem.
 
 ---
 
