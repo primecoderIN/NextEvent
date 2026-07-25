@@ -165,4 +165,60 @@ public class OrganizationsController : BaseApiController
 
         return OkResponse(profile, "Organization profile retrieved successfully.");
     }
+    /// <summary>
+    /// Invites a registered user to join the organization.
+    /// The invited user receives the 'Member' system role by default.
+    /// Requires the caller to have the 'members.invite' permission.
+    /// </summary>
+    /// <response code="200">User invited successfully. Returns the new membership Id.</response>
+    /// <response code="400">Validation failure or user is already a member/invited.</response>
+    /// <response code="401">No valid JWT supplied.</response>
+    /// <response code="403">Caller lacks the required permission in the organization.</response>
+    /// <response code="404">User with the given email not found.</response>
+    [Authorize]
+    [HttpPost("{id:guid}/members/invite")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<object>>> InviteMember(
+        Guid id,
+        [FromBody] Application.Organizations.Commands.InviteOrganizationMember.InviteOrganizationMemberCommand command,
+        CancellationToken cancellationToken)
+    {
+        // Ensure the ID from the route matches the ID in the command (if you want to keep it clean)
+        command.OrganizationId = id;
+        
+        var membershipId = await Mediator.Send(command, cancellationToken);
+        
+        return OkResponse((object)new { id = membershipId }, "User invited successfully.");
+    }
+    /// <summary>
+    /// Accepts an invitation to join the organization.
+    /// The caller must be the user who was invited (must be authenticated).
+    /// </summary>
+    /// <response code="200">Invitation accepted successfully.</response>
+    /// <response code="400">Invitation is invalid (declined or already active).</response>
+    /// <response code="401">No valid JWT supplied.</response>
+    /// <response code="404">Invitation not found.</response>
+    [Authorize]
+    [HttpPost("{id:guid}/members/accept-invite")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<object>>> AcceptInvite(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var command = new Application.Organizations.Commands.AcceptOrganizationInvitation.AcceptOrganizationInvitationCommand
+        {
+            OrganizationId = id
+        };
+        
+        await Mediator.Send(command, cancellationToken);
+        
+        return OkResponse<object>(null!, "Invitation accepted successfully.");
+    }
 }

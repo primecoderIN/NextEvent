@@ -621,7 +621,7 @@ Indexes:
 
 Business rules:
 
-- A user may own multiple organizations unless product policy later restricts this.
+- A user may only belong to one organization (active status) across the entire platform. Therefore, a user can only own ONE organization.
 - Every organization must have exactly one owner.
 - Owner must be an active organization member.
 - Slug must be unique.
@@ -650,7 +650,9 @@ Indexes:
 - `IX_OrganizationMembers_UserId`
 - `IX_OrganizationMembers_Status`
 
-#### OrganizationRoles
+Business rules:
+
+- **Single-Organization Policy**: A user can only have one `Active` membership across the entire platform. They cannot create a new organization, receive an invite to a new organization, or accept an invite if they are already an active member anywhere.
 
 | Column | Type | Constraints |
 |---|---|---|

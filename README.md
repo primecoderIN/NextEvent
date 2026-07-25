@@ -43,6 +43,9 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 - **Tenant-Specific RBAC**  
   Unlike ASP.NET Identity roles which are platform-wide (e.g., a user is an "Admin" everywhere), we implemented a custom Organization RBAC model. Users hold `OrganizationRoles` tied specifically to an `OrganizationId`, composed of granular `Permissions` (like `events.create`). This isolates authorization boundaries, preventing role-bleeding across different organizations the user might belong to.
 
+- **Single-Organization Policy**
+  Users are restricted to an **Active** membership in at most one organization across the entire platform. Centralized checks in `IOrganizationMemberService` prevent a user from creating a new organization, receiving an invitation, or accepting an invitation if they are already part of any organization.
+
 - **Profile Isolation (ActiveProfile)**  
   To provide a clean UX separation between "Member" (event attendee) and "Organizer" experiences, the `User` entity maintains an `ActiveProfile` state. This state is embedded into the JWT as a claim. The backend defines an `ActiveOrganizer` policy (requiring both the Organizer role AND the Organizer active profile claim) to protect organizer endpoints. The frontend mirrors this using a smart `<RequireProfile>` guard that prevents accidental cross-profile navigation, forcing explicit mode switching via the new `POST /api/account/switch-profile` endpoint without requiring multiple accounts.
 
@@ -237,14 +240,16 @@ Base URL: `https://localhost:5001/api`
 | `DELETE` | `/events/{id}` | `200 OK` | Delete an event |
 
 ### Organizations
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/organizations` | Create a new organization (seeds default roles) |
-| `GET` | `/organizations/{id}` | Get organization details by ID |
-| `GET` | `/organizations/{slug}` | Get public organization profile + upcoming events (AllowAnonymous) |
-| `POST` | `/organizations/{id}/approve` | Approve a pending organization (Admin only) |
-| `POST` | `/organizations/{id}/roles` | Create a custom organization role |
-| `PUT` | `/organizations/{id}/roles/{roleId}` | Update an organization role (name, description, permissions) |
+| Method | Endpoint | Authorization | Description |
+|---|---|---|---|
+| `POST` | `/organizations` | Authenticated | Create a new organization (seeds default roles) |
+| `GET` | `/organizations/{id}` | Anonymous | Get organization details by ID |
+| `GET` | `/organizations/{slug}` | Anonymous | Get public organization profile + upcoming events |
+| `POST` | `/organizations/{id}/approve` | Platform `Admin` | Approve a pending organization |
+| `POST` | `/organizations/{id}/roles` | Org `roles.manage` | Create a custom organization role |
+| `PUT` | `/organizations/{id}/roles/{roleId}` | Org `roles.manage` | Update an organization role |
+| `POST` | `/organizations/{id}/members/invite` | Org `members.invite` | Invite a user to the organization via email |
+| `POST` | `/organizations/{id}/members/accept-invite`| Authenticated | Accept a pending organization invitation |
 
 ### Permissions
 | Method | Endpoint | Description |

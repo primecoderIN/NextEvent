@@ -2,7 +2,7 @@ namespace Domain.Constants;
 
 /// <summary>
 /// System role names seeded into every new Organization's OrganizationRoles table.
-/// These are the 5 roles listed in Architecture.md §4.2.
+/// These are the 6 roles listed in Architecture.md §4.2.
 ///
 /// "System roles" (IsSystemRole = true) cannot be renamed or deleted by org admins
 /// because the Owner role in particular is load-bearing for ownership transfer logic.
@@ -14,6 +14,7 @@ public static class OrganizationRoleConstants
     public const string EventManager   = "Event Manager";
     public const string FinanceManager = "Finance Manager";
     public const string CheckInStaff   = "Check-In Staff";
+    public const string Member         = "Member";
 
     /// <summary>
     /// Defines which permissions are pre-assigned to each system role when an
@@ -26,6 +27,7 @@ public static class OrganizationRoleConstants
     ///   Event Manager  → manage event lifecycle only
     ///   Finance Manager→ view orders and analytics
     ///   Check-In Staff → check in attendees only
+    ///   Member         → basic viewing access (least privilege)
     /// </summary>
     public static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> DefaultPermissions =
         new Dictionary<string, IReadOnlyList<string>>
@@ -89,6 +91,11 @@ public static class OrganizationRoleConstants
             [
                 PermissionConstants.OrganizationView,
                 PermissionConstants.AttendeesCheckin,
+            ],
+
+            [Member] =
+            [
+                PermissionConstants.OrganizationView,
             ],
         };
 }

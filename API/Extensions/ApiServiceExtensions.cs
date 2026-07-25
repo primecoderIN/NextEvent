@@ -53,6 +53,12 @@ public static class ApiServiceExtensions
         // Register the application-level abstraction for Identity role assignment.
         // Keeps the Application layer free of direct UserManager dependencies.
         services.AddScoped<IIdentityService, IdentityService>();
+        
+        // Register the centralized organization authorization service
+        services.AddScoped<IOrganizationAuthorizationService, Application.Core.Services.OrganizationAuthorizationService>();
+
+        // Register the centralized membership service for querying OrganizationMembers
+        services.AddScoped<IOrganizationMemberService, Application.Core.Services.OrganizationMemberService>();
 
         return services;
     }

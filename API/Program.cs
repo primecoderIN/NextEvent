@@ -57,6 +57,9 @@ try
 {
     var context = services.GetRequiredService<AppDBContext>();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    
+    // We use our custom Domain.User class (which extends IdentityUser with app-specific properties).
+    // The explicit 'Domain.' namespace prevents collisions with other common 'User' types in ASP.NET Core.
     var userManager = services.GetRequiredService<UserManager<Domain.User>>();
     await context.Database.MigrateAsync();  //pending migration will be done //DB will be created if not created
     await DBInitializer.SeedData(context, roleManager, userManager); //Update data in database.

@@ -12,7 +12,8 @@ namespace Application.Events.Commands.CreateEvent;
 // HTTP concerns and makes it testable without a request context.
 public class CreateEventCommandHandler(
     IAppDBContext context,
-    ICurrentUserService currentUserService) : IRequestHandler<CreateEventCommand, Guid>
+    ICurrentUserService currentUserService,
+    IOrganizationAuthorizationService authorizationService) : IRequestHandler<CreateEventCommand, Guid>
 {
     public async Task<Guid> Handle(
         CreateEventCommand request,
@@ -32,19 +33,10 @@ public class CreateEventCommandHandler(
             throw new NotFoundException("Organization", request.Event.OrganizationId);
 
         // ── 3. RBAC: caller must be an active member with events.create ────────
-        var hasPermission = await context.OrganizationMembers
-            .Where(m => m.OrganizationId == request.Event.OrganizationId
-                     && m.UserId == currentUserId
-                     && m.Status == Domain.OrganizationMemberStatus.Active)
-            .SelectMany(m => m.MemberRoles)
-            .Select(mr => mr.Role!)
-            .SelectMany(r => r.RolePermissions)
-            .Select(rp => rp.Permission!)
-            .AnyAsync(p => p.Code == PermissionConstants.EventsCreate, cancellationToken);
-
-        if (!hasPermission)
-            throw new ForbiddenAccessException(
-                "You do not have permission to create events in this organization.");
+        await authorizationService.AuthorizeAsync(
+            request.Event.OrganizationId, 
+            PermissionConstants.EventsCreate, 
+            cancellationToken);
 
         // ── 4. Create the event ────────────────────────────────────────────────
         var eventEntity = new Domain.Event

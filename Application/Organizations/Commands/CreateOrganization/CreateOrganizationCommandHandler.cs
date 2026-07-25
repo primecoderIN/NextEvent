@@ -22,7 +22,8 @@ namespace Application.Organizations.Commands.CreateOrganization;
 /// </summary>
 public class CreateOrganizationCommandHandler(
     IAppDBContext context,
-    ICurrentUserService currentUserService)
+    ICurrentUserService currentUserService,
+    IOrganizationMemberService memberService)
     : IRequestHandler<CreateOrganizationCommand, Guid>
 {
     public async Task<Guid> Handle(
@@ -32,6 +33,11 @@ public class CreateOrganizationCommandHandler(
         // ── 0. Resolve current user ───────────────────────────────────────────
         var userId = currentUserService.GetCurrentUserId()
             ?? throw new UnauthorizedException("You must be authenticated to create an organization.");
+
+        // ── 0.5. Enforce Single-Org Business Rule ─────────────────────────────
+        var isActiveAnywhere = await memberService.IsActiveMemberOfAnyOrganizationAsync(userId, cancellationToken);
+        if (isActiveAnywhere)
+            throw new BusinessRuleException("You are already an active member of an organization and cannot create a new one.");
 
         var dto = request.Organization;
 

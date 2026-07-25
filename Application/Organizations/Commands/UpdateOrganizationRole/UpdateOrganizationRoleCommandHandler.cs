@@ -9,7 +9,8 @@ namespace Application.Organizations.Commands.UpdateOrganizationRole;
 
 public class UpdateOrganizationRoleCommandHandler(
     IAppDBContext context,
-    ICurrentUserService currentUserService)
+    ICurrentUserService currentUserService,
+    IOrganizationAuthorizationService authorizationService)
     : IRequestHandler<UpdateOrganizationRoleCommand>
 {
     public async Task Handle(
@@ -20,18 +21,7 @@ public class UpdateOrganizationRoleCommandHandler(
             ?? throw new UnauthorizedException("User not authenticated.");
 
         // 1. Authorize: Does the user have 'roles.manage' in this organization?
-        var hasPermission = await context.OrganizationMembers
-            .Where(m => m.OrganizationId == request.OrganizationId 
-                     && m.UserId == userId 
-                     && m.Status == OrganizationMemberStatus.Active)
-            .SelectMany(m => m.MemberRoles)
-            .Select(mr => mr.Role!)
-            .SelectMany(r => r.RolePermissions)
-            .Select(rp => rp.Permission!)
-            .AnyAsync(p => p.Code == PermissionConstants.RolesManage, cancellationToken);
-
-        if (!hasPermission)
-            throw new ForbiddenAccessException("You do not have permission to manage roles in this organization.");
+        await authorizationService.AuthorizeAsync(request.OrganizationId, PermissionConstants.RolesManage, cancellationToken);
 
         // 2. Load the role including its current permissions
         var role = await context.OrganizationRoles

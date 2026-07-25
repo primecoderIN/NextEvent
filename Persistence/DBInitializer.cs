@@ -40,15 +40,17 @@ public class DBInitializer
         // -----------------------------------------------------------------
         // Seed organization permissions (idempotent)
         //
-        // Code is the stable machine key — it is used as the idempotency
-        // anchor. If a row with the same Code already exists we upsert the
-        // human-readable fields (Name, Description, Category) so that display
-        // label changes in PermissionConstants are picked up automatically on
-        // the next app restart, without requiring a new migration.
+        // 1. Global Catalogue Setup: We populate the central Permissions table with 
+        //    all available permissions defined in codebase (PermissionConstants.All).
+        //    This table is global and organization-independent — it is the catalogue every org draws from.
         //
-        // We do NOT create organizations here; this table is global and
-        // organization-independent — it is the catalogue every org draws from.
+        // 4. Why it's done this way: By doing this upsert, it guarantees that if you ever change 
+        //    a permission's description, name, or category in C# code, the DB will automatically 
+        //    sync those display labels on app restart, without requiring a manual migration.
         // -----------------------------------------------------------------
+        
+        // 2. Fetching Existing Records: Query the DB for all permission Codes already saved 
+        //    and store in a highly-efficient HashSet. Code acts as the stable unique identifier (anchor).
         var existingCodes = await context.Permissions
             .AsNoTracking()
             .Select(p => p.Code)
@@ -56,11 +58,12 @@ public class DBInitializer
 
         bool permissionsChanged = false;
 
+        // 3. Insert or Update (Upsert): Loop through every permission currently defined
         foreach (var (code, name, description, category) in PermissionConstants.All)
         {
             if (!existingCodes.Contains(code))
             {
-                // New permission — insert it
+                // 3a. Insert (New): Code not found in DB, insert a brand new Permission record.
                 context.Permissions.Add(new Permission
                 {
                     Code        = code,
@@ -72,8 +75,8 @@ public class DBInitializer
             }
             else
             {
-                // Existing permission — upsert display fields so label changes
-                // in PermissionConstants propagate without a manual DB edit.
+                // 3b. Update (Existing): Code exists, check if human-readable fields differ.
+                // If they differ, update the existing DB record to sync with codebase.
                 var existing = await context.Permissions.SingleAsync(p => p.Code == code);
                 if (existing.Name != name || existing.Description != description || existing.Category != category)
                 {
@@ -85,6 +88,8 @@ public class DBInitializer
             }
         }
 
+        // 5. Saving Changes: Track if inserts/updates occurred. Only hit the database 
+        //    with SaveChangesAsync if actual modifications were made for efficiency.
         if (permissionsChanged)
         {
             await context.SaveChangesAsync();
