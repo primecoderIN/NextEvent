@@ -17,7 +17,7 @@ public class PermissionsController : BaseApiController
     /// </summary>
     /// <response code="200">Returns the list of permissions grouped by category.</response>
     /// <response code="401">No valid JWT supplied.</response>
-    [Authorize]
+    [Authorize(Policy = "ActiveOrganizer")]
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<List<PermissionDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
