@@ -50,7 +50,12 @@ const rolePermissions: Record<RoleName, Permission[]> = {
 export const PermissionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
 
-  const roles = user?.roles ?? [];
+  const roles = (user?.roles ?? []).filter((role) => {
+    if (role.toLowerCase() === Roles.Organizer.toLowerCase() && user?.activeProfile !== "Organizer") {
+      return false;
+    }
+    return true;
+  });
 
   const hasRole = (role: RoleName): boolean =>
     roles.some((userRole) => userRole.toLowerCase() === role.toLowerCase());
