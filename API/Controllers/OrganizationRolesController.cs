@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers;
 
 [Route(ApiRouteConstants.Organizations.Base)]
+[Authorize(Policy = "ActiveOrganizer")]
 public class OrganizationRolesController : BaseApiController
 {
     /// <summary>
@@ -18,7 +19,6 @@ public class OrganizationRolesController : BaseApiController
     /// </summary>
     /// <response code="200">Returns list of organization roles.</response>
     /// <response code="401">No valid JWT supplied.</response>
-    [Authorize]
     [HttpGet(ApiRouteConstants.Organizations.Roles)]
     [ProducesResponseType(typeof(ApiResponse<List<OrganizationRoleDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -42,7 +42,6 @@ public class OrganizationRolesController : BaseApiController
     /// <response code="401">No valid JWT supplied.</response>
     /// <response code="403">User lacks the required permission in the organization.</response>
     /// <response code="409">Role name already exists or invalid permission codes provided.</response>
-    [Authorize]
     [HttpPost(ApiRouteConstants.Organizations.Roles)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -73,7 +72,6 @@ public class OrganizationRolesController : BaseApiController
     /// <response code="403">User lacks the required permission in the organization.</response>
     /// <response code="404">Role not found.</response>
     /// <response code="409">Role name already exists, attempted to rename system role, or invalid permission codes.</response>
-    [Authorize]
     [HttpPut(ApiRouteConstants.Organizations.Roles + "/{roleId:guid}")]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]

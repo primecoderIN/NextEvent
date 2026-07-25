@@ -3,15 +3,21 @@ using Application.Organizations.DTOs;
 using Dapper;
 using MediatR;
 
+using Domain.Constants;
+
 namespace Application.Organizations.Queries.GetOrganizationRoles;
 
-public class GetOrganizationRolesListQueryHandler(ISqlConnectionFactory connectionFactory)
+public class GetOrganizationRolesListQueryHandler(
+    ISqlConnectionFactory connectionFactory,
+    IOrganizationAuthorizationService authorizationService)
     : IRequestHandler<GetOrganizationRolesListQuery, List<OrganizationRoleDto>>
 {
     public async Task<List<OrganizationRoleDto>> Handle(
         GetOrganizationRolesListQuery request,
         CancellationToken cancellationToken)
     {
+        await authorizationService.AuthorizeAsync(request.OrganizationId, PermissionConstants.RolesManage, cancellationToken);
+
         using var connection = connectionFactory.CreateConnection();
 
         const string sql = """
