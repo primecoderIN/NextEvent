@@ -57,14 +57,27 @@ export function OrganizerManageRolesPage() {
     
     try {
       if (editingRole) {
+        const payload: Partial<{ name: string; description: string; permissions: string[] }> = {}
+        
+        if (roleName.trim() !== editingRole.name) payload.name = roleName.trim()
+        if (roleDesc.trim() !== (editingRole.description || "")) payload.description = roleDesc.trim()
+        
+        const currentPerms = new Set(editingRole.permissions)
+        const permsChanged = selectedPerms.size !== currentPerms.size || 
+          Array.from(selectedPerms).some(p => !currentPerms.has(p))
+          
+        if (permsChanged) payload.permissions = Array.from(selectedPerms)
+        
+        if (Object.keys(payload).length === 0) {
+          toast.info("No changes made")
+          handleCancel()
+          return
+        }
+
         await updateRoleMutation.mutateAsync({
           id,
           roleId: editingRole.id,
-          payload: {
-            name: roleName,
-            description: roleDesc,
-            permissions: Array.from(selectedPerms),
-          }
+          payload
         })
         toast.success("Role updated successfully")
       } else {

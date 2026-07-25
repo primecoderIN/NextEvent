@@ -57,9 +57,9 @@ export type CreateOrganizationRoleDto = {
 }
 
 export type UpdateOrganizationRoleDto = {
-  name: string;
+  name?: string;
   description?: string | null;
-  permissions: string[];
+  permissions?: string[];
 }
 
 export type OrganizationRole = {
