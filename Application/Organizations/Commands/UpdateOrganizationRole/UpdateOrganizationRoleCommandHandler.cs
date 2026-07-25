@@ -34,69 +34,75 @@ public class UpdateOrganizationRoleCommandHandler(
         // 3. Handle System Role constraints
         if (role.IsSystemRole)
         {
-            if (role.Name != dto.Name)
+            if (dto.Name != null && role.Name != dto.Name)
             {
                 throw new BusinessRuleException($"Cannot rename the system role '{role.Name}'.");
             }
-            // For system roles, description updates are usually blocked or ignored, let's block it if changed
-            if (role.Description != dto.Description)
+            if (dto.Description != null && role.Description != dto.Description)
             {
                 throw new BusinessRuleException($"Cannot change the description of the system role '{role.Name}'.");
             }
         }
         else
         {
-            // 4. Validate uniqueness of the role name within the organization for custom roles
-            var nameExists = await context.OrganizationRoles
-                .AnyAsync(r => r.OrganizationId == request.OrganizationId 
-                            && r.Id != request.RoleId
-                            && r.Name.ToLower() == dto.Name.ToLower() 
-                            && !r.IsDeleted, cancellationToken);
-
-            if (nameExists)
-                throw new BusinessRuleException($"A role with the name '{dto.Name}' already exists in this organization.");
-
-            role.Name = dto.Name;
-            role.Description = dto.Description;
-        }
-
-        // 5. Load requested permissions from DB to ensure they are valid
-        var validPermissions = await context.Permissions
-            .Where(p => dto.Permissions.Contains(p.Code))
-            .ToListAsync(cancellationToken);
-
-        var missingPermissions = dto.Permissions.Except(validPermissions.Select(p => p.Code)).ToList();
-        if (missingPermissions.Count > 0)
-        {
-            throw new BusinessRuleException($"The following permission codes are invalid: {string.Join(", ", missingPermissions)}");
-        }
-
-        // 6. Update permissions
-        // Remove existing permissions that are not in the new list
-        var permissionsToRemove = role.RolePermissions
-            .Where(rp => !dto.Permissions.Contains(rp.Permission!.Code))
-            .ToList();
-
-        foreach (var rp in permissionsToRemove)
-        {
-            role.RolePermissions.Remove(rp);
-        }
-
-        // Add new permissions that are not currently mapped
-        var existingPermissionCodes = role.RolePermissions.Select(rp => rp.Permission!.Code).ToHashSet();
-        var permissionsToAdd = validPermissions
-            .Where(p => !existingPermissionCodes.Contains(p.Code))
-            .ToList();
-
-        foreach (var permission in permissionsToAdd)
-        {
-            role.RolePermissions.Add(new OrganizationRolePermission
+            // 4. Update Name and Description if provided
+            if (dto.Name != null)
             {
-                OrganizationRoleId = role.Id,
-                PermissionId = permission.Id,
-                Role = role,
-                Permission = permission
-            });
+                var nameExists = await context.OrganizationRoles
+                    .AnyAsync(r => r.OrganizationId == request.OrganizationId 
+                                && r.Id != request.RoleId
+                                && r.Name.ToLower() == dto.Name.ToLower() 
+                                && !r.IsDeleted, cancellationToken);
+
+                if (nameExists)
+                    throw new BusinessRuleException($"A role with the name '{dto.Name}' already exists in this organization.");
+
+                role.Name = dto.Name;
+            }
+
+            if (dto.Description != null)
+            {
+                role.Description = dto.Description;
+            }
+        }
+
+        // 5. Update permissions if provided
+        if (dto.Permissions != null)
+        {
+            var validPermissions = await context.Permissions
+                .Where(p => dto.Permissions.Contains(p.Code))
+                .ToListAsync(cancellationToken);
+
+            var missingPermissions = dto.Permissions.Except(validPermissions.Select(p => p.Code)).ToList();
+            if (missingPermissions.Count > 0)
+            {
+                throw new BusinessRuleException($"The following permission codes are invalid: {string.Join(", ", missingPermissions)}");
+            }
+
+            var permissionsToRemove = role.RolePermissions
+                .Where(rp => !dto.Permissions.Contains(rp.Permission!.Code))
+                .ToList();
+
+            foreach (var rp in permissionsToRemove)
+            {
+                role.RolePermissions.Remove(rp);
+            }
+
+            var existingPermissionCodes = role.RolePermissions.Select(rp => rp.Permission!.Code).ToHashSet();
+            var permissionsToAdd = validPermissions
+                .Where(p => !existingPermissionCodes.Contains(p.Code))
+                .ToList();
+
+            foreach (var permission in permissionsToAdd)
+            {
+                role.RolePermissions.Add(new OrganizationRolePermission
+                {
+                    OrganizationRoleId = role.Id,
+                    PermissionId = permission.Id,
+                    Role = role,
+                    Permission = permission
+                });
+            }
         }
 
         role.UpdatedAtUtc = DateTimeOffset.UtcNow;

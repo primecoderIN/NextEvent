@@ -196,7 +196,7 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
 
             b.Property(o => o.RowVersion)
                 .IsRowVersion()          // maps to SQL Server rowversion
-                .IsConcurrencyToken();   // EF optimistic concurrency guard
+                .IsConcurrencyToken();   // Enables Optimistic Concurrency in EF Core. If two users try to edit the same organization at the same time, EF will check this token. The second user to save will get a DbUpdateConcurrencyException instead of silently overwriting the first user's changes.
 
             // -----------------------------------------------------------------
             // Foreign keys → AspNetUsers
@@ -208,37 +208,37 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
             b.HasOne(o => o.Owner)
                 .WithMany()
                 .HasForeignKey(o => o.OwnerUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); //ells the database to throw an error if someone tries to delete the User who owns this Organization.
 
             // VerifiedByUserId — optional, set by Admin on approval
             b.HasOne(o => o.VerifiedBy)
                 .WithMany()
                 .HasForeignKey(o => o.VerifiedByUserId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Restrict) //If the admin user is deleted, it is restricted (Restrict), preventing the admin's deletion.
                 .IsRequired(false);
 
             // CreatedByUserId — required, immutable audit
             b.HasOne(o => o.CreatedBy)
                 .WithMany()
                 .HasForeignKey(o => o.CreatedByUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); //If the admin user is deleted, it is restricted (Restrict), preventing the admin's deletion.
 
             // -----------------------------------------------------------------
             // Indexes — matching Architecture.md §4.2
             // -----------------------------------------------------------------
 
             // UX_Organizations_Slug — slug must be globally unique
-            b.HasIndex(o => o.Slug)
-                .IsUnique()
-                .HasDatabaseName("UX_Organizations_Slug");
+            b.HasIndex(o => o.Slug) //Creates a database index on the Slug column to make lookups fast.
+                .IsUnique() //Enforces a unique constraint at the database level. No two organizations can have the same URL slug.
+                .HasDatabaseName("UX_Organizations_Slug"); //Explicitly names the index UX_Organizations_Slug instead of relying on EF's auto-generated naming convention
 
             // IX_Organizations_OwnerUserId — fast lookup of orgs by owner
-            b.HasIndex(o => o.OwnerUserId)
-                .HasDatabaseName("IX_Organizations_OwnerUserId");
+            b.HasIndex(o => o.OwnerUserId) //Creates a database index on the OwnerUserId column to make lookups fast.
+                .HasDatabaseName("IX_Organizations_OwnerUserId"); //Explicitly names the index IX_Organizations_OwnerUserId instead of relying on EF's auto-generated naming convention
 
             // IX_Organizations_Status — fast admin dashboard filter
-            b.HasIndex(o => o.Status)
-                .HasDatabaseName("IX_Organizations_Status");
+            b.HasIndex(o => o.Status) //Creates a database index on the Status column to make lookups fast.
+                .HasDatabaseName("IX_Organizations_Status"); //Explicitly names the index IX_Organizations_Status instead of relying on EF's auto-generated naming convention
         });
 
         // OrganizationMember entity configuration
@@ -322,6 +322,7 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
             b.Property(p => p.Name).IsRequired().HasMaxLength(120).HasColumnType("varchar(120)");
             b.Property(p => p.Category).IsRequired().HasMaxLength(80).HasColumnType("varchar(80)");
 
+            //Creating index on code property for faster lookup and ensure each code is unique
             b.HasIndex(p => p.Code).IsUnique().HasDatabaseName("UX_Permissions_Code");
         });
 
@@ -336,6 +337,7 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
             b.Property(r => r.IsDeleted).HasDefaultValue(false);
 
             // Organization FK
+            //Deleting organization deletes all organization roles
             b.HasOne(r => r.Organization)
                 .WithMany()
                 .HasForeignKey(r => r.OrganizationId)
@@ -360,15 +362,18 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
         });
 
         // OrganizationRolePermission entity configuration
+        //Deleting organization role or permission deletes organization role permission
         modelBuilder.Entity<OrganizationRolePermission>(b =>
         {
             b.HasKey(rp => new { rp.OrganizationRoleId, rp.PermissionId });
 
+            //One role can have many permission, when role is deleted, all permissions are deleted
             b.HasOne(rp => rp.Role)
                 .WithMany(r => r.RolePermissions)
                 .HasForeignKey(rp => rp.OrganizationRoleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            //One permission can have many role, when permission is deleted, all roles are deleted
             b.HasOne(rp => rp.Permission)
                 .WithMany(p => p.RolePermissions)
                 .HasForeignKey(rp => rp.PermissionId)
@@ -380,11 +385,13 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
         {
             b.HasKey(mr => new { mr.OrganizationMemberId, mr.OrganizationRoleId });
 
+            //One organization member can have many role, when organization member is deleted, all roles are deleted
             b.HasOne(mr => mr.Member)
                 .WithMany(m => m.MemberRoles)
                 .HasForeignKey(mr => mr.OrganizationMemberId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            //One organization role can have many member, when organization role is deleted, all members are deleted
             b.HasOne(mr => mr.Role)
                 .WithMany(r => r.MemberRoles)
                 .HasForeignKey(mr => mr.OrganizationRoleId)

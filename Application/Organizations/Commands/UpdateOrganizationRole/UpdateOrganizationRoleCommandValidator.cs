@@ -13,10 +13,8 @@ public class UpdateOrganizationRoleCommandValidator : AbstractValidator<UpdateOr
             .NotEmpty().WithMessage("RoleId is required.");
 
         RuleFor(x => x.Role.Name)
-            .NotEmpty().WithMessage("Role name is required.")
-            .MaximumLength(80).WithMessage("Role name must not exceed 80 characters.");
-
-        RuleFor(x => x.Role.Permissions)
-            .NotNull().WithMessage("Permissions list cannot be null.");
+            .NotEmpty().WithMessage("Role name cannot be empty if provided.")
+            .MaximumLength(80).WithMessage("Role name must not exceed 80 characters.")
+            .When(x => x.Role.Name != null);
     }
 }
