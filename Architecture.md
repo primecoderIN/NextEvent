@@ -473,6 +473,22 @@ ASP.NET Identity role proves platform-level capability.
 Organization membership and permissions prove organization-level capability.
 ```
 
+#### Tenant Isolation Rules
+
+To enforce strict multi-tenant isolation while supporting Platform Admins, the API layer follows these rules:
+
+1. **List Endpoints are Segmented:**
+   - Handlers returning lists of data are partitioned by role. For example, `GET /events/my` strictly filters events to only include those belonging to organizations where the caller is an active member or owner. Even if a caller attempts to supply another organization's ID, the query ignores it, preventing cross-tenant data leakage.
+   - Platform Admins use entirely separate list endpoints (e.g. `GET /events/admin` or `GET /organizations`) that return unsegmented data across the entire system.
+
+2. **Single-Item Endpoints use Unified Queries:**
+   - When fetching a specific resource by ID (e.g. `GET /organizations/{id}`), the query logic remains unified.
+   - The query handler enforces access dynamically by checking if the caller meets **any** of the following criteria:
+     - Caller has the Platform `Admin` role.
+     - Caller is the Organization's Owner.
+     - Caller is an `Active` member of the Organization.
+   - If the caller fails these checks, a `404 Not Found` is returned instead of `403 Forbidden` to prevent resource enumeration.
+
 ### 3.3 Database Convention
 
 Apply these conventions to all new business tables:

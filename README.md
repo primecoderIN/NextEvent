@@ -46,6 +46,9 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 - **Single-Organization Policy**
   Users are restricted to an **Active** membership in at most one organization across the entire platform. Centralized checks in `IOrganizationMemberService` prevent a user from creating a new organization, receiving an invitation, or accepting an invitation if they are already part of any organization.
 
+- **Strict Tenant Isolation**
+  Data visibility is strictly partitioned. Endpoints returning lists of data (like `GET /events/my`) inherently filter queries so an organizer only ever sees data belonging to their organization, actively ignoring any malicious query parameters attempting to cross tenant boundaries. Single-resource endpoints (like `GET /organizations/{id}`) unify logic for both members and Platform Admins, failing securely with a `404 Not Found` (rather than a 403) for unauthorized users to prevent resource enumeration.
+
 - **Profile Isolation (ActiveProfile)**  
   To provide a clean UX separation between "Member" (event attendee) and "Organizer" experiences, the `User` entity maintains an `ActiveProfile` state. This state is embedded into the JWT as a claim. The backend defines an `ActiveOrganizer` policy (requiring both the Organizer role AND the Organizer active profile claim) to protect organizer endpoints. The frontend mirrors this using a smart `<RequireProfile>` guard that prevents accidental cross-profile navigation, forcing explicit mode switching via the new `POST /api/account/switch-profile` endpoint without requiring multiple accounts.
 
