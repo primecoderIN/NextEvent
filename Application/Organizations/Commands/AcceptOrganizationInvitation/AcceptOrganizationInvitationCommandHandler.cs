@@ -1,7 +1,9 @@
 using Application.Core.Exceptions;
 using Application.Core.Interfaces;
 using Domain;
+using Domain.Constants;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Organizations.Commands.AcceptOrganizationInvitation;
@@ -9,7 +11,8 @@ namespace Application.Organizations.Commands.AcceptOrganizationInvitation;
 public class AcceptOrganizationInvitationCommandHandler(
     IAppDBContext context,
     ICurrentUserService currentUserService,
-    IOrganizationMemberService memberService) : IRequestHandler<AcceptOrganizationInvitationCommand>
+    IOrganizationMemberService memberService,
+    UserManager<User> userManager) : IRequestHandler<AcceptOrganizationInvitationCommand>
 {
     public async Task Handle(
         AcceptOrganizationInvitationCommand request,
@@ -35,6 +38,15 @@ public class AcceptOrganizationInvitationCommandHandler(
 
         membership.Status = OrganizationMemberStatus.Active;
         membership.JoinedAtUtc = DateTimeOffset.UtcNow;
+
+        // 3. Grant the Organizer platform role if they don't already have it
+        var user = await userManager.FindByIdAsync(currentUserId)
+            ?? throw new UnauthorizedException("User not found.");
+
+        if (!await userManager.IsInRoleAsync(user, RoleConstants.Organizer))
+        {
+            await userManager.AddToRoleAsync(user, RoleConstants.Organizer);
+        }
 
         await context.SaveChangesAsync(cancellationToken);
     }
