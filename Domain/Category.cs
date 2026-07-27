@@ -14,7 +14,7 @@ public class Category
 
     public int SortOrder { get; set; } = 0;
 
-    public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
-    public DateTimeOffset UpdatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 }

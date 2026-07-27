@@ -107,5 +107,13 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
         // IX_Organizations_Status — fast admin dashboard filter
         builder.HasIndex(o => o.Status)
             .HasDatabaseName("IX_Organizations_Status");
+
+        // -----------------------------------------------------------------
+        // Audit timestamp columns — datetime2(3): 6 bytes, ms precision, UTC
+        // -----------------------------------------------------------------
+        builder.Property(o => o.VerifiedAtUtc).HasColumnType("datetime2(3)");
+        builder.Property(o => o.CreatedAtUtc).IsRequired().HasColumnType("datetime2(3)");
+        builder.Property(o => o.UpdatedAtUtc).HasColumnType("datetime2(3)");
+        builder.Property(o => o.DeletedAtUtc).HasColumnType("datetime2(3)");
     }
 }

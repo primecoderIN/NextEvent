@@ -7,7 +7,8 @@ public class EventResponseDto
     public string Description { get; set; } = string.Empty;
     public Guid? CategoryId { get; set; }
     public string Category { get; set; } = string.Empty;
-    public DateTimeOffset Date { get; set; }
+    public DateTime Date { get; set; }
+    public string TimeZoneId { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string Venue { get; set; } = string.Empty;
     public bool IsCancelled { get; set; }

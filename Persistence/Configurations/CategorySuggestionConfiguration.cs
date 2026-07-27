@@ -40,5 +40,10 @@ public class CategorySuggestionConfiguration : IEntityTypeConfiguration<Category
             .IsRequired(false);
 
         builder.HasIndex(s => s.Status); // fast admin dashboard filter
+
+        // Timestamp columns — datetime2(3): 6 bytes, ms precision, UTC
+        builder.Property(s => s.ReviewedAt).HasColumnType("datetime2(3)");
+        builder.Property(s => s.CreatedAtUtc).IsRequired().HasColumnType("datetime2(3)");
+        builder.Property(s => s.UpdatedAtUtc).IsRequired().HasColumnType("datetime2(3)");
     }
 }

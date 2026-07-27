@@ -10,7 +10,8 @@ public class UpdateEventDto
     public string? Title { get; set; }
     public string? Description { get; set; }
     public Guid? CategoryId { get; set; }
-    public DateTimeOffset? Date { get; set; }
+    public DateTime? Date { get; set; }
+    public string? TimeZoneId { get; set; }
     public string? City { get; set; }
     public string? Venue { get; set; }
     public bool? IsCancelled { get; set; }

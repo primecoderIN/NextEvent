@@ -10,10 +10,11 @@ interface EventDetailHeroProps {
 
 export function EventDetailHero({ event }: EventDetailHeroProps) {
   const { t } = useTranslation("eventDetail")
-  const d = parseISO(event.date)
-  const month = format(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())), "MMM").toUpperCase()
-  const day = d.getUTCDate()
-  const weekday = format(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())), "EEE").toUpperCase()
+  const dateObj = new Date(event.date)
+  const tz = (event as any).timeZoneId || undefined
+  const month = dateObj.toLocaleDateString("en-US", { month: "short", timeZone: tz }).toUpperCase()
+  const day = dateObj.toLocaleDateString("en-US", { day: "numeric", timeZone: tz })
+  const weekday = dateObj.toLocaleDateString("en-US", { weekday: "short", timeZone: tz }).toUpperCase()
 
   return (
     <div className="relative w-full" style={{ aspectRatio: "16/7" }}>
@@ -50,7 +51,7 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
             <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-white/75 text-xs md:text-sm">
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5 shrink-0" />
-                {formatDate(event.date)}
+                {dateObj.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric", timeZone: tz })}
               </span>
               <span className="flex items-center gap-1.5">
                 <MapPin className="h-3.5 w-3.5 shrink-0" />

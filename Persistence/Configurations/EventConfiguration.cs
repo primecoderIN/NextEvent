@@ -48,5 +48,18 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
         // Index for fast lookup of all events belonging to an organization.
         builder.HasIndex(e => e.OrganizationId)
             .HasDatabaseName("IX_Events_OrganizationId");
+
+        // Date — always UTC, stored as datetime2(3) (6 bytes, ms precision).
+        builder.Property(e => e.Date)
+            .IsRequired()
+            .HasColumnType("datetime2(3)");
+
+        // TimeZoneId — IANA timezone name of the venue, e.g. "Asia/Kolkata".
+        // Lets the UI display the event time in the venue's local timezone.
+        builder.Property(e => e.TimeZoneId)
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasColumnType("varchar(50)")
+            .HasDefaultValue("UTC");
     }
 }

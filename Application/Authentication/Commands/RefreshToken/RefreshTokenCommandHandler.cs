@@ -17,14 +17,14 @@ public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenSer
     {
         var user = await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == request.Token, cancellationToken);
 
-        if (user == null || user.RefreshTokenExpiryTime == null || user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
+        if (user == null || user.RefreshTokenExpiryTime == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
         {
             throw new UnauthorizedException("Invalid refresh token");
         }
 
         var newRefreshToken = tokenService.GenerateRefreshToken();
         user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         
         // Heal legacy accounts (seeded before ActiveProfile existed) where DB contains NULL or empty string
         if (string.IsNullOrEmpty(user.ActiveProfile))

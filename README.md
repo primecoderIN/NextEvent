@@ -42,12 +42,12 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 
 ### Key Design Decisions
 
-- **DateTimeOffset over DateTime**  
-  We strictly use `DateTimeOffset` across the entire solution. This architectural decision provides several critical benefits:
-  - **Timezone Safety**: Exact points in time are unambiguous, explicitly storing the offset from UTC.
-  - **Native SQL Mapping**: It natively maps to EF Core's `datetimeoffset` column type without the overhead of custom string value converters.
-  - **Improved Database Indexing**: By storing as native `datetimeoffset` rather than strings, SQL Server can build more efficient indexes and perform faster range queries (e.g. finding upcoming events).
-  - **Seamless Serialization**: Generates standard ISO-8601 strings during `System.Text.Json` serialization (e.g., `+00:00`), which the frontend JavaScript `Date` object parses natively without needing custom date converters on the backend or parsing logic on the frontend.
+- **Date and Time Convention (UTC + TimeZoneId)**  
+  We strictly use `DateTime` (in UTC) across the entire solution.
+  - **Audit Timestamps**: Fields like `CreatedAtUtc` are pure UTC `DateTime` values mapped to SQL Server's `datetime2(3)`. Millisecond precision (3) saves 2 bytes per row over the default precision (7).
+  - **Business Event Dates**: Scheduled events require both an absolute point in time (UTC) and a local context. We store the UTC point in time in a `Date` column (`datetime2(3)`) and the IANA timezone identifier (e.g. `"Asia/Kolkata"`) in a separate `TimeZoneId` string column.
+  - **UI Display**: The frontend derives the local time strictly client-side using the UTC Date + IANA ID.
+  - **Identity Exemption**: Third-party framework columns (like `User.LockoutEnd`) retain their original `datetimeoffset` types to prevent breaking internal ASP.NET Identity operations.
 
 - **Tenant-Specific RBAC**  
   Unlike ASP.NET Identity roles which are platform-wide (e.g., a user is an "Admin" everywhere), we implemented a custom Organization RBAC model. Users hold `OrganizationRoles` tied specifically to an `OrganizationId`, composed of granular `Permissions` (like `events.create`). This isolates authorization boundaries, preventing role-bleeding across different organizations the user might belong to.
@@ -399,8 +399,8 @@ This section documents every domain entity, its columns, foreign key relationshi
 | `Description` | `nvarchar(2000)` | ✅ | |
 | `IsActive` | `bit` | ❌ | Default `true` |
 | `SortOrder` | `int` | ❌ | Default `0` |
-| `CreatedAtUtc` | `datetimeoffset` | ❌ | |
-| `UpdatedAtUtc` | `datetimeoffset` | ❌ | |
+| `CreatedAtUtc` | `datetime2(3)` | ❌ | |
+| `UpdatedAtUtc` | `datetime2(3)` | ❌ | |
 
 **Indexes:** `UX_Categories_Slug` (unique)
 
@@ -417,12 +417,12 @@ This section documents every domain entity, its columns, foreign key relationshi
 | `Status` | `int` | ❌ | Enum: `Pending=0`, `Approved=1`, `Rejected=2` |
 | `SuggestedById` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) |
 | `ReviewedById` | `nvarchar(450)` | ✅ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `ReviewedAt` | `datetimeoffset` | ✅ | |
+| `ReviewedAt` | `datetime2(3)` | ✅ | |
 | `RejectionReason` | `nvarchar` | ✅ | |
 | `ApprovedCategoryId` | `uniqueidentifier` | ✅ | FK → `Categories.Id` (`SetNull`) |
 | `OrganizationId` | `uniqueidentifier` | ✅ | Reserved for future use |
-| `CreatedAtUtc` | `datetimeoffset` | ❌ | |
-| `UpdatedAtUtc` | `datetimeoffset` | ❌ | |
+| `CreatedAtUtc` | `datetime2(3)` | ❌ | |
+| `UpdatedAtUtc` | `datetime2(3)` | ❌ | |
 
 **Relationships:**
 - `SuggestedById` → `AspNetUsers.Id` — `Restrict`
@@ -448,14 +448,14 @@ This section documents every domain entity, its columns, foreign key relationshi
 | `ContactPhone` | `varchar(40)` | ✅ | |
 | `Status` | `varchar(30)` | ❌ | `pending_verification` \| `active` \| `suspended` \| `rejected` |
 | `OwnerUserId` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `VerifiedAtUtc` | `datetimeoffset` | ✅ | Set by Admin on approval |
+| `VerifiedAtUtc` | `datetime2(3)` | ✅ | Set by Admin on approval |
 | `VerifiedByUserId` | `nvarchar(450)` | ✅ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `CreatedAtUtc` | `datetimeoffset` | ❌ | |
+| `CreatedAtUtc` | `datetime2(3)` | ❌ | |
 | `CreatedByUserId` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) — immutable |
-| `UpdatedAtUtc` | `datetimeoffset` | ✅ | |
+| `UpdatedAtUtc` | `datetime2(3)` | ✅ | |
 | `UpdatedByUserId` | `nvarchar(max)` | ✅ | |
 | `IsDeleted` | `bit` | ❌ | Default `false` |
-| `DeletedAtUtc` | `datetimeoffset` | ✅ | |
+| `DeletedAtUtc` | `datetime2(3)` | ✅ | |
 | `DeletedByUserId` | `nvarchar(max)` | ✅ | |
 | `RowVersion` | `rowversion` | ❌ | Auto-managed optimistic-concurrency token |
 
@@ -481,11 +481,11 @@ This section documents every domain entity, its columns, foreign key relationshi
 | `OrganizationId` | `uniqueidentifier` | ❌ | FK → `Organizations.Id` (`Cascade`) |
 | `UserId` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) |
 | `Status` | `int` | ❌ | Enum: `Invited=0`, `Active=1`, `Declined=2`, `Removed=3`. Default `0` |
-| `JoinedAtUtc` | `datetimeoffset` | ✅ | Set when `Status` transitions to `Active` |
-| `CreatedAtUtc` | `datetimeoffset` | ❌ | |
+| `JoinedAtUtc` | `datetime2(3)` | ✅ | Set when `Status` transitions to `Active` |
+| `CreatedAtUtc` | `datetime2(3)` | ❌ | |
 | `CreatedByUserId` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) — immutable |
 | `IsDeleted` | `bit` | ❌ | Default `false` |
-| `DeletedAtUtc` | `datetimeoffset` | ✅ | |
+| `DeletedAtUtc` | `datetime2(3)` | ✅ | |
 | `DeletedByUserId` | `nvarchar(max)` | ✅ | |
 
 **Relationships:**
@@ -538,9 +538,9 @@ Invited (0) ──► Active (1) ──► Removed (3)
 | `Name` | `varchar(80)` | ❌ | |
 | `Description` | `nvarchar` | ✅ | |
 | `IsSystemRole` | `bit` | ❌ | Default `false` |
-| `CreatedAtUtc` | `datetimeoffset` | ❌ | |
+| `CreatedAtUtc` | `datetime2(3)` | ❌ | |
 | `CreatedByUserId` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `UpdatedAtUtc` | `datetimeoffset` | ✅ | |
+| `UpdatedAtUtc` | `datetime2(3)` | ✅ | |
 | `UpdatedByUserId` | `nvarchar(450)` | ✅ | FK → `AspNetUsers.Id` (`Restrict`) |
 | `IsDeleted` | `bit` | ❌ | Default `false` |
 
@@ -577,7 +577,7 @@ Invited (0) ──► Active (1) ──► Removed (3)
 | `CategorySuggestions` | 2026-07-04 | `CategorySuggestions` table |
 | `AddOrganization` | 2026-07-12 | `Organizations` table |
 | `AddOrganizationMember` | 2026-07-13 | `OrganizationMembers` table + filtered unique index |
-| `UpdateToDateTimeOffset` | 2026-07-14 | Migrated DateTime to DateTimeOffset globally |
+| `UpdateTodatetime2(3)` | 2026-07-14 | Migrated DateTime to datetime2(3) globally |
 | `AddOrganizationRBAC` | 2026-07-14 | `Permissions`, `OrganizationRoles`, and RBAC join tables |
 | `AddOrganizationIdToEvents` | 2026-07-16 | Added `OrganizationId` FK to `Events` table |
 

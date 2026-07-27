@@ -5,6 +5,7 @@ import { format } from "date-fns"
 import type { Event } from "@/types/Event"
 import { getEventImage, getCategoryBadgeClass } from "@/app/(public)/widgets/common/helpers"
 import { Button } from "@/shared/ui/button"
+import { formatEventDate } from "@/shared/utils/date"
 
 export interface EventCardProps {
   event: Partial<Event>
@@ -26,7 +27,7 @@ export function EventCard({ event, imageSeed, onClick, showBookButton = true, cl
     }
   }
 
-  const dateStr = event.date ? new Date(event.date) : null
+  const dateStr = event.date ? formatEventDate(event.date, (event as any).timeZoneId) : "Date TBA"
   const displayTitle = event.title?.trim() || "Untitled Event"
   const displayVenue = event.venue?.trim() || "TBA"
   const displayCity = event.city?.trim() || ""
@@ -72,10 +73,10 @@ export function EventCard({ event, imageSeed, onClick, showBookButton = true, cl
         <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-2.5 py-1.5 text-center text-white min-w-12 shadow-sm">
             <p className="text-[9px] font-bold tracking-widest uppercase opacity-90">
-              {dateStr ? format(dateStr, "MMM") : "---"}
+              {event.date ? new Date(event.date).toLocaleDateString("en-US", { month: "short", timeZone: (event as any).timeZoneId || undefined }) : "---"}
             </p>
             <p className="text-xl font-black leading-none my-0.5">
-              {dateStr ? format(dateStr, "dd") : "--"}
+              {event.date ? new Date(event.date).toLocaleDateString("en-US", { day: "2-digit", timeZone: (event as any).timeZoneId || undefined }) : "--"}
             </p>
           </div>
         </div>
@@ -90,7 +91,7 @@ export function EventCard({ event, imageSeed, onClick, showBookButton = true, cl
         <div className="flex flex-col gap-1.5 text-xs text-muted-foreground mb-3">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 shrink-0 opacity-70" />
-            <span>{dateStr ? format(dateStr, "d MMM yyyy") : "Date TBA"}</span>
+            <span>{dateStr}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <MapPin className="h-3.5 w-3.5 shrink-0 opacity-70" />

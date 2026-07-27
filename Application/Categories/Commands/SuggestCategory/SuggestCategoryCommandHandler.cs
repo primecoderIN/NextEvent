@@ -30,8 +30,8 @@ public class SuggestCategoryCommandHandler(
             Description = request.Description,
             SuggestedById = userId,
             Status      = CategorySuggestionStatus.Pending,
-            CreatedAtUtc = DateTimeOffset.UtcNow,
-            UpdatedAtUtc = DateTimeOffset.UtcNow,
+            CreatedAtUtc = DateTime.UtcNow,
+            UpdatedAtUtc = DateTime.UtcNow,
         };
 
         context.CategorySuggestions.Add(suggestion);

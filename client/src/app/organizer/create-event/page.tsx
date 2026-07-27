@@ -106,6 +106,7 @@ export function CreateEventPage() {
       description: values.description.trim(),
       categoryId: values.categoryId,
       date: utcDate.toISOString(),
+      timeZoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
       city: values.city.trim(),
       venue: values.venue.trim(),
       latitude: values.latitude ? parseFloat(values.latitude) : 0,

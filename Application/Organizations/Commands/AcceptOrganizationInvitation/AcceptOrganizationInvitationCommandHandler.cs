@@ -37,7 +37,7 @@ public class AcceptOrganizationInvitationCommandHandler(
             throw new BusinessRuleException("This invitation is no longer valid.");
 
         membership.Status = OrganizationMemberStatus.Active;
-        membership.JoinedAtUtc = DateTimeOffset.UtcNow;
+        membership.JoinedAtUtc = DateTime.UtcNow;
 
         // 3. Grant the Organizer platform role if they don't already have it
         var user = await userManager.FindByIdAsync(currentUserId)

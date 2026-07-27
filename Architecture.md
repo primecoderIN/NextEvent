@@ -520,11 +520,12 @@ Follow REST conventions:
 
 ### 3.5 Date and Time Convention
 
-We strictly use `DateTimeOffset` over `DateTime` across the entire solution. This architectural decision provides several critical benefits:
-- **Timezone Safety**: `DateTimeOffset` inherently stores the offset from UTC, ensuring that the exact point in time is unambiguous regardless of the server's local time zone or the database server's configuration.
-- **Native SQL Server Mapping**: Entity Framework Core maps `DateTimeOffset` directly to SQL Server's `datetimeoffset` column type. This preserves temporal accuracy natively at the database level without requiring custom string value converters.
-- **Improved Database Indexing**: By storing as native `datetimeoffset` rather than text, SQL Server can build much more efficient indexes and execute range queries (such as finding upcoming events) significantly faster.
-- **Seamless Serialization**: When serialized by `System.Text.Json`, `DateTimeOffset` natively produces standard ISO-8601 strings (e.g., `YYYY-MM-DDTHH:mm:ss.fff+00:00`). The JavaScript `Date` object parses `+00:00` identically to Zulu (`Z`) time, eliminating the need for custom JSON serialization converters on the backend or custom date parsing on the frontend.
+We strictly use `DateTime` (in UTC) across the entire solution, adhering to the following architectural patterns:
+- **Audit Timestamps**: Fields like `CreatedAtUtc`, `UpdatedAtUtc`, and `DeletedAtUtc` are pure UTC `DateTime` values mapped to SQL Server's `datetime2(3)`. Millisecond precision (3) is sufficient and saves 2 bytes per row over the default precision (7).
+- **Business Event Dates**: Scheduled events require both an absolute point in time (UTC) and a local context (timezone). We store the UTC point in time in a `Date` column (mapped to `datetime2(3)`) and the IANA timezone identifier (e.g. `"Asia/Kolkata"`) in a separate `TimeZoneId` string column. The frontend uses the `TimeZoneId` to format the UTC date into the venue's local time accurately, surviving Daylight Saving Time (DST) changes.
+- **Identity Exemption**: Third-party framework columns (like `AspNetUsers.LockoutEnd`) retain their original `datetimeoffset` types to prevent breaking internal Identity operations.
+
+This split pattern ensures we never lose temporal accuracy while keeping storage costs low and indexing performance high.
 
 ## 4. Complete Database Design
 
@@ -533,7 +534,7 @@ Important: the schema below is target planning for SQL Server. It reuses current
 SQL Server conventions used below:
 
 - IDs use `uniqueidentifier`.
-- Date/time audit fields use `datetimeoffset`.
+- Date/time audit fields use `datetime2(3)`.
 - JSON payload columns use `nvarchar(max)` with an `ISJSON(...)` check constraint where practical.
 - Concurrency columns use SQL Server `rowversion`.
 
@@ -551,7 +552,7 @@ Add only if needed:
 | Bio | text nullable | Already exists |
 | ImageUrl | text nullable | Already exists |
 | RefreshToken | text nullable | Already exists |
-| RefreshTokenExpiryTime | datetimeoffset nullable | Already exists conceptually |
+| RefreshTokenExpiryTime | datetime2(3) nullable | Already exists conceptually |
 
 Do not create a separate `Users` table unless a profile table is intentionally added.
 
@@ -570,8 +571,9 @@ Recommended target columns:
 | Description | text | required |
 | CategoryId | uniqueidentifier | FK Categories.Id |
 | Status | varchar(30) | draft, pending_approval, published, cancelled, completed |
-| Date | datetimeoffset | required |
-| EndDate | datetimeoffset | nullable |
+| Date | datetime2(3) | required, UTC |
+| TimeZoneId | varchar(50) | required, default "UTC" |
+| EndDate | datetime2(3) | nullable, UTC |
 | City | varchar(120) | required |
 | Venue | varchar(200) | required |
 | AddressLine1 | varchar(250) | nullable |
@@ -582,13 +584,13 @@ Recommended target columns:
 | CoverImageUrl | text | nullable |
 | IsCancelled | boolean | required |
 | CancellationReason | text | nullable |
-| PublishedAtUtc | datetimeoffset | nullable |
-| CreatedAtUtc | datetimeoffset | required |
+| PublishedAtUtc | datetime2(3) | nullable |
+| CreatedAtUtc | datetime2(3) | required |
 | CreatedByUserId | text | FK AspNetUsers.Id |
-| UpdatedAtUtc | datetimeoffset | nullable |
+| UpdatedAtUtc | datetime2(3) | nullable |
 | UpdatedByUserId | text | FK AspNetUsers.Id nullable |
 | IsDeleted | boolean | required default false |
-| DeletedAtUtc | datetimeoffset | nullable |
+| DeletedAtUtc | datetime2(3) | nullable |
 | DeletedByUserId | text | FK AspNetUsers.Id nullable |
 | RowVersion | rowversion | concurrency |
 
@@ -618,14 +620,14 @@ Indexes:
 | ContactPhone | varchar(40) | nullable |
 | Status | varchar(30) | pending_verification, active, suspended, rejected |
 | OwnerUserId | text | FK AspNetUsers.Id |
-| VerifiedAtUtc | datetimeoffset | nullable |
+| VerifiedAtUtc | datetime2(3) | nullable |
 | VerifiedByUserId | text | FK AspNetUsers.Id nullable |
-| CreatedAtUtc | datetimeoffset | required |
+| CreatedAtUtc | datetime2(3) | required |
 | CreatedByUserId | text | FK AspNetUsers.Id |
-| UpdatedAtUtc | datetimeoffset | nullable |
+| UpdatedAtUtc | datetime2(3) | nullable |
 | UpdatedByUserId | text | nullable |
 | IsDeleted | boolean | required default false |
-| DeletedAtUtc | datetimeoffset | nullable |
+| DeletedAtUtc | datetime2(3) | nullable |
 | DeletedByUserId | text | nullable |
 | RowVersion | rowversion | concurrency |
 
@@ -650,14 +652,14 @@ Business rules:
 | OrganizationId | uniqueidentifier | FK Organizations.Id |
 | UserId | text | FK AspNetUsers.Id |
 | Status | varchar(30) | active, invited, suspended, removed |
-| JoinedAtUtc | datetimeoffset | nullable |
+| JoinedAtUtc | datetime2(3) | nullable |
 | InvitedByUserId | text | FK AspNetUsers.Id nullable |
-| CreatedAtUtc | datetimeoffset | required |
+| CreatedAtUtc | datetime2(3) | required |
 | CreatedByUserId | text | required |
-| UpdatedAtUtc | datetimeoffset | nullable |
+| UpdatedAtUtc | datetime2(3) | nullable |
 | UpdatedByUserId | text | nullable |
 | IsDeleted | boolean | required default false |
-| DeletedAtUtc | datetimeoffset | nullable |
+| DeletedAtUtc | datetime2(3) | nullable |
 | DeletedByUserId | text | nullable |
 
 Indexes:
@@ -677,9 +679,9 @@ Business rules:
 | Name | varchar(80) | required |
 | Description | text | nullable |
 | IsSystemRole | boolean | required default false |
-| CreatedAtUtc | datetimeoffset | required |
+| CreatedAtUtc | datetime2(3) | required |
 | CreatedByUserId | text | required |
-| UpdatedAtUtc | datetimeoffset | nullable |
+| UpdatedAtUtc | datetime2(3) | nullable |
 | UpdatedByUserId | text | nullable |
 | IsDeleted | boolean | required default false |
 
@@ -729,9 +731,9 @@ Seed per organization:
 | InvitedUserId | text | FK AspNetUsers.Id nullable |
 | TokenHash | text | required |
 | Status | varchar(30) | pending, accepted, revoked, expired |
-| ExpiresAtUtc | datetimeoffset | required |
-| AcceptedAtUtc | datetimeoffset | nullable |
-| CreatedAtUtc | datetimeoffset | required |
+| ExpiresAtUtc | datetime2(3) | required |
+| AcceptedAtUtc | datetime2(3) | nullable |
+| CreatedAtUtc | datetime2(3) | required |
 | CreatedByUserId | text | required |
 
 Indexes:
@@ -746,7 +748,7 @@ Indexes:
 |---|---|---|
 | OrganizationId | uniqueidentifier | PK part, FK Organizations.Id |
 | UserId | text | PK part, FK AspNetUsers.Id |
-| CreatedAtUtc | datetimeoffset | required |
+| CreatedAtUtc | datetime2(3) | required |
 
 Indexes:
 
@@ -760,7 +762,7 @@ Indexes:
 |---|---|---|
 | UserId | text | PK part, FK AspNetUsers.Id |
 | EventId | uniqueidentifier | PK part, FK Events.Id |
-| CreatedAtUtc | datetimeoffset | required |
+| CreatedAtUtc | datetime2(3) | required |
 
 Indexes:
 
@@ -777,8 +779,8 @@ Optional extension table if `AspNetUsers` should not grow further.
 | PhoneNumber | varchar(40) | nullable |
 | City | varchar(120) | nullable |
 | PreferencesJson | nvarchar(max) | nullable |
-| CreatedAtUtc | datetimeoffset | required |
-| UpdatedAtUtc | datetimeoffset | nullable |
+| CreatedAtUtc | datetime2(3) | required |
+| UpdatedAtUtc | datetime2(3) | nullable |
 
 #### Reviews
 
@@ -791,8 +793,8 @@ Optional extension table if `AspNetUsers` should not grow further.
 | Rating | int | required, 1 to 5 |
 | Comment | text | nullable |
 | Status | varchar(30) | pending, published, hidden, removed |
-| CreatedAtUtc | datetimeoffset | required |
-| UpdatedAtUtc | datetimeoffset | nullable |
+| CreatedAtUtc | datetime2(3) | required |
+| UpdatedAtUtc | datetime2(3) | nullable |
 | IsDeleted | boolean | required default false |
 
 Indexes:
@@ -814,12 +816,12 @@ Indexes:
 | Currency | char(3) | required |
 | QuantityAvailable | int | required, >= 0 |
 | QuantitySold | int | required, default 0 |
-| SalesStartUtc | datetimeoffset | nullable |
-| SalesEndUtc | datetimeoffset | nullable |
+| SalesStartUtc | datetime2(3) | nullable |
+| SalesEndUtc | datetime2(3) | nullable |
 | MaxPerOrder | int | nullable |
 | IsActive | boolean | required default true |
-| CreatedAtUtc | datetimeoffset | required |
-| UpdatedAtUtc | datetimeoffset | nullable |
+| CreatedAtUtc | datetime2(3) | required |
+| UpdatedAtUtc | datetime2(3) | nullable |
 | IsDeleted | boolean | required default false |
 
 Indexes:
@@ -843,9 +845,9 @@ Indexes:
 | TotalAmount | decimal(12,2) | required |
 | Currency | char(3) | required |
 | CouponId | uniqueidentifier | FK Coupons.Id nullable |
-| CreatedAtUtc | datetimeoffset | required |
-| PaidAtUtc | datetimeoffset | nullable |
-| CancelledAtUtc | datetimeoffset | nullable |
+| CreatedAtUtc | datetime2(3) | required |
+| PaidAtUtc | datetime2(3) | nullable |
+| CancelledAtUtc | datetime2(3) | nullable |
 
 Indexes:
 
@@ -884,8 +886,8 @@ Indexes:
 | Currency | char(3) | required |
 | FailureReason | text | nullable |
 | MetadataJson | nvarchar(max) | nullable |
-| CreatedAtUtc | datetimeoffset | required |
-| UpdatedAtUtc | datetimeoffset | nullable |
+| CreatedAtUtc | datetime2(3) | required |
+| UpdatedAtUtc | datetime2(3) | nullable |
 
 Indexes:
 
@@ -905,8 +907,8 @@ Indexes:
 | TicketTypeId | uniqueidentifier | FK TicketTypes.Id |
 | Status | varchar(30) | active, checked_in, cancelled, refunded |
 | QrCodeTokenHash | text | required |
-| IssuedAtUtc | datetimeoffset | required |
-| CheckedInAtUtc | datetimeoffset | nullable |
+| IssuedAtUtc | datetime2(3) | required |
+| CheckedInAtUtc | datetime2(3) | nullable |
 
 Indexes:
 
@@ -923,7 +925,7 @@ Indexes:
 | TicketId | uniqueidentifier | FK Tickets.Id |
 | EventId | uniqueidentifier | FK Events.Id |
 | CheckedInByUserId | text | FK AspNetUsers.Id |
-| CheckedInAtUtc | datetimeoffset | required |
+| CheckedInAtUtc | datetime2(3) | required |
 | Method | varchar(30) | qr, manual |
 | Notes | text | nullable |
 
@@ -944,8 +946,8 @@ Indexes:
 | Status | varchar(30) | requested, approved, rejected, processed, failed |
 | Reason | text | nullable |
 | RequestedByUserId | text | FK AspNetUsers.Id |
-| ProcessedAtUtc | datetimeoffset | nullable |
-| CreatedAtUtc | datetimeoffset | required |
+| ProcessedAtUtc | datetime2(3) | nullable |
+| CreatedAtUtc | datetime2(3) | required |
 
 ### 4.5 Marketing and Communication
 
@@ -961,10 +963,10 @@ Indexes:
 | DiscountValue | decimal(12,2) | required |
 | MaxRedemptions | int | nullable |
 | RedemptionCount | int | required default 0 |
-| StartsAtUtc | datetimeoffset | nullable |
-| EndsAtUtc | datetimeoffset | nullable |
+| StartsAtUtc | datetime2(3) | nullable |
+| EndsAtUtc | datetime2(3) | nullable |
 | IsActive | boolean | required default true |
-| CreatedAtUtc | datetimeoffset | required |
+| CreatedAtUtc | datetime2(3) | required |
 | IsDeleted | boolean | required default false |
 
 Indexes:
@@ -982,8 +984,8 @@ Indexes:
 | Title | varchar(160) | required |
 | Body | text | required |
 | Status | varchar(30) | draft, published, archived |
-| PublishedAtUtc | datetimeoffset | nullable |
-| CreatedAtUtc | datetimeoffset | required |
+| PublishedAtUtc | datetime2(3) | nullable |
+| CreatedAtUtc | datetime2(3) | required |
 | CreatedByUserId | text | FK AspNetUsers.Id |
 
 #### Messages
@@ -995,8 +997,8 @@ Indexes:
 | CustomerUserId | text | FK AspNetUsers.Id |
 | Subject | varchar(180) | required |
 | Status | varchar(30) | open, closed |
-| CreatedAtUtc | datetimeoffset | required |
-| ClosedAtUtc | datetimeoffset | nullable |
+| CreatedAtUtc | datetime2(3) | required |
+| ClosedAtUtc | datetime2(3) | nullable |
 
 #### MessageReplies
 
@@ -1006,7 +1008,7 @@ Indexes:
 | MessageId | uniqueidentifier | FK Messages.Id |
 | SenderUserId | text | FK AspNetUsers.Id |
 | Body | text | required |
-| CreatedAtUtc | datetimeoffset | required |
+| CreatedAtUtc | datetime2(3) | required |
 
 #### Notifications
 
@@ -1018,8 +1020,8 @@ Indexes:
 | Title | varchar(160) | required |
 | Body | text | required |
 | DataJson | nvarchar(max) | nullable |
-| ReadAtUtc | datetimeoffset | nullable |
-| CreatedAtUtc | datetimeoffset | required |
+| ReadAtUtc | datetime2(3) | nullable |
+| CreatedAtUtc | datetime2(3) | required |
 
 Indexes:
 
@@ -1038,8 +1040,8 @@ Indexes:
 | Description | text | nullable |
 | IsActive | boolean | required default true |
 | SortOrder | int | required default 0 |
-| CreatedAtUtc | datetimeoffset | required |
-| UpdatedAtUtc | datetimeoffset | nullable |
+| CreatedAtUtc | datetime2(3) | required |
+| UpdatedAtUtc | datetime2(3) | nullable |
 
 #### Reports
 
@@ -1054,8 +1056,8 @@ Indexes:
 | Status | varchar(30) | open, under_review, resolved, dismissed |
 | ResolvedByUserId | text | FK AspNetUsers.Id nullable |
 | ResolutionNotes | text | nullable |
-| CreatedAtUtc | datetimeoffset | required |
-| ResolvedAtUtc | datetimeoffset | nullable |
+| CreatedAtUtc | datetime2(3) | required |
+| ResolvedAtUtc | datetime2(3) | nullable |
 
 #### PlatformSettings
 
@@ -1063,7 +1065,7 @@ Indexes:
 |---|---|---|
 | Key | varchar(120) | PK |
 | ValueJson | nvarchar(max) | required |
-| UpdatedAtUtc | datetimeoffset | required |
+| UpdatedAtUtc | datetime2(3) | required |
 | UpdatedByUserId | text | FK AspNetUsers.Id |
 
 #### AuditLogs
@@ -1079,7 +1081,7 @@ Indexes:
 | AfterJson | nvarchar(max) | nullable |
 | IpAddress | varchar(80) | nullable |
 | UserAgent | text | nullable |
-| CreatedAtUtc | datetimeoffset | required |
+| CreatedAtUtc | datetime2(3) | required |
 
 ### 4.7 Analytics
 

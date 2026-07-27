@@ -49,7 +49,7 @@ public class RegisterCommandHandler(UserManager<User> userManager, ITokenService
 
         var refreshToken = tokenService.GenerateRefreshToken();
         user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await userManager.UpdateAsync(user);
 
         var roles = await userManager.GetRolesAsync(user);

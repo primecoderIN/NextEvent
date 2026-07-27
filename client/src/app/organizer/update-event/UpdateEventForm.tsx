@@ -126,6 +126,7 @@ export function UpdateEventForm({ id, event }: UpdateEventFormProps) {
         )
       )
       payload.date = utcDate.toISOString()
+      payload.timeZoneId = Intl.DateTimeFormat().resolvedOptions().timeZone
     }
 
     // GPS diff — parse optional string fields to numbers for comparison

@@ -45,7 +45,7 @@ public class CreateOrganizationRoleCommandHandler(
             throw new BusinessRuleException($"The following permission codes are invalid: {string.Join(", ", missingPermissions)}");
         }
 
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.UtcNow;
 
         // 4. Create the role
         var newRole = new OrganizationRole

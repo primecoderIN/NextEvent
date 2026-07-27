@@ -8,6 +8,7 @@ import { RoutePaths } from "@/shared/constants/routePaths"
 import { RequirePermission } from "@/authorization"
 import { getEventImage } from "@/app/(public)/widgets/common/helpers"
 import { Permissions } from "@/shared/constants/permissions"
+import { formatEventDate } from "@/shared/utils/date"
 
 export function OrganizerEventsPage() {
   const navigate = useNavigate()
@@ -91,7 +92,7 @@ export function OrganizerEventsPage() {
                   <div className="space-y-2 mb-6">
                     <div className="flex items-center text-sm text-muted-foreground">
                       <CalendarDays className="w-4 h-4 mr-2 shrink-0" />
-                      <span className="truncate">{new Date(event.date).toLocaleDateString()}</span>
+                      <span className="truncate">{formatEventDate(event.date, (event as any).timeZoneId)}</span>
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4 mr-2 shrink-0" />

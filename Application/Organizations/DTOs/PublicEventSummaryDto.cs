@@ -20,7 +20,8 @@ public class PublicEventSummaryDto
     /// Scheduled date/time of the event (UTC).
     /// Only future events are returned (Date >= NOW).
     /// </summary>
-    public DateTimeOffset Date    { get; set; }
+    public DateTime Date    { get; set; }
+    public string TimeZoneId { get; set; } = string.Empty;
 
     /// <summary>City where the event takes place.</summary>
     public string City    { get; set; } = string.Empty;

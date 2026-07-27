@@ -90,14 +90,14 @@ public class OrganizationMember
     /// <see cref="OrganizationMemberStatus.Active"/>.
     /// Null for memberships that were never activated (e.g., Declined).
     /// </summary>
-    public DateTimeOffset? JoinedAtUtc { get; set; }
+    public DateTime? JoinedAtUtc { get; set; }
 
     // -------------------------------------------------------------------------
     // Standard audit fields  (Architecture.md §3.3)
     // -------------------------------------------------------------------------
 
     /// <summary>UTC timestamp of when this record was created.</summary>
-    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
 
     /// <summary>
     /// FK → AspNetUsers.Id.  Who created this membership record
@@ -122,7 +122,7 @@ public class OrganizationMember
     public bool IsDeleted { get; set; } = false;
 
     /// <summary>UTC timestamp of when this row was soft-deleted. Nullable.</summary>
-    public DateTimeOffset? DeletedAtUtc { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
 
     /// <summary>
     /// FK → AspNetUsers.Id. The user who performed the soft delete. Nullable.

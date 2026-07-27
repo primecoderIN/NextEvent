@@ -10,6 +10,7 @@ export interface CreateEventPayload {
   description: string
   categoryId: string
   date: string          // ISO 8601 datetime string
+  timeZoneId: string    // IANA timezone string
   city: string
   venue: string
   latitude: number

@@ -103,7 +103,7 @@ public class Organization
     /// <summary>
     /// UTC timestamp of when the organization was verified by an Admin. Nullable.
     /// </summary>
-    public DateTimeOffset? VerifiedAtUtc { get; set; }
+    public DateTime? VerifiedAtUtc { get; set; }
 
     /// <summary>
     /// FK → AspNetUsers.Id. The Admin who performed the verification. Nullable.
@@ -121,9 +121,9 @@ public class Organization
 
     /// <summary>
     /// UTC timestamp of when this record was created. Required.
-    /// Maps to SQL Server datetimeoffset.
+    /// Maps to SQL Server datetime2(3).
     /// </summary>
-    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
 
     /// <summary>
     /// FK → AspNetUsers.Id. The user who created this record. Immutable after insert.
@@ -138,7 +138,7 @@ public class Organization
     /// <summary>
     /// UTC timestamp of the last update to this record. Nullable.
     /// </summary>
-    public DateTimeOffset? UpdatedAtUtc { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
 
     /// <summary>
     /// FK → AspNetUsers.Id. The user who last updated this record. Nullable.
@@ -158,7 +158,7 @@ public class Organization
     /// <summary>
     /// UTC timestamp of when this record was soft-deleted. Nullable.
     /// </summary>
-    public DateTimeOffset? DeletedAtUtc { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
 
     /// <summary>
     /// FK → AspNetUsers.Id. The user who performed the soft delete. Nullable.

@@ -2,6 +2,7 @@ import { Search, ChevronDown, Download, Calendar, ChevronLeft, ChevronRight } fr
 import { EventViewAction, EventEditAction, EventBanAction } from "@/features/events/components/EventActions"
 import { StatusBadge } from "../EventStatusBadge"
 import { CategoryBadge } from "@/features/categories/components/CategoryBadge"
+import { formatEventDate, formatEventTime } from "@/shared/utils/date"
 
 const STATUS_TABS: { label: string; value: string }[] = [
   { label: "All Events", value: "all" },
@@ -142,9 +143,8 @@ export function EventsTable({
               </tr>
             ) : (
               events.map((event, idx) => {
-                const evtDate = new Date(event.date)
-                const dateStr = evtDate.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })
-                const timeStr = evtDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+                const dateStr = formatEventDate(event.date, event.timeZoneId)
+                const timeStr = formatEventTime(event.date, event.timeZoneId)
                 const status = event.isCancelled ? "unpublished" : "published"
                 const shortId = `EVT-${String(idx + 1 + (page - 1) * 8).padStart(4, "0")}`
 

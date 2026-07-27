@@ -105,7 +105,7 @@ public class UpdateOrganizationRoleCommandHandler(
             }
         }
 
-        role.UpdatedAtUtc = DateTimeOffset.UtcNow;
+        role.UpdatedAtUtc = DateTime.UtcNow;
         role.UpdatedByUserId = userId;
 
         await context.SaveChangesAsync(cancellationToken);

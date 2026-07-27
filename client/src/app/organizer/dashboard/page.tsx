@@ -4,6 +4,7 @@ import { useMyEvents } from "@/shared/hooks/useMyEvents"
 import { Building2, CalendarPlus, Settings, LayoutDashboard, MapPin, CalendarDays, ExternalLink } from "lucide-react"
 import { Button } from "@/shared/ui/button"
 import { Badge } from "@/shared/ui/badge"
+import { formatEventDate } from "@/shared/utils/date"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { RequirePermission } from "@/authorization"
 import { getEventImage } from "@/app/(public)/widgets/common/helpers"
@@ -134,7 +135,7 @@ export function OrganizerDashboardPage() {
                   <div className="space-y-2 mb-6">
                     <div className="flex items-center text-sm text-muted-foreground">
                       <CalendarDays className="w-4 h-4 mr-2 shrink-0" />
-                      <span className="truncate">{new Date(event.date).toLocaleDateString()}</span>
+                      <span className="truncate">{formatEventDate(event.date, (event as any).timeZoneId)}</span>
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4 mr-2 shrink-0" />

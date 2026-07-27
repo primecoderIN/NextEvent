@@ -49,7 +49,7 @@ public class SwitchProfileCommandHandler(
         // We also want to refresh the token since the frontend relies on receiving a new token & user state when logging in/refreshing
         var newRefreshToken = tokenService.GenerateRefreshToken();
         user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
         await userManager.UpdateAsync(user);
 

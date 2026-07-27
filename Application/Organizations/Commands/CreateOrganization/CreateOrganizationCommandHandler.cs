@@ -48,7 +48,7 @@ public class CreateOrganizationCommandHandler(
         if (slugTaken)
             throw new BusinessRuleException($"The slug '{dto.Slug}' is already taken. Please choose a different slug.");
 
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.UtcNow;
 
         // ── 2. Create Organization ────────────────────────────────────────────
         var organization = new Organization

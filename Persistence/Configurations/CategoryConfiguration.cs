@@ -28,10 +28,12 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .HasDefaultValue(0);
 
         builder.Property(c => c.CreatedAtUtc)
-            .IsRequired();
+            .IsRequired()
+            .HasColumnType("datetime2(3)");
 
         builder.Property(c => c.UpdatedAtUtc)
-            .IsRequired();
+            .IsRequired()
+            .HasColumnType("datetime2(3)");
 
         builder.HasIndex(c => c.Slug).IsUnique();
     }

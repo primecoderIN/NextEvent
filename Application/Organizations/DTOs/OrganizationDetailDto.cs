@@ -18,5 +18,5 @@ public class OrganizationDetailDto
     public string  Status       { get; set; } = string.Empty;
     public string  OwnerUserId  { get; set; } = string.Empty;
     public string? OwnerDisplayName { get; set; }
-    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
 }

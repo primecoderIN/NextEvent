@@ -37,5 +37,9 @@ public class OrganizationRoleConfiguration : IEntityTypeConfiguration<Organizati
         builder.HasIndex(r => new { r.OrganizationId, r.Name })
             .IsUnique()
             .HasDatabaseName("UX_OrganizationRoles_OrganizationId_Name");
+
+        // Audit timestamp columns — datetime2(3): 6 bytes, ms precision, UTC
+        builder.Property(r => r.CreatedAtUtc).IsRequired().HasColumnType("datetime2(3)");
+        builder.Property(r => r.UpdatedAtUtc).HasColumnType("datetime2(3)");
     }
 }

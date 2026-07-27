@@ -5,6 +5,7 @@ export type Event = {
   category: string;
   categoryId: string;
   date: string; // UTC ISO-8601 datetime string with Z suffix, e.g. "2026-06-29T10:30:00.000Z"
+  timeZoneId: string; // IANA timezone identifier, e.g. "Asia/Kolkata"
   city: string;
   venue: string;
   isCancelled: boolean;

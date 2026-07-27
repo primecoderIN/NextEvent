@@ -34,7 +34,18 @@ public class Event
     /// <summary>Navigation property for the owning organization.</summary>
     public Organization? Organization { get; set; }
 
-    public DateTimeOffset Date { get; set; }
+    /// <summary>
+    /// UTC point-in-time when the event starts. Always stored in UTC.
+    /// Maps to SQL Server datetime2(3).
+    /// </summary>
+    public DateTime Date { get; set; }
+
+    /// <summary>
+    /// IANA timezone identifier of the venue (e.g. "Asia/Kolkata", "America/New_York").
+    /// Used by the UI to display the event date in the venue's local time.
+    /// Defaults to "UTC" if not provided.
+    /// </summary>
+    public string TimeZoneId { get; set; } = "UTC";
     public required string City { get; set; }
     public required string Venue { get; set; }
 
@@ -65,9 +76,14 @@ public class Event
         if (value.HasValue) CategoryId = value.Value;
     }
 
-    public void ChangeDate(DateTimeOffset? value)
+    public void ChangeDate(DateTime? value)
     {
-        if (value.HasValue) Date = value.Value;
+        if (value.HasValue) Date = DateTime.SpecifyKind(value.Value, DateTimeKind.Utc);
+    }
+
+    public void ChangeTimeZoneId(string? value)
+    {
+        if (value is not null) TimeZoneId = value;
     }
 
     public void ChangeCity(string? value)

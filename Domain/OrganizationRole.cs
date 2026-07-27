@@ -15,11 +15,11 @@ public class OrganizationRole
     public bool IsSystemRole { get; set; } = false;
     
     // Audit fields
-    public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public string CreatedByUserId { get; set; } = string.Empty;
     public User? CreatedByUser { get; set; }
     
-    public DateTimeOffset? UpdatedAtUtc { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
     public string? UpdatedByUserId { get; set; }
     public User? UpdatedByUser { get; set; }
     

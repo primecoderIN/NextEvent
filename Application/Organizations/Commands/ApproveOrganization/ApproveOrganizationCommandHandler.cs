@@ -51,7 +51,7 @@ public class ApproveOrganizationCommandHandler(
         // redundant DB write and fall through to the idempotent role grant.
         if (organization.Status != "active")
         {
-            var now = DateTimeOffset.UtcNow;
+            var now = DateTime.UtcNow;
             organization.Status           = "active";
             organization.VerifiedAtUtc    = now;
             organization.VerifiedByUserId = adminUserId;

@@ -75,5 +75,10 @@ public class OrganizationMemberConfiguration : IEntityTypeConfiguration<Organiza
             .IsUnique()
             .HasFilter("[Status] = 1 AND [IsDeleted] = 0")
             .HasDatabaseName("UX_OrganizationMembers_Active");
+
+        // Audit timestamp columns — datetime2(3): 6 bytes, ms precision, UTC
+        builder.Property(m => m.JoinedAtUtc).HasColumnType("datetime2(3)");
+        builder.Property(m => m.CreatedAtUtc).IsRequired().HasColumnType("datetime2(3)");
+        builder.Property(m => m.DeletedAtUtc).HasColumnType("datetime2(3)");
     }
 }

@@ -72,7 +72,7 @@ public class OrganizationPublicProfileDto
     /// UTC timestamp when the organization was created.
     /// Useful for "member since" display.
     /// </summary>
-    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
 
     // -----------------------------------------------------------------------
     // Upcoming public events

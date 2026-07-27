@@ -17,7 +17,7 @@ public class User : IdentityUser
 
     public string? RefreshToken {get;set;}
 
-    public DateTimeOffset? RefreshTokenExpiryTime {get;set;}
+    public DateTime? RefreshTokenExpiryTime {get;set;}
 
     public string ActiveProfile { get; set; } = "Member";
 

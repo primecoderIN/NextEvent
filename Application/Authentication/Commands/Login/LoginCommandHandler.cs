@@ -23,7 +23,7 @@ public class LoginCommandHandler(UserManager<User> userManager, ITokenService to
 
         var refreshToken = tokenService.GenerateRefreshToken();
         user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         
         // Heal legacy accounts (seeded before ActiveProfile existed) where DB contains NULL or empty string
         if (string.IsNullOrEmpty(user.ActiveProfile))

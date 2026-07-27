@@ -59,7 +59,7 @@ public class InviteOrganizationMemberCommandHandler(
             UserId = invitedUser.Id,
             Status = OrganizationMemberStatus.Invited,
             CreatedByUserId = currentUserId,
-            CreatedAtUtc = DateTimeOffset.UtcNow
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         // 6. Assign the Member role

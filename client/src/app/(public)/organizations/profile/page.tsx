@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom"
 import { useOrganizationProfile } from "@/shared/hooks/useOrganizationProfile"
+import { formatEventDate } from "@/shared/utils/date"
 import { Building2, Globe, Mail, Phone, CalendarDays, MapPin } from "lucide-react"
 
 export function OrganizationProfilePage() {
@@ -115,7 +116,7 @@ export function OrganizationProfilePage() {
                         <div className="space-y-2 text-sm text-muted-foreground mb-4">
                           <div className="flex items-center gap-2">
                             <CalendarDays className="w-4 h-4" />
-                            {new Date(event.startDateUtc).toLocaleDateString()}
+                            {formatEventDate((event as any).date, (event as any).timeZoneId)}
                           </div>
                           {(event.city || event.venueName) && (
                             <div className="flex items-center gap-2 line-clamp-1">

@@ -17,7 +17,9 @@ public class CreateEventDto
 
     public Guid CategoryId { get; set; }
 
-    public DateTimeOffset Date { get; set; }
+    public DateTime Date { get; set; }
+
+    public string TimeZoneId { get; set; } = string.Empty;
 
     public string City { get; set; } = string.Empty;
 
@@ -27,4 +29,4 @@ public class CreateEventDto
     public double Latitude { get; set; }
 
     public double Longitude { get; set; }
-}
+}

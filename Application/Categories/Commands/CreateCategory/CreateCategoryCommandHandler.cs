@@ -20,8 +20,8 @@ public class CreateCategoryCommandHandler(IAppDBContext context) : IRequestHandl
             Name = request.Name,
             Slug = request.Slug,
             Description = request.Description,
-            CreatedAtUtc = DateTimeOffset.UtcNow,
-            UpdatedAtUtc = DateTimeOffset.UtcNow,
+            CreatedAtUtc = DateTime.UtcNow,
+            UpdatedAtUtc = DateTime.UtcNow,
         };
 
         context.Categories.Add(cat);
