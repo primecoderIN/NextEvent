@@ -2137,3 +2137,68 @@ Orders + Tickets + CheckIns
   -> Organizer analytics
   -> Platform analytics
 ```
+
+## 10. Infrastructure Conventions
+
+### 10.1 EF Core Migrations Assembly
+
+**File:** `API/Extensions/DatabaseServiceExtensions.cs`
+
+The solution is split across two projects that are relevant to EF Core:
+
+| Project | Role |
+|---|---|
+| `Persistence` | Contains `AppDBContext` and the `Migrations/` folder |
+| `API` | Startup / DI composition root, references `Persistence` |
+
+Because the startup project (`API`) differs from the project that owns the migrations (`Persistence`), the following line is explicitly set in `DatabaseServiceExtensions`:
+
+```csharp
+sqlOptions.MigrationsAssembly(typeof(AppDBContext).Assembly.GetName().Name);
+```
+
+**Why it is needed:**
+
+Without this line, when running EF CLI tools with `API` as the startup project and no `--project` flag, EF Core defaults to looking for migrations in the startup assembly (`API`) rather than `Persistence`. This causes migrations to be created in the wrong project or not found at runtime.
+
+**Benefits:**
+
+- **Correct migration location** — EF Core generates and reads migrations from `Persistence` regardless of which project is the startup project.
+- **Simpler CLI commands** — The `--project Persistence` flag becomes optional; `--startup-project API` alone is sufficient.
+- **Explicit intent** — Any developer reading the code immediately understands that migrations are owned by `Persistence`, not `API`.
+- **Future-proof** — If `AppDBContext` is ever moved to a new assembly, the breaking change is caught immediately at startup rather than silently misbehaving.
+- **Zero runtime cost** — The setting is read once at startup; it has no effect on query or transaction performance.
+
+**Effect at runtime vs. tooling:**
+
+| Scenario | Without `MigrationsAssembly` | With `MigrationsAssembly` |
+|---|---|---|
+| App runtime | ✅ Works (default resolves to `Persistence` correctly) | ✅ Works |
+| EF CLI without `--project` flag | ❌ Targets wrong assembly | ✅ Targets `Persistence` |
+| EF CLI with `--project` flag | ✅ Works | ✅ Works |
+
+**Conclusion:** Keep `MigrationsAssembly`. It allows simpler CLI commands and makes the intent explicit, at zero runtime cost.
+
+### 10.2 EF Core CLI Commands
+
+Always run EF CLI commands from the solution root or the `API` directory. The `--startup-project` flag is required; the `--project` flag is optional because `MigrationsAssembly` covers it.
+
+**Add a migration:**
+
+```bash
+dotnet ef migrations add <MigrationName> --startup-project API --project Persistence
+```
+
+**Apply migrations to the database:**
+
+```bash
+dotnet ef database update --startup-project API --project Persistence
+```
+
+**Remove the last migration:**
+
+```bash
+dotnet ef migrations remove --startup-project API --project Persistence
+```
+
+> The `--project Persistence` flag is shown for explicitness and is safe to omit only when `MigrationsAssembly` is configured as above.
