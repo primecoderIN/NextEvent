@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers;
 
 [Route(ApiRouteConstants.Organizations.Base)]
+// SECURITY (BFLA): The 'ActiveOrganizer' policy guarantees that ONLY users with an active organizer profile
+// can reach ANY endpoint in this controller. This prevents basic members or anonymous users from executing 
+// mutating actions or viewing roles (Broken Function Level Authorization).
 [Authorize(Policy = "ActiveOrganizer")]
 public class OrganizationRolesController : BaseApiController
 {

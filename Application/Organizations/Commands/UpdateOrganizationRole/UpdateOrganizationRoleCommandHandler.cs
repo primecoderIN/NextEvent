@@ -24,6 +24,9 @@ public class UpdateOrganizationRoleCommandHandler(
         await authorizationService.AuthorizeAsync(request.OrganizationId, PermissionConstants.RolesManage, cancellationToken);
 
         // 2. Load the role including its current permissions
+        // SECURITY (BOLA): We MUST forcefully bind the OrganizationId verified above against the OrganizationRoles table.
+        // If we only looked up by `r.Id == request.RoleId`, a user in Org A could pass Org A's ID in the route (passing auth)
+        // but pass a Role ID from Org B in the payload/route. This strict binding prevents cross-organization mutation.
         var role = await context.OrganizationRoles
             .Include(r => r.RolePermissions)
             .FirstOrDefaultAsync(r => r.Id == request.RoleId && r.OrganizationId == request.OrganizationId && !r.IsDeleted, cancellationToken)

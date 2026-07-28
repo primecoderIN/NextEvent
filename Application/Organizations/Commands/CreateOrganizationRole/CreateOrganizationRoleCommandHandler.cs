@@ -21,6 +21,9 @@ public class CreateOrganizationRoleCommandHandler(
             ?? throw new UnauthorizedException("User not authenticated.");
 
         // 1. Authorize: Does the user have 'roles.manage' in this organization?
+        // SECURITY (BOLA): We authorize against the OrganizationId provided in the request payload/route.
+        // Even if they spoof the ID to belong to another organization, this check will fail unless
+        // they are ACTUALLY an active member with roles.manage permission in that target organization.
         await authorizationService.AuthorizeAsync(request.OrganizationId, PermissionConstants.RolesManage, cancellationToken);
 
         var dto = request.Role;

@@ -176,6 +176,10 @@ public class OrganizationsController : BaseApiController
     /// <response code="401">No valid JWT supplied.</response>
     /// <response code="403">Caller lacks the required permission in the organization.</response>
     /// <response code="404">User with the given email not found.</response>
+    // SECURITY (BFLA/BOLA): We don't apply [Authorize(Policy = "ActiveOrganizer")] at the controller level
+    // because this controller has mixed endpoints (public read, admin actions, user actions). 
+    // However, the BOLA protection happens in the InviteOrganizationMemberCommandHandler where we 
+    // strictly authorize against the OrganizationId from the route.
     [Authorize]
     [HttpPost("{id:guid}/members/invite")]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]

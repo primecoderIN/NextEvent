@@ -10,7 +10,7 @@ namespace API.Services;
 
 public class TokenService(IConfiguration config) : ITokenService
 {
-    public string CreateToken(User user, IList<string> roles, string activeProfile)
+    public string CreateToken(User user, IList<string> roles, string activeProfile, Guid? organizationId = null)
     {
         var claims = new List<Claim>
         {
@@ -19,6 +19,11 @@ public class TokenService(IConfiguration config) : ITokenService
             new Claim(ClaimTypes.Name, user.UserName!),
             new Claim("ActiveProfile", activeProfile)
         };
+
+        if (organizationId.HasValue)
+        {
+            claims.Add(new Claim("OrganizationId", organizationId.Value.ToString()));
+        }
 
         foreach (var role in roles)
         {

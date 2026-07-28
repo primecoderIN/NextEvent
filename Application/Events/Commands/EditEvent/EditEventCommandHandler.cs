@@ -13,6 +13,8 @@ public class EditEventCommandHandler(
 {
     public async Task<Unit> Handle(EditEventCommand request, CancellationToken cancellationToken)
     {
+        // SECURITY (BOLA): The eventAuthorizationService securely loads the event and verifies the user 
+        // has the required permission against the event's TRUE organization, preventing spoofing.
         var eventEntity = await eventAuthorizationService.AuthorizeAndGetAsync(request.Id, PermissionConstants.EventsUpdate, cancellationToken);
 
         var dto = request.EventData;

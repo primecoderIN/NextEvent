@@ -4,10 +4,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Core.Services;
 
+/// <summary>
+/// The central authority for Organization-level RBAC (Role-Based Access Control).
+/// SECURITY (BOLA/Tenant Isolation): This service strictly ensures that a user can only perform 
+/// actions within an organization if they are an ACTIVE member of that specific organization, 
+/// AND hold a role granting the specific permission code. 
+/// By centralizing this logic, we prevent cross-tenant data leakage and Broken Object Level Authorization.
+/// </summary>
 public class OrganizationAuthorizationService(
     IAppDBContext context,
     ICurrentUserService currentUserService) : IOrganizationAuthorizationService
 {
+    /// <summary>
+    /// Evaluates whether the current authenticated user holds a role that grants the specified permission code 
+    /// within the given organization. Returns true or false without throwing exceptions.
+    /// </summary>
     public async Task<bool> HasPermissionAsync(Guid organizationId, string permissionCode, CancellationToken cancellationToken = default)
     {
         var userId = currentUserService.GetCurrentUserId();
@@ -29,6 +40,10 @@ public class OrganizationAuthorizationService(
         return hasPermission;
     }
 
+    /// <summary>
+    /// Strictly authorizes the current user against the given organization and permission.
+    /// Throws a ForbiddenAccessException if the user lacks the required permission, immediately halting the request.
+    /// </summary>
     public async Task AuthorizeAsync(Guid organizationId, string permissionCode, CancellationToken cancellationToken = default)
     {
         var hasPermission = await HasPermissionAsync(organizationId, permissionCode, cancellationToken);

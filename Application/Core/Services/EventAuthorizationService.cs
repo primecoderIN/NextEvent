@@ -13,12 +13,20 @@ public class EventAuthorizationService(
     IOrganizationAuthorizationService organizationAuthorizationService)
     : IEventAuthorizationService
 {
+    /// <summary>
+    /// Loads an event by ID and authorizes the current user against the event's true OrganizationId.
+    /// Prevents Broken Object Level Authorization (BOLA) by refusing to trust client-provided Organization IDs.
+    /// Returns the loaded event entity so handlers don't have to fetch it a second time.
+    /// </summary>
     public async Task<Domain.Event> AuthorizeAndGetAsync(
         Guid eventId,
         string permissionCode,
         CancellationToken cancellationToken = default)
     {
-        // 1. Load the event — OrganizationId comes from DB, not the caller
+        // 1. Load the event — OrganizationId comes from DB, not the caller.
+        // SECURITY (BOLA): We MUST fetch the entity from the database first to discover its true OrganizationId.
+        // If we relied on an OrganizationId passed in the request body/URL, a malicious user could spoof it
+        // and bypass authorization for an event they don't own (Broken Object Level Authorization).
         var eventEntity = await context.Events.FindAsync([eventId], cancellationToken)
             ?? throw new NotFoundException(nameof(Domain.Event), eventId);
 

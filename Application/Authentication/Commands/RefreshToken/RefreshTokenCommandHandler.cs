@@ -10,7 +10,7 @@ using Application.Core.Interfaces;
 
 namespace Application.Authentication.Commands.RefreshToken;
 
-public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenService tokenService, IAppDBContext appDbContext) 
+public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenService tokenService, IOrganizationMemberService memberService) 
     : IRequestHandler<RefreshTokenCommand, AuthResult<LoginResponseDto>>
 {
     public async Task<AuthResult<LoginResponseDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
@@ -36,7 +36,9 @@ public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenSer
 
         var roles = await userManager.GetRolesAsync(user);
 
-        var isOrganizer = roles.Contains(Domain.Constants.RoleConstants.Organizer) || await appDbContext.Organizations.AnyAsync(o => o.OwnerUserId == user.Id, cancellationToken) || await appDbContext.OrganizationMembers.AnyAsync(m => m.UserId == user.Id && m.Status == Domain.OrganizationMemberStatus.Active, cancellationToken);
+        var activeOrgId = await memberService.GetActiveOrganizationIdAsync(user.Id, cancellationToken);
+
+        var isOrganizer = roles.Contains(Domain.Constants.RoleConstants.Organizer) || activeOrgId.HasValue;
         var availableProfiles = new List<string> { "Member" };
         if (isOrganizer) availableProfiles.Add("Organizer");
 
@@ -47,7 +49,7 @@ public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenSer
             {
                 DisplayName = user.DisplayName ?? user.UserName!,
                 Image = user.ImageUrl,
-                Token = tokenService.CreateToken(user, roles, user.ActiveProfile),
+                Token = tokenService.CreateToken(user, roles, user.ActiveProfile, user.ActiveProfile == "Organizer" ? activeOrgId : null),
                 Username = user.UserName!,
                 Roles = roles,
                 ActiveProfile = user.ActiveProfile,

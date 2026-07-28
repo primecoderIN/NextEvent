@@ -138,6 +138,9 @@ public class EventsController : BaseApiController
     /// </summary>
     /// <response code="201">Event created successfully.</response>
     /// <response code="400">Validation failure.</response>
+    // SECURITY (BFLA): The 'ActiveOrganizer' policy guarantees that ONLY users with an active organizer profile
+    // can reach this endpoint. This prevents basic members or anonymous users from executing mutating actions 
+    // (Broken Function Level Authorization).
     [Authorize(Policy = "ActiveOrganizer")]
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status201Created)]

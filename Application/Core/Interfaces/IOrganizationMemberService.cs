@@ -19,4 +19,10 @@ public interface IOrganizationMemberService
     /// Useful for checking invitation status or active membership in a specific context.
     /// </summary>
     Task<OrganizationMember?> GetMembershipAsync(Guid organizationId, string userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves the ID of the organization the user currently belongs to, either as the Owner or an Active Member.
+    /// Used during token generation to embed the organization ID into the JWT.
+    /// </summary>
+    Task<Guid?> GetActiveOrganizationIdAsync(string userId, CancellationToken cancellationToken = default);
 }

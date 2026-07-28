@@ -33,6 +33,9 @@ public class CreateEventCommandHandler(
             throw new NotFoundException("Organization", request.Event.OrganizationId);
 
         // ── 3. RBAC: caller must be an active member with events.create ────────
+        // SECURITY (BOLA): We authorize against the OrganizationId provided in the request payload.
+        // Even if they spoof the ID to belong to another organization, this check will fail unless
+        // they are ACTUALLY an active member with events.create permission in that target organization.
         await authorizationService.AuthorizeAsync(
             request.Event.OrganizationId, 
             PermissionConstants.EventsCreate, 

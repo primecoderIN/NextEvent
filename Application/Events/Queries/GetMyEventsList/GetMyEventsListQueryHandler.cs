@@ -54,14 +54,20 @@ public class GetMyEventsListQueryHandler(
         }
 
         var userId = currentUserService.GetCurrentUserId();
+        var currentOrgId = currentUserService.GetCurrentOrganizationId();
         
-        // Organizers can only see events for organizations they own or are an active member of.
-        whereClauses.Add(@"e.OrganizationId IN (
-            SELECT o.Id FROM Organizations o WHERE o.OwnerUserId = @CurrentUserId AND o.IsDeleted = 0
-            UNION
-            SELECT om.OrganizationId FROM OrganizationMembers om WHERE om.UserId = @CurrentUserId AND om.Status = 1 AND om.IsDeleted = 0
-        )");
-        parameters.Add("CurrentUserId", userId);
+        // Organizers can only see events for their active organization.
+        // We eliminate expensive database subqueries by relying on the OrganizationId extracted directly from the JWT.
+        if (currentOrgId.HasValue)
+        {
+            whereClauses.Add("e.OrganizationId = @CurrentOrgId");
+            parameters.Add("CurrentOrgId", currentOrgId.Value);
+        }
+        else
+        {
+            // If they somehow hit this endpoint without an active org in their token, return no results.
+            whereClauses.Add("1 = 0");
+        }
 
         var whereSql = whereClauses.Count > 0 ? "WHERE " + string.Join(" AND ", whereClauses) : "";
 

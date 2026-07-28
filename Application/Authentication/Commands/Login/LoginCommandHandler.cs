@@ -9,7 +9,7 @@ using Application.Core.Interfaces;
 
 namespace Application.Authentication.Commands.Login;
 
-public class LoginCommandHandler(UserManager<User> userManager, ITokenService tokenService, IAppDBContext appDbContext) 
+public class LoginCommandHandler(UserManager<User> userManager, ITokenService tokenService, IOrganizationMemberService memberService) 
     : IRequestHandler<LoginCommand, AuthResult<LoginResponseDto>>
 {
     public async Task<AuthResult<LoginResponseDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -35,14 +35,16 @@ public class LoginCommandHandler(UserManager<User> userManager, ITokenService to
 
         var roles = await userManager.GetRolesAsync(user);
 
-        var isOrganizer = roles.Contains(Domain.Constants.RoleConstants.Organizer) || await appDbContext.Organizations.AnyAsync(o => o.OwnerUserId == user.Id, cancellationToken) || await appDbContext.OrganizationMembers.AnyAsync(m => m.UserId == user.Id && m.Status == Domain.OrganizationMemberStatus.Active, cancellationToken);
+        var activeOrgId = await memberService.GetActiveOrganizationIdAsync(user.Id, cancellationToken);
+
+        var isOrganizer = roles.Contains(Domain.Constants.RoleConstants.Organizer) || activeOrgId.HasValue;
         var availableProfiles = new List<string> { "Member" };
         if (isOrganizer) availableProfiles.Add("Organizer");
 
         var userDto = new LoginResponseDto
         {
             DisplayName = user.DisplayName ?? user.UserName!,
-            Token = tokenService.CreateToken(user, roles, user.ActiveProfile),
+            Token = tokenService.CreateToken(user, roles, user.ActiveProfile, user.ActiveProfile == "Organizer" ? activeOrgId : null),
             Username = user.UserName!,
             Image = user.ImageUrl,
             Roles = roles,

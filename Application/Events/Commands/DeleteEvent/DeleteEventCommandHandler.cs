@@ -13,6 +13,8 @@ public class DeleteEventCommandHandler(
 {
     public async Task<Unit> Handle(DeleteEventCommand request, CancellationToken cancellationToken)
     {
+        // SECURITY (BOLA): The eventAuthorizationService securely loads the event and verifies the user 
+        // has the required permission against the event's TRUE organization, preventing spoofing.
         var eventEntity = await eventAuthorizationService.AuthorizeAndGetAsync(request.Id, PermissionConstants.EventsCancel, cancellationToken);
         
         context.Events.Remove(eventEntity);

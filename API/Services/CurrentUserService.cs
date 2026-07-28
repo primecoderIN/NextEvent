@@ -27,6 +27,19 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
         return user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
 
+    public Guid? GetCurrentOrganizationId()
+    {
+        var user = httpContextAccessor.HttpContext?.User;
+        var orgIdClaim = user?.FindFirst("OrganizationId")?.Value;
+        
+        if (Guid.TryParse(orgIdClaim, out var orgId))
+        {
+            return orgId;
+        }
+
+        return null;
+    }
+
     public bool HasRole(string role)
     {
         var user = httpContextAccessor.HttpContext?.User;
