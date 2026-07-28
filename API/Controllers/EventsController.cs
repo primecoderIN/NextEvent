@@ -138,7 +138,7 @@ public class EventsController : BaseApiController
     /// </summary>
     /// <response code="201">Event created successfully.</response>
     /// <response code="400">Validation failure.</response>
-    [Authorize]
+    [Authorize(Policy = "ActiveOrganizer")]
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -163,7 +163,7 @@ public class EventsController : BaseApiController
     /// <response code="200">Event updated successfully.</response>
     /// <response code="400">Validation failure.</response>
     /// <response code="404">No event exists with the provided ID.</response>
-    [Authorize]
+    [Authorize(Policy = "ActiveOrganizer")]
     [HttpPut(ApiRouteConstants.Events.Update)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -185,7 +185,7 @@ public class EventsController : BaseApiController
     /// </summary>
     /// <response code="200">Event deleted successfully.</response>
     /// <response code="404">No event exists with the provided ID.</response>
-    [Authorize]
+    [Authorize(Policy = "ActiveOrganizer")]
     [HttpDelete(ApiRouteConstants.Events.Delete)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]

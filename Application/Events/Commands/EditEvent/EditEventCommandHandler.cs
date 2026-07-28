@@ -3,13 +3,17 @@ using Application.Core.Interfaces;
 using Domain;
 using MediatR;
 
+using Domain.Constants;
+
 namespace Application.Events.Commands.EditEvent;
 
-public class EditEventCommandHandler(IAppDBContext context) : IRequestHandler<EditEventCommand, Unit>
+public class EditEventCommandHandler(
+    IAppDBContext context,
+    IEventAuthorizationService eventAuthorizationService) : IRequestHandler<EditEventCommand, Unit>
 {
     public async Task<Unit> Handle(EditEventCommand request, CancellationToken cancellationToken)
     {
-        var eventEntity = await context.Events.FindAsync([request.Id], cancellationToken) ?? throw new NotFoundException(nameof(Event), request.Id);
+        var eventEntity = await eventAuthorizationService.AuthorizeAndGetAsync(request.Id, PermissionConstants.EventsUpdate, cancellationToken);
 
         var dto = request.EventData;
 

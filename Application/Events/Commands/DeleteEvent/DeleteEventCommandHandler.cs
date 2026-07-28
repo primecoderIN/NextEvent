@@ -3,13 +3,17 @@ using Application.Core.Interfaces;
 using Domain;
 using MediatR;
 
+using Domain.Constants;
+
 namespace Application.Events.Commands.DeleteEvent;
 
-public class DeleteEventCommandHandler(IAppDBContext context) : IRequestHandler<DeleteEventCommand, Unit>
+public class DeleteEventCommandHandler(
+    IAppDBContext context,
+    IEventAuthorizationService eventAuthorizationService) : IRequestHandler<DeleteEventCommand, Unit>
 {
     public async Task<Unit> Handle(DeleteEventCommand request, CancellationToken cancellationToken)
     {
-        var eventEntity = await context.Events.FindAsync([request.Id], cancellationToken) ?? throw new NotFoundException(nameof(Event), request.Id);
+        var eventEntity = await eventAuthorizationService.AuthorizeAndGetAsync(request.Id, PermissionConstants.EventsCancel, cancellationToken);
         
         context.Events.Remove(eventEntity);
 

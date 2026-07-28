@@ -3,9 +3,12 @@ using API.Services;
 using Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace API.Controllers;
 
 [Route(ApiRouteConstants.Ai.Base)]
+[Authorize]
 public class AiController(IGeminiService geminiService) : BaseApiController
 {
     // -----------------------------------------------------------------------

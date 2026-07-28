@@ -4,6 +4,7 @@ using Application.Organizations.DTOs;
 using Dapper;
 using Domain;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Organizations.Queries.GetOrganizationById;
 
@@ -14,15 +15,28 @@ namespace Application.Organizations.Queries.GetOrganizationById;
 /// </summary>
 public class GetOrganizationByIdQueryHandler(
     ISqlConnectionFactory connectionFactory,
-    ICurrentUserService currentUserService)
+    ICurrentUserService currentUserService,
+    IOrganizationAuthorizationService authorizationService,
+    IAppDBContext context)
     : IRequestHandler<GetOrganizationByIdQuery, OrganizationDetailDto>
 {
     public async Task<OrganizationDetailDto> Handle(
         GetOrganizationByIdQuery request,
         CancellationToken cancellationToken)
     {
+        var userId = currentUserService.GetCurrentUserId()
+            ?? throw new UnauthorizedException("User not authenticated.");
+
+        var isAdmin = currentUserService.HasRole(Domain.Constants.RoleConstants.Admin);
+        var hasViewPerm = await authorizationService
+            .HasPermissionAsync(request.Id, Domain.Constants.PermissionConstants.OrganizationView, cancellationToken);
+        var isOwner = await context.Organizations
+            .AnyAsync(o => o.Id == request.Id && o.OwnerUserId == userId && !o.IsDeleted, cancellationToken);
+
+        if (!isAdmin && !hasViewPerm && !isOwner)
+            throw new ForbiddenAccessException("You do not have access to this organization.");
+
         using var connection = connectionFactory.CreateConnection();
-        var userId = currentUserService.GetCurrentUserId();
 
         const string sql = """
             SELECT o.Id,

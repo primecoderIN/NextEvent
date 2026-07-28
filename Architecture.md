@@ -473,6 +473,14 @@ ASP.NET Identity role proves platform-level capability.
 Organization membership and permissions prove organization-level capability.
 ```
 
+#### Object-Level Authorization (BOLA Prevention)
+For endpoints that mutate resources (like `EditEvent` or `DeleteEvent`), authorization cannot rely on request payloads (which can be spoofed) or solely on the controller `[Authorize]` attribute.
+- **`IEventAuthorizationService`**: This service acts as a DRY ownership-resolution layer. It loads the entity from the database *first*, extracts its unforgeable `OrganizationId`, and then delegates to `IOrganizationAuthorizationService` to check if the caller has the required permission for *that specific organization*. 
+
+#### Function-Level Authorization (BFLA Prevention)
+Access to organizer-specific endpoints is strictly gated at the controller boundary.
+- **Controller Boundary Gates**: All mutation endpoints (e.g., in `EventsController`) use `[Authorize(Policy = "ActiveOrganizer")]` instead of a generic `[Authorize]`. This rejects unauthorized roles or inactive profiles before the handler is even invoked, preventing Broken Function Level Authorization.
+
 #### Tenant Isolation Rules
 
 To enforce strict multi-tenant isolation while supporting Platform Admins, the API layer follows these rules:

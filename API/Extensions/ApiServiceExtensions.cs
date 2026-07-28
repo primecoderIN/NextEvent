@@ -60,6 +60,8 @@ public static class ApiServiceExtensions
         // Register the centralized membership service for querying OrganizationMembers
         services.AddScoped<IOrganizationMemberService, Application.Core.Services.OrganizationMemberService>();
 
+        services.AddScoped<IEventAuthorizationService, Application.Core.Services.EventAuthorizationService>();
+
         return services;
     }
 }

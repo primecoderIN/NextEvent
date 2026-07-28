@@ -49,14 +49,16 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
   - **UI Display**: The frontend derives the local time strictly client-side using the UTC Date + IANA ID.
   - **Identity Exemption**: Third-party framework columns (like `User.LockoutEnd`) retain their original `datetimeoffset` types to prevent breaking internal ASP.NET Identity operations.
 
-- **Tenant-Specific RBAC**  
-  Unlike ASP.NET Identity roles which are platform-wide (e.g., a user is an "Admin" everywhere), we implemented a custom Organization RBAC model. Users hold `OrganizationRoles` tied specifically to an `OrganizationId`, composed of granular `Permissions` (like `events.create`). This isolates authorization boundaries, preventing role-bleeding across different organizations the user might belong to.
+- **Tenant-Specific RBAC & BOLA Prevention**  
+  Unlike ASP.NET Identity roles which are platform-wide (e.g., a user is an "Admin" everywhere), we implemented a custom Organization RBAC model. Users hold `OrganizationRoles` tied specifically to an `OrganizationId`, composed of granular `Permissions` (like `events.create`). This isolates authorization boundaries, preventing role-bleeding across different organizations.
+  To strictly prevent Broken Object Level Authorization (BOLA), mutation handlers (e.g., `EditEvent`, `DeleteEvent`) do not trust user-provided organization IDs. Instead, they use a centralized `IEventAuthorizationService` that loads the target resource from the database, extracts its unforgeable `OrganizationId`, and verifies permissions against that true owner.
 
 - **Single-Organization Policy**
   Users are restricted to an **Active** membership in at most one organization across the entire platform. Centralized checks in `IOrganizationMemberService` prevent a user from creating a new organization, receiving an invitation, or accepting an invitation if they are already part of any organization.
 
-- **Strict Tenant Isolation**
+- **Strict Tenant Isolation & BFLA Prevention**
   Data visibility is strictly partitioned. Endpoints returning lists of data (like `GET /events/my`) inherently filter queries so an organizer only ever sees data belonging to their organization, actively ignoring any malicious query parameters attempting to cross tenant boundaries. Single-resource endpoints (like `GET /organizations/{id}`) unify logic for both members and Platform Admins, failing securely with a `404 Not Found` (rather than a 403) for unauthorized users to prevent resource enumeration.
+  Furthermore, to prevent Broken Function Level Authorization (BFLA), all organizer-only API routes are firmly gated at the controller boundary using `[Authorize(Policy = "ActiveOrganizer")]`. This instantly rejects basic members or anonymous users without invoking deeper handler logic.
 
 - **Profile Isolation (ActiveProfile)**  
   To provide a clean UX separation between "Member" (event attendee) and "Organizer" experiences, the `User` entity maintains an `ActiveProfile` state. This state is embedded into the JWT as a claim. The backend defines an `ActiveOrganizer` policy (requiring both the Organizer role AND the Organizer active profile claim) to protect organizer endpoints. The frontend mirrors this using a smart `<RequireProfile>` guard that prevents accidental cross-profile navigation, forcing explicit mode switching via the new `POST /api/account/switch-profile` endpoint without requiring multiple accounts.
