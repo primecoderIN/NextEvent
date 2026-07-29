@@ -45,6 +45,10 @@ public static class DatabaseServiceExtensions
         // Register ISqlConnectionFactory so query handlers can inject it for fast Dapper reads.
         services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
 
+        // Register Dapper Type Handler globally to enforce DateTimeKind.Utc
+        Dapper.SqlMapper.AddTypeHandler(new Persistence.DapperTypeHandlers.UtcDateTimeHandler());
+        Dapper.SqlMapper.AddTypeHandler(new Persistence.DapperTypeHandlers.NullableUtcDateTimeHandler());
+
         return services;
     }
 }

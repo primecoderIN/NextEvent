@@ -22,6 +22,7 @@ public class GetEventDetailsByIdQueryHandler(ISqlConnectionFactory connectionFac
                    e.CategoryId,
                    c.Name AS Category,
                    e.Date,
+                   e.TimeZoneId,
                    e.City,
                    e.Venue,
                    e.IsCancelled,
