@@ -46,6 +46,7 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
   We strictly use `DateTime` (in UTC) across the entire solution.
   - **Audit Timestamps**: Fields like `CreatedAtUtc` are pure UTC `DateTime` values mapped to SQL Server's `datetime2(3)`. Millisecond precision (3) saves 2 bytes per row over the default precision (7).
   - **Business Event Dates**: Scheduled events require both an absolute point in time (UTC) and a local context. We store the UTC point in time in a `Date` column (`datetime2(3)`) and the IANA timezone identifier (e.g. `"Asia/Kolkata"`) in a separate `TimeZoneId` string column.
+  - **UTC Enforcement**: To guarantee JSON serialization outputs the `Z` offset, we configured a global EF Core convention (`UtcDateTimeConverter`) and global Dapper TypeHandlers (`UtcDateTimeHandler`). These automatically intercept all dates from the database and force `DateTimeKind.Utc` before they reach the API.
   - **UI Display**: The frontend derives the local time strictly client-side using the UTC Date + IANA ID.
   - **Identity Exemption**: Third-party framework columns (like `User.LockoutEnd`) retain their original `datetimeoffset` types to prevent breaking internal ASP.NET Identity operations.
 

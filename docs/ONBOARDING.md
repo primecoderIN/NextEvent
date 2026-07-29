@@ -64,7 +64,8 @@ Our development journey has been highly iterative:
 ### 4.1 Backend Architecture
 * **CQRS with MediatR:** Every use case is either a Command (mutates state) or a Query (reads state).
 * **Thin Controllers:** Controllers only map HTTP requests to MediatR commands/queries and return a standardized `ApiResponse<T>`. Validation happens automatically via `ValidationBehavior`, and errors are mapped via `ExceptionMiddleware`.
-* **DateTimeOffset (Crucial Decision):** We strictly use `DateTimeOffset` across the entire solution. This ensures timezone safety natively in SQL Server, improves indexing, and cleanly serializes to ISO-8601 strings.
+* **Date and Time Convention (UTC + TimeZoneId):** We strictly use `DateTime` (in UTC) across the entire solution mapped to SQL Server's `datetime2(3)`. To support local contexts (like events), we store an IANA timezone identifier (e.g. `"Asia/Kolkata"`) in a separate `TimeZoneId` string column.
+* **UTC Enforcement:** To guarantee JSON serialization outputs the `Z` offset, we configured a global EF Core convention (`UtcDateTimeConverter`) and global Dapper TypeHandlers (`UtcDateTimeHandler`) which force `DateTimeKind.Utc` on all dates read from the database.
 * **Tenant-Specific RBAC:** Unlike ASP.NET Identity roles which are platform-wide, we implemented a custom Organization RBAC model. Users hold `OrganizationRoles` tied specifically to an `OrganizationId`, preventing role-bleeding.
 
 ### 4.2 Frontend Architecture

@@ -531,6 +531,7 @@ Follow REST conventions:
 We strictly use `DateTime` (in UTC) across the entire solution, adhering to the following architectural patterns:
 - **Audit Timestamps**: Fields like `CreatedAtUtc`, `UpdatedAtUtc`, and `DeletedAtUtc` are pure UTC `DateTime` values mapped to SQL Server's `datetime2(3)`. Millisecond precision (3) is sufficient and saves 2 bytes per row over the default precision (7).
 - **Business Event Dates**: Scheduled events require both an absolute point in time (UTC) and a local context (timezone). We store the UTC point in time in a `Date` column (mapped to `datetime2(3)`) and the IANA timezone identifier (e.g. `"Asia/Kolkata"`) in a separate `TimeZoneId` string column. The frontend uses the `TimeZoneId` to format the UTC date into the venue's local time accurately, surviving Daylight Saving Time (DST) changes.
+- **UTC Enforcement**: To guarantee JSON serialization outputs the `Z` offset, we configured a global EF Core convention (`UtcDateTimeConverter`) and global Dapper TypeHandlers (`UtcDateTimeHandler`). These automatically intercept all dates from the database and force `DateTimeKind.Utc` before they reach the API.
 - **Identity Exemption**: Third-party framework columns (like `AspNetUsers.LockoutEnd`) retain their original `datetimeoffset` types to prevent breaking internal Identity operations.
 
 This split pattern ensures we never lose temporal accuracy while keeping storage costs low and indexing performance high.
