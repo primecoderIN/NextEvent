@@ -23,6 +23,7 @@ public class EditEventCommandHandler(
         eventEntity.ChangeDescription(dto.Description);
         eventEntity.ChangeCategoryId(dto.CategoryId);
         eventEntity.ChangeDate(dto.Date);
+        eventEntity.ChangeTimeZoneId(dto.TimeZoneId);
         eventEntity.ChangeCity(dto.City);
         eventEntity.ChangeVenue(dto.Venue);
         eventEntity.ChangeIsCancelled(dto.IsCancelled);

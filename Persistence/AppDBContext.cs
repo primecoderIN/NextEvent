@@ -42,4 +42,22 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
         // class and this line picks it up automatically — OnModelCreating never needs to change.
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDBContext).Assembly);
     }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        // Enforce DateTimeKind.Utc on ALL DateTime properties system-wide automatically
+        configurationBuilder
+            .Properties<DateTime>()
+            .HaveConversion<UtcDateTimeConverter>();
+    }
+}
+
+public class UtcDateTimeConverter : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>
+{
+    public UtcDateTimeConverter()
+        : base(
+            v => v,
+            v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+    {
+    }
 }

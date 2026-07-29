@@ -50,6 +50,7 @@ public class CreateEventCommandHandler(
             Description    = request.Event.Description,
             CategoryId     = request.Event.CategoryId,
             Date           = request.Event.Date,
+            TimeZoneId     = request.Event.TimeZoneId,
             City           = request.Event.City,
             Venue          = request.Event.Venue,
             Latitude       = request.Event.Latitude,
