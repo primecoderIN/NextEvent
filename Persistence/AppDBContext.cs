@@ -45,7 +45,11 @@ public class AppDBContext(DbContextOptions options) : IdentityDbContext<User>(op
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        // Enforce DateTimeKind.Utc on ALL DateTime properties system-wide automatically
+        // Enforce DateTimeKind.Utc on ALL DateTime properties system-wide automatically.
+        // IMPORTANT: This convention ONLY applies to queries materialized by Entity Framework Core 
+        // (e.g., _context.Events.ToListAsync()). 
+        // It does NOT apply to raw Dapper queries. Dapper requires its own SqlMapper.TypeHandler 
+        // (which is registered in DatabaseServiceExtensions.cs).
         configurationBuilder
             .Properties<DateTime>()
             .HaveConversion<UtcDateTimeConverter>();
