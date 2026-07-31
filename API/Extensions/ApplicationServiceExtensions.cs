@@ -1,6 +1,7 @@
-using API.Services;
-using Application.Events.Commands.CreateEvent;
-using Application.Events.Queries.GetEventsList;
+using NextEvent.Modules.Events.Application.Events.Commands.CreateEvent;
+using NextEvent.Modules.Events.Application.Events.Queries.GetEventsList;
+using NextEvent.Modules.AI.Application.Interfaces;
+using NextEvent.Modules.AI.Application.Services;
 using FluentValidation;
 
 namespace API.Extensions;
@@ -20,7 +21,9 @@ public static class ApplicationServiceExtensions
         services.AddMediatR(x =>
         {
             x.RegisterServicesFromAssemblyContaining<GetEventsListQueryHandler>();
-            x.AddOpenBehavior(typeof(Application.Core.ValidationBehavior<,>));
+            x.RegisterServicesFromAssemblyContaining<NextEvent.Modules.Organizations.Application.Organizations.Queries.GetOrganizationById.GetOrganizationByIdQueryHandler>();
+            x.RegisterServicesFromAssemblyContaining<NextEvent.Modules.Identity.Application.Authentication.Commands.Login.LoginCommandHandler>();
+            x.AddOpenBehavior(typeof(NextEvent.Shared.ValidationBehavior<,>));
         });
 
         return services;

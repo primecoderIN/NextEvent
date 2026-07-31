@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.AspNetCore.Http" />
+    <Using Include="Microsoft.AspNetCore.Mvc" />
+    <Using Include="Microsoft.AspNetCore.Authorization" />
+    <Using Include="NextEvent.Shared.Common" />
+    <Using Include="NextEvent.Shared.Controllers" />
+    <Using Include="NextEvent.Shared.Exceptions" />
+    <Using Include="NextEvent.Shared.Interfaces" />
+    <Using Include="NextEvent.Shared.Constants" />
+    <Using Include="NextEvent.Shared.Pagination" />
+    <Using Include="NextEvent.Modules.Events.Domain" />
+    <Using Include="NextEvent.Modules.Organizations.Domain" />
+    <Using Include="NextEvent.Modules.Identity.Domain" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\NextEvent.Shared.csproj" />
+    <ProjectReference Include="..\Identity\NextEvent.Modules.Identity.csproj" />
+    <ProjectReference Include="..\Organizations\NextEvent.Modules.Organizations.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.79" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.1.3" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.1.3" />
+    <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
+  </ItemGroup>
+
+</Project>

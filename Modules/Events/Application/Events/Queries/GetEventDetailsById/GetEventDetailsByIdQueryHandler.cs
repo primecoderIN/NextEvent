@@ -1,0 +1,50 @@
+using NextEvent.Shared.Exceptions;
+using NextEvent.Shared.Interfaces;
+using NextEvent.Modules.Events.Application.Events.DTOs;
+using Dapper;
+using NextEvent.Modules.Identity.Domain;
+using MediatR;
+
+namespace NextEvent.Modules.Events.Application.Events.Queries.GetEventDetailsById;
+public class GetEventDetailsByIdQueryHandler(ISqlConnectionFactory connectionFactory) : IRequestHandler<GetEventDetailsByIdQuery, EventResponseDto>
+{
+    public async Task<EventResponseDto> Handle(GetEventDetailsByIdQuery request, CancellationToken cancellationToken)
+    {
+        // CQRS (Queries): Create a raw connection instead of using EF Core
+        using var connection = connectionFactory.CreateConnection();
+        
+        // Parameterized SQL query to prevent SQL injection
+        var sql = @"
+            SELECT e.Id,
+                   e.Title,
+                   e.Description,
+                   e.CategoryId,
+                   c.Name AS Category,
+                   e.Date,
+                   e.TimeZoneId,
+                   e.City,
+                   e.Venue,
+                   e.IsCancelled,
+                   e.Latitude,
+                   e.Longitude,
+                   o.Id AS OrganizationId,
+                   o.Name AS OrganizationName,
+                   o.Slug AS OrganizationSlug,
+                   o.LogoUrl AS OrganizationLogoUrl
+            FROM Events e
+            LEFT JOIN Categories c ON e.CategoryId = c.Id
+            LEFT JOIN Organizations o ON e.OrganizationId = o.Id
+            WHERE e.Id = @Id";
+        
+        // Dapper securely executes the query and maps the first result to the EventResponseDto class
+        var eventDto = await connection.QueryFirstOrDefaultAsync<EventResponseDto>(sql, new { Id = request.Id });
+        
+        if (eventDto == null) 
+        {
+            throw new NotFoundException(nameof(Event), request.Id);
+        }
+        
+        // Note: the ExceptionMiddleware will catch nulls and return 404
+        return eventDto;
+    }
+}

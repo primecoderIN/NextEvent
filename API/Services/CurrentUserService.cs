@@ -1,5 +1,6 @@
 using System.Security.Claims;
-using Application.Core.Interfaces;
+using NextEvent.Shared.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace API.Services;
 

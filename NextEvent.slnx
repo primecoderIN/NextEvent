@@ -1,6 +1,8 @@
 <Solution>
   <Project Path="API/API.csproj" />
-  <Project Path="Application/Application.csproj" />
-  <Project Path="Domain/Domain.csproj" />
-  <Project Path="Persistence/Persistence.csproj" />
+  <Project Path="Shared/NextEvent.Shared.csproj" />
+  <Project Path="Modules/Identity/NextEvent.Modules.Identity.csproj" />
+  <Project Path="Modules/Organizations/NextEvent.Modules.Organizations.csproj" />
+  <Project Path="Modules/Events/NextEvent.Modules.Events.csproj" />
+  <Project Path="Modules/AI/NextEvent.Modules.AI.csproj" />
 </Solution>

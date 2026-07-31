@@ -1,16 +1,13 @@
-using API.Common;
-using Application.Core.Exceptions;
 using FluentValidation;
+using NextEvent.Shared.Exceptions;
+using NextEvent.Shared.Common;
 
 namespace API.Middleware;
 
 /// <summary>
-/// Centralized exception handling middleware.
-/// Catches all exceptions thrown anywhere in the pipeline and
-/// converts them into a consistent <see cref="ApiResponse{T}"/> JSON body.
-///
-/// Registration order matters — must be the first middleware registered
-/// so it wraps everything downstream.
+/// Global exception handler that catches ALL unhandled exceptions in the request pipeline.
+/// It prevents stack traces from leaking to clients and enforces a consistent JSON response format
+/// across all error types (Validation, NotFound, Business Rules, Internal Server Errors).
 /// </summary>
 public class ExceptionMiddleware(
     RequestDelegate next,
@@ -21,6 +18,7 @@ public class ExceptionMiddleware(
     {
         try
         {
+            // Proceed to the next middleware (or the actual endpoint handler)
             await next(context);
         }
         catch (ValidationException ex)
@@ -48,10 +46,6 @@ public class ExceptionMiddleware(
             await HandleUnexpectedExceptionAsync(context, ex);
         }
     }
-
-    // -----------------------------------------------------------------------
-    // Handlers
-    // -----------------------------------------------------------------------
 
     private static async Task HandleUnauthorizedExceptionAsync(
         HttpContext context,

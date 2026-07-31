@@ -1,6 +1,9 @@
-using Application.Core.Interfaces;
+using NextEvent.Shared.Interfaces;
+using NextEvent.Shared.Persistence;
+using NextEvent.Modules.Identity.Persistence;
+using NextEvent.Modules.Organizations.Persistence.Contexts;
+using NextEvent.Modules.Events.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
-using Persistence;
 
 namespace API.Extensions;
 
@@ -16,38 +19,29 @@ public static class DatabaseServiceExtensions
         IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException(
-                "Connection string 'DefaultConnection' was not found.");
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
-        services.AddDbContext<AppDBContext>(options =>
+        void ConfigureSqlOptions(DbContextOptionsBuilder options, string migrationsAssembly)
         {
             options.UseSqlServer(connectionString, sqlOptions =>
             {
-                // Migrations are stored in the Persistence project.
-                //It tells EF Core: "Even though you're running from API, the migrations live in Persistence."
-                sqlOptions.MigrationsAssembly(typeof(AppDBContext).Assembly.GetName().Name);
-
-                // Automatically retry transient SQL Server failures.
-                sqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 5,
-                    maxRetryDelay: TimeSpan.FromSeconds(10),
-                    errorNumbersToAdd: null);
-
-                // Allow long-running operations such as migrations,
-                // imports, and complex reports.
+                sqlOptions.MigrationsAssembly(migrationsAssembly);
+                sqlOptions.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
                 sqlOptions.CommandTimeout(60);
             });
-        });
+        }
 
-        // Expose AppDBContext via the IAppDBContext abstraction for application layer usage.
-        services.AddScoped<IAppDBContext>(provider => provider.GetRequiredService<AppDBContext>());
+        // We configure all three DbContexts.
+        services.AddDbContext<IdentityDbContext>(options => ConfigureSqlOptions(options, "NextEvent.Modules.Identity"));
+        services.AddDbContext<OrganizationsDbContext>(options => ConfigureSqlOptions(options, "NextEvent.Modules.Organizations"));
+        services.AddDbContext<EventsDbContext>(options => ConfigureSqlOptions(options, "NextEvent.Modules.Events"));
 
         // Register ISqlConnectionFactory so query handlers can inject it for fast Dapper reads.
         services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
 
         // Register Dapper Type Handler globally to enforce DateTimeKind.Utc
-        Dapper.SqlMapper.AddTypeHandler(new Persistence.DapperTypeHandlers.UtcDateTimeHandler());
-        Dapper.SqlMapper.AddTypeHandler(new Persistence.DapperTypeHandlers.NullableUtcDateTimeHandler());
+        Dapper.SqlMapper.AddTypeHandler(new NextEvent.Shared.Persistence.DapperTypeHandlers.UtcDateTimeHandler());
+        Dapper.SqlMapper.AddTypeHandler(new NextEvent.Shared.Persistence.DapperTypeHandlers.NullableUtcDateTimeHandler());
 
         return services;
     }

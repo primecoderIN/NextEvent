@@ -2,12 +2,14 @@ using API.Extensions;
 using API.Middleware;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Persistence;
+using NextEvent.Modules.Identity.Persistence;
+using NextEvent.Modules.Identity.Domain;
+using API;
 
 // =======================================================================
 // API LAYER (Program.cs)
 // This is the Composition Root of the application. It acts as the entry point 
-// and wires up all dependencies across the Domain, Application, and Persistence layers.
+// and wires up all dependencies across the Modules and Shared layers.
 // It configures the HTTP request pipeline, Middleware, Authentication, and Swagger.
 // =======================================================================
 
@@ -19,6 +21,7 @@ builder.Services.AddDatabaseServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddSwaggerServices();
 builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services.AddMassTransitServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -31,11 +34,6 @@ if (app.Environment.IsDevelopment())
 
 // -----------------------------------------------------------------------
 // Global exception handling middleware
-// Must be the FIRST middleware registered so it wraps the entire pipeline.
-// Replaces the previous inline app.Use(async (context, next) => …) lambda.
-// Handles: ValidationException → 400, NotFoundException → 404,
-//          BusinessRuleException → 409, Exception → 500
-// All responses use the ApiResponse<T> envelope.
 // -----------------------------------------------------------------------
 app.UseCors("CorsPolicy"); //Enable CORS with the defined policy.
 app.UseMiddleware<ExceptionMiddleware>();
@@ -43,31 +41,35 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
-
 // Configure the HTTP request pipeline.
 app.MapControllers(); //When an HTTP request arrives, route it to controller actions.
 
-
-
-//There is no scope before app.Run(), so manually creating scope to do migrations
+// Run migrations for the DbContexts (basic approach for now)
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 
 try
 {
-    var context = services.GetRequiredService<AppDBContext>();
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var identityContext = services.GetRequiredService<IdentityDbContext>();
+    var orgContext = services.GetRequiredService<NextEvent.Modules.Organizations.Persistence.Contexts.OrganizationsDbContext>();
+    var eventsContext = services.GetRequiredService<NextEvent.Modules.Events.Persistence.Contexts.EventsDbContext>();
+    
+    // Automatically apply migrations for all modules
+    identityContext.Database.Migrate();
+    orgContext.Database.Migrate();
+    eventsContext.Database.Migrate();
     
     // We use our custom Domain.User class (which extends IdentityUser with app-specific properties).
-    // The explicit 'Domain.' namespace prevents collisions with other common 'User' types in ASP.NET Core.
-    var userManager = services.GetRequiredService<UserManager<Domain.User>>();
-    await context.Database.MigrateAsync();  //pending migration will be done //DB will be created if not created
-    await DBInitializer.SeedData(context, roleManager, userManager); //Update data in database.
+    var userManager = services.GetRequiredService<UserManager<User>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    
+    // Seed initial data
+    await DatabaseInitializer.SeedData(identityContext, orgContext, eventsContext, roleManager, userManager); 
 }
 catch (Exception ex)
 {
     var logger = services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex, "An error occured during migration");
+    logger.LogError(ex, "An error occured during initialization");
 }
 
 app.Run();

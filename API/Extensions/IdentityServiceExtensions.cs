@@ -1,11 +1,12 @@
 using System.Text;
-using Application.Authentication.Interfaces;
-using API.Services;
-using Domain;
+using NextEvent.Modules.Identity.Application.Authentication.Interfaces;
+using NextEvent.Modules.Identity.Application.Services;
+using NextEvent.Modules.Identity.Domain;
+using NextEvent.Modules.Identity.Persistence;
+using NextEvent.Shared.Constants;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Persistence;
 
 namespace API.Extensions;
 
@@ -24,7 +25,7 @@ public static class IdentityServiceExtensions
             opt.User.RequireUniqueEmail = true;
         })
         .AddRoles<IdentityRole>()
-        .AddEntityFrameworkStores<AppDBContext>();
+        .AddEntityFrameworkStores<IdentityDbContext>(); // Use Identity module's DbContext
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(opt =>
@@ -45,7 +46,7 @@ public static class IdentityServiceExtensions
         {
             options.AddPolicy("ActiveOrganizer", policy =>
             {
-                policy.RequireRole(Domain.Constants.RoleConstants.Organizer);
+                policy.RequireRole(RoleConstants.Organizer);
                 policy.RequireClaim("ActiveProfile", "Organizer");
             });
         });
