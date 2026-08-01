@@ -10,7 +10,7 @@ namespace NextEvent.Modules.Organizations.Domain;
 /// Only <see cref="Active"/> memberships participate in the
 /// one-active-membership-per-user-per-organization uniqueness rule
 /// (see <c>UX_OrganizationMembers_Active</c> filtered index in
-/// <see cref="Persistence.AppDBContext"/>).
+/// <see cref="NextEvent.Modules.Organizations.Persistence.Contexts.OrganizationsDbContext"/>).
 /// </summary>
 public enum OrganizationMemberStatus
 {

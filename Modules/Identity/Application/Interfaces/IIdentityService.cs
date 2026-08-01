@@ -10,7 +10,7 @@ public interface IIdentityService
     /// <summary>
     /// Assigns the given ASP.NET Identity role to a user.
     /// No-ops silently if the user already holds the role.
-    /// Throws <see cref="Application.Core.Exceptions.BusinessRuleException"/>
+    /// Throws <see cref="NextEvent.Shared.Exceptions.BusinessRuleException"/>
     /// if the user does not exist or the role is unknown.
     /// </summary>
     Task AssignRoleAsync(string userId, string roleName, CancellationToken cancellationToken = default);
