@@ -1,97 +1,115 @@
-# 🚀 Backend Onboarding Guide: NextEvent
+# 🚀 The Ultimate Backend Onboarding & .NET Crash Course
 
-Welcome to the NextEvent backend! If you are a new developer coming from another language (like TypeScript/Node.js, Python, or Go), this guide will help you understand our C#/.NET backend so you can start shipping features immediately.
+Welcome to the NextEvent backend! This guide is written explicitly for developers coming from other ecosystems (like TypeScript/Node.js, Python, or Go). It will teach you the fundamentals of C# and .NET 8, and then dive deep into the specific architecture (Modular Monolith) and patterns we use in this project.
 
----
-
-## 1. The Ecosystem: C# and .NET
-NextEvent is built on **.NET 8+** using **C#**. 
-If you are coming from Node.js or Python, here are the key differences:
-- **Compiled & Strongly Typed**: Code must be built (`dotnet build`) before it runs. Types are strictly enforced at compile time.
-- **Dependency Injection (DI) is First-Class**: We don't manually instantiate services (`new MyService()`). Instead, we declare what we need in the class constructor, and the framework provides it automatically at runtime.
-- **Async/Await Everywhere**: Just like JS/TS, but we use `Task` and `Task<T>` instead of `Promise`.
+By the end of this document, you will understand exactly how data flows through this application and how to confidently build new features.
 
 ---
 
-## 2. Our Architecture: The "Modular Monolith"
+## Part 1: .NET & C# Crash Course (For the JS/Python Developer)
 
-NextEvent is not a traditional monolith (where everything is dumped into one giant folder), nor is it a complex microservices cluster (where every feature is a separate repository). It is a **Modular Monolith**.
+If you are used to dynamic languages, C# will feel a bit different. Here are the core concepts you need to grasp immediately.
 
-### What does this mean?
-The backend is divided into vertical slices called **Modules** based on business features:
-- `NextEvent.Modules.Events` (Handles creating events, categories, search)
-- `NextEvent.Modules.Organizations` (Handles org profiles, roles, and permissions)
-- `NextEvent.Modules.Identity` (Handles users, authentication, and JWTs)
+### 1.1 The Runtime & Compilation
+- **.NET** is the runtime framework (similar to the V8 engine in Node.js or the JVM).
+- **C#** is the programming language.
+- Unlike Node.js where you run a file directly (`node app.js`), C# is a **compiled language**. When you run `dotnet build`, your C# code is compiled into Intermediate Language (IL) binaries (`.dll` files). `dotnet run` executes them.
+- **Projects & Solutions**: Code is grouped into "Projects" (`.csproj` files). A "Solution" (`.sln` file) is just a container that holds multiple projects together.
 
-**The Golden Rule of Modules:**
-Modules **cannot** reference or talk to each other directly in code. For example, the `Events` module does not know the `Organizations` module exists. This prevents "spaghetti code" and makes it incredibly easy to break a module out into a separate microservice later if we get massive traffic.
+### 1.2 Strongly Typed & Object-Oriented
+Everything in C# is a Class or a Record. Types are strictly enforced at compile time.
+- **Records**: You will see a lot of `public record MyCommand(string Name);`. Records are immutable data structures (they cannot be changed after creation). They are perfect for Data Transfer Objects (DTOs) and MediatR Requests.
 
-### The Composition Root (`API` Project)
-If modules can't talk to each other, how does the app run? 
-The **`API`** project is the "brain" (Composition Root). It references all modules, wires them together using Dependency Injection, and starts the web server. When you want to run the app, you run the `API` project.
+### 1.3 Dependency Injection (DI) - The Heart of .NET
+In Node.js, you might `require()` a database connection pool in a file. **In .NET, you almost never manually instantiate services using `new`.**
+Instead, .NET has a built-in Dependency Injection container.
+1. You register a service when the app starts in `Program.cs`.
+2. When you need that service, you simply ask for it in your class's constructor. The framework automatically passes it in!
 
----
-
-## 3. How We Write Code: CQRS Pattern
-
-We use a pattern called **CQRS (Command Query Responsibility Segregation)**. Instead of having massive "Service" classes with 50 methods, we split every operation into a specific **Command** (write/mutate data) or a **Query** (read data).
-
-We use a library called **MediatR** to dispatch these.
-
-### A. The Read Side (Queries) -> Dapper & Raw SQL
-When we want to fetch data (e.g., getting a list of events), we use **Dapper**.
-- **Why?** It's insanely fast.
-- **How it works:** You write raw SQL, and Dapper maps the SQL result directly to C# objects (DTOs).
-- *Analogy:* It's like using `pg` or `mysql2` in Node.js instead of an ORM.
-
-### B. The Write Side (Commands) -> EF Core
-When we want to mutate data (Create, Update, Delete), we use **Entity Framework Core (EF Core)**.
-- **Why?** It's our ORM. It handles complex relationships, data validation, transactions, and prevents SQL injection automatically.
-- **How it works:** You modify C# objects, and call `DbContext.SaveChangesAsync()`. EF Core translates this into SQL `UPDATE`/`INSERT` statements.
-- *Analogy:* Similar to Prisma or TypeORM in the TypeScript ecosystem.
-
----
-
-## 4. Cross-Module Communication (RabbitMQ)
-
-Since modules cannot call each other's databases directly, how do they communicate? 
-**Asynchronously via RabbitMQ.**
-
-If the `Organizations` module deletes an organization, it doesn't try to delete the events directly. Instead:
-1. `Organizations` publishes a message to RabbitMQ: `"Hey, Organization X was deleted!"` (`IntegrationEvent`).
-2. The `Events` module has a listener (Consumer) waiting for that specific message.
-3. When `Events` receives the message, it deletes the events belonging to that organization.
-
-**The Transactional Outbox Pattern:**
-To ensure messages aren't lost if the server crashes mid-request, we save the message to our SQL database in the *exact same transaction* as our business data. A background worker then picks it up and sends it to RabbitMQ. We use a library called **MassTransit** to handle all of this automatically.
-
----
-
-## 5. The Database Structure
-
-We use a single SQL Server database, but we logically isolate the data using **Schemas**:
-- `[identity].AspNetUsers`
-- `[org].Organizations`
-- `[evt].Events`
-
-Each module has its own `DbContext` (Database connection manager) that only knows about its own schema.
-*Note: When writing raw SQL queries using Dapper, you MUST include the schema prefix (e.g., `SELECT * FROM [evt].[Events]`).*
-
----
-
-## 6. Step-by-Step: Building a New Feature
-
-Imagine you need to create an endpoint to **Update an Event's Title**. Here is exactly what you would do:
-
-### Step 1: Create the Command & Response (The Request Payload)
-In `Modules/Events/Application/Events/Commands/UpdateEvent/`, create `UpdateEventCommand.cs`:
+We use **C# 12 Primary Constructors** to make this incredibly clean:
 ```csharp
-// This is the data we receive from the controller
+// The database connection (EventsDbContext) is automatically injected!
+public class MyService(EventsDbContext context) 
+{
+    public void DoSomething() => context.Events.Add(new Event());
+}
+```
+
+**Service Lifetimes (Crucial to understand):**
+- **Transient**: A brand new instance is created every time it's injected.
+- **Scoped**: One instance is created *per HTTP Request*. (This is how Database connections work. Everyone in the same API request shares the exact same DB connection).
+- **Singleton**: One instance is created for the entire lifetime of the application (like a cache).
+
+### 1.4 Async/Await & LINQ
+- C# uses `async/await` heavily. Instead of `Promise<T>`, we use `Task<T>`.
+- **LINQ (Language Integrated Query)** is C#'s superpower. It allows you to manipulate arrays/lists using SQL-like syntax built into the language. It replaces `array.map().filter()`.
+  ```csharp
+  // Node.js: const active = users.filter(u => u.isActive).map(u => u.name);
+  // C# LINQ:
+  var active = users.Where(u => u.IsActive).Select(u => u.Name).ToList();
+  ```
+
+---
+
+## Part 2: Our Architecture - The "Modular Monolith"
+
+Most enterprise applications are either standard Layered Monoliths (Onion/Clean Architecture) or Microservices. NextEvent is a **Modular Monolith**.
+
+### 2.1 The Problem with Standard Monoliths
+In a standard architecture, code is grouped by *technical layer*. You have a massive `Controllers` folder, a massive `Services` folder, and a massive `Database` folder. Over time, code gets tangled into "spaghetti," where the User system is tightly coupled to the Event system.
+
+### 2.2 The Solution: Modules
+We group code by **Business Feature (Bounded Contexts)** into completely isolated vertical slices called Modules:
+- `NextEvent.Modules.Identity` (Users, Auth)
+- `NextEvent.Modules.Organizations` (Orgs, Roles)
+- `NextEvent.Modules.Events` (Events, Categories)
+
+**The Golden Rule of NextEvent:**
+> Modules **CANNOT** reference or call each other directly in C#. 
+
+The `Events` module does not know that the `Organizations` module exists. If we ever experience massive traffic, we can literally copy-paste the `Events` folder into a new repository, and it immediately becomes an independent Microservice with zero code rewrites.
+
+### 2.3 The Composition Root (`API` Project)
+If modules can't talk to each other, how does the app run? 
+The **`API`** project is the "brain" (Composition Root). It is the only project that is allowed to reference everything. It wires up Dependency Injection, starts the web server, and exposes the Swagger API documentation.
+
+---
+
+## Part 3: Database Strategy - CQRS (EF Core & Dapper)
+
+We use a single SQL Server database, but data is isolated using **Schemas** (`[identity]`, `[org]`, `[evt]`). Each module has its own `DbContext` that only controls its specific schema.
+
+To interact with the database, we use **CQRS (Command Query Responsibility Segregation)**. This means we use completely different tools for writing data vs reading data.
+
+### 3.1 Write Side (Commands): Entity Framework Core (EF Core)
+- **What it is**: The official Object-Relational Mapper (ORM) for .NET (similar to Prisma or TypeORM).
+- **When to use**: Creating, Updating, or Deleting data.
+- **Why**: It handles complex entity relationships, data validation, prevents SQL injection, and manages transactions flawlessly.
+- **How**: You inject your module's DbContext, modify C# objects, and call `await context.SaveChangesAsync();`.
+
+### 3.2 Read Side (Queries): Dapper (Raw SQL)
+- **What it is**: A lightning-fast micro-ORM that maps raw SQL results directly to C# objects.
+- **When to use**: Fetching data, paginated lists, or detailed views.
+- **Why**: It is significantly faster than EF Core for reads. More importantly, it allows us to do **cross-schema SQL joins** (e.g., joining an Event in `[evt]` with an Organization in `[org]`) for the UI, without violating our strict C# domain boundaries!
+
+---
+
+## Part 4: Building Features with MediatR
+
+NextEvent does not use giant "Service" classes. Instead, we use the **MediatR** library to dispatch operations.
+MediatR is an in-memory message bus. A Controller simply says, "Here is a Command, find the exact class that knows how to handle this."
+
+Let's walk through building a feature: **Updating an Event Title**.
+
+### Step 1: The Command (The Payload)
+We define a Record representing the data we want to process, and the type of response we expect (`ApiResponse<Guid>`).
+```csharp
+// Modules/Events/Application/Events/Commands/UpdateEventCommand.cs
 public record UpdateEventCommand(Guid EventId, string NewTitle) : IRequest<ApiResponse<Guid>>;
 ```
 
-### Step 2: Create the Validator
-In the same folder, create `UpdateEventCommandValidator.cs`. We use **FluentValidation** (similar to Zod or Joi):
+### Step 2: The Validator (FluentValidation)
+Before MediatR executes our business logic, a validation pipeline intercepts the command. We use **FluentValidation** (similar to Zod or Joi).
 ```csharp
 public class UpdateEventCommandValidator : AbstractValidator<UpdateEventCommand>
 {
@@ -102,41 +120,41 @@ public class UpdateEventCommandValidator : AbstractValidator<UpdateEventCommand>
 }
 ```
 
-### Step 3: Create the Handler (The Business Logic)
-Create `UpdateEventCommandHandler.cs`. This is where MediatR routes the command:
+### Step 3: The Handler (The Business Logic)
+This is where the actual work happens. MediatR routes the command here.
 ```csharp
+// 1. Primary Constructor injects the Database Context
 public class UpdateEventCommandHandler(EventsDbContext context) 
     : IRequestHandler<UpdateEventCommand, ApiResponse<Guid>>
 {
-    public async Task<ApiResponse<Guid>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<Guid>> Handle(UpdateEventCommand request, CancellationToken ct)
     {
-        // 1. Fetch from EF Core
+        // 2. Fetch the entity using EF Core
         var eventItem = await context.Events.FindAsync(request.EventId);
         if (eventItem == null) throw new NotFoundException("Event not found");
 
-        // 2. Update state
+        // 3. Mutate State
         eventItem.Title = request.NewTitle;
 
-        // 3. Save changes
-        await context.SaveChangesAsync(cancellationToken);
+        // 4. Save Changes to Database
+        await context.SaveChangesAsync(ct);
 
-        // 4. Return standard response wrapper
-        return ApiResponse<Guid>.Success(eventItem.Id, "Event updated");
+        // 5. Return our standard JSON wrapper
+        return ApiResponse<Guid>.Success(eventItem.Id, "Updated successfully");
     }
 }
 ```
-*(Note the `(EventsDbContext context)` syntax at the top class definition—this is a C# 12 Primary Constructor injecting the database connection automatically!)*
 
-### Step 4: Expose it in the Controller
-In `Modules/Events/API/EventsController.cs`:
+### Step 4: The API Controller
+Because MediatR handles the routing, our Controllers are incredibly thin—usually just one line of code!
 ```csharp
 [Route("api/events")]
 public class EventsController(IMediator mediator) : BaseApiController(mediator)
 {
     [HttpPut("{id}")]
-    public async Task<ActionResult> UpdateEvent(Guid id, [FromBody] UpdateEventRequest dto)
+    public async Task<ActionResult> UpdateEvent(Guid id, [FromBody] UpdateDto dto)
     {
-        // Send the command to MediatR. It automatically finds the Handler!
+        // Controller just passes the data to MediatR
         return Ok(await Mediator.Send(new UpdateEventCommand(id, dto.Title)));
     }
 }
@@ -144,11 +162,50 @@ public class EventsController(IMediator mediator) : BaseApiController(mediator)
 
 ---
 
-## 7. Key Takeaways for New Developers
-1. **Never write business logic in Controllers.** Controllers just pass data to MediatR (`Mediator.Send`).
-2. **Never cross module boundaries.** An `Events` handler cannot inject `OrganizationsDbContext`. 
-3. **Use the `ApiResponse<T>` wrapper** for all returns so the frontend gets a predictable JSON structure (`{ data, success, message }`).
-4. **Constructor Injection is mandatory.** Do not use `HttpContext.RequestServices`. Use Primary Constructors for cleaner code.
-5. **Dapper for Reads, EF Core for Writes.**
+## Part 5: Cross-Module Communication (RabbitMQ & MassTransit)
 
-Welcome to the team! 🎉
+Since modules are forbidden from calling each other's databases, what happens when an action in one module affects another?
+**Example**: If the `Organizations` module deletes an organization, the `Events` module must delete all associated events.
+
+We solve this using **Asynchronous Integration Events via RabbitMQ**.
+
+### 5.1 Publishing an Event
+When an organization is deleted, the `Organizations` module publishes an event using **MassTransit** (our message broker library):
+```csharp
+await _publishEndpoint.Publish(new OrganizationDeletedIntegrationEvent(orgId));
+```
+
+### 5.2 The Transactional Outbox Pattern (Critical Concept)
+What happens if the database saves the deletion, but the RabbitMQ server crashes before the message is sent? The system would be permanently out of sync.
+
+To prevent this, NextEvent uses the **Transactional Outbox Pattern**:
+1. When you call `.Publish()`, MassTransit does NOT send the message to RabbitMQ.
+2. Instead, it saves the message into a local SQL table (`[org].[OutboxMessages]`) inside the *exact same SQL transaction* as the database changes.
+3. If the database transaction succeeds, a background worker instantly reads the table and forwards the message to RabbitMQ. Guaranteed delivery!
+
+### 5.3 Consuming the Event
+The `Events` module has a Consumer class listening to RabbitMQ for that specific event:
+```csharp
+public class OrganizationDeletedConsumer(EventsDbContext context) 
+    : IConsumer<OrganizationDeletedIntegrationEvent>
+{
+    public async Task Consume(ConsumeContext<OrganizationDeletedIntegrationEvent> ctx)
+    {
+        var orgId = ctx.Message.OrganizationId;
+        // Logic to delete events associated with this org
+        // ...
+    }
+}
+```
+
+---
+
+## 6. Summary: Rules for Backend Developers
+1. **Never write business logic in Controllers.** Controllers exist only to route HTTP requests to MediatR.
+2. **Never cross module boundaries.** An `Events` handler cannot inject `OrganizationsDbContext`. Use Integration Events (RabbitMQ) or cross-schema Dapper SQL for reads.
+3. **Use the `ApiResponse<T>` wrapper** for all returns so the frontend client gets a predictable JSON structure (`{ data, success, message }`).
+4. **Constructor Injection is mandatory.** Do not use the service locator anti-pattern (`HttpContext.RequestServices`). Use C# 12 Primary Constructors for cleaner code.
+5. **Dapper for Reads, EF Core for Writes.**
+6. **Always use CancellationToken.** Pass `ct` or `cancellationToken` down to all database calls (`ToListAsync(ct)`, `SaveChangesAsync(ct)`) so long-running queries cancel if the user closes their browser.
+
+Welcome to the team! 🎉 You are now equipped to build scalable features in NextEvent.
