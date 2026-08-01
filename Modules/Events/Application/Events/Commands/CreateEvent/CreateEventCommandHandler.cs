@@ -33,6 +33,14 @@ public class CreateEventCommandHandler(
             PermissionConstants.EventsCreate, 
             cancellationToken);
 
+        // ── 2.5. Verify Category exists ───────────────────────────────────────
+        var categoryExists = await context.Categories
+            .AnyAsync(c => c.Id == request.Event.CategoryId, cancellationToken);
+        if (!categoryExists)
+        {
+            throw new BusinessRuleException($"Category with ID '{request.Event.CategoryId}' does not exist.");
+        }
+
         // ── 3. Create the event ────────────────────────────────────────────────
         var eventEntity = new Domain.Event
         {
