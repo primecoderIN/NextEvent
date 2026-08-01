@@ -21,10 +21,10 @@ public class PermissionsController : BaseApiController
     [ProducesResponseType(typeof(ApiResponse<List<PermissionDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<ApiResponse<List<PermissionDto>>>> GetAllPermissions(
-        [FromQuery] Guid organizationId,
+        [FromQuery] GetPermissionsQueryDto queryDto,
         CancellationToken cancellationToken)
     {
-        var permissions = await Mediator.Send(new GetAllPermissionsQuery { OrganizationId = organizationId }, cancellationToken);
+        var permissions = await Mediator.Send(new GetAllPermissionsQuery { OrganizationId = queryDto.OrganizationId }, cancellationToken);
 
         return OkResponse(permissions, "Permissions retrieved successfully.");
     }
