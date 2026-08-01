@@ -485,3 +485,59 @@ In a Modular Monolith, API controller endpoints live inside independent module p
 
 
 
+
+---
+
+## 15. Controller Dependency Injection (DI) Guidelines
+
+### Constructor Injection vs. Service Locator
+When injecting dependencies into your controllers, always use **Constructor Injection**. Do not use the Service Locator pattern (HttpContext.RequestServices.GetService<T>()).
+
+**Correct (Constructor Injection with C# 12 Primary Constructors):**
+`csharp
+[Route("api/events")]
+public class EventsController(IMediator mediator) : BaseApiController(mediator)
+{
+    [HttpGet]
+    public async Task<ActionResult> GetEvents() => Ok(await Mediator.Send(new GetEventsQuery()));
+}
+`
+
+**Incorrect (Service Locator Anti-Pattern):**
+`csharp
+// Hidden dependency
+protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
+`
+
+**Why?**
+1. **Transparency**: Constructor injection explicitly declares what the controller needs to function.
+2. **Testability**: You can easily pass mocked dependencies into the constructor during unit testing without having to mock the entire ASP.NET Core HttpContext and DI container.
+
+---
+
+## 16. Production Database Migrations
+
+### Guarding Automatic Migrations
+In Program.cs, it is acceptable to automatically run .Migrate() for convenience **only** in local development environments.
+
+`csharp
+if (app.Environment.IsDevelopment())
+{
+    // Safe for local dev
+    identityContext.Database.Migrate();
+    orgContext.Database.Migrate();
+    eventsContext.Database.Migrate();
+}
+`
+
+**Do NOT run automatic migrations on startup in Production.**
+If your application is scaled out (e.g., 5 instances running behind a load balancer), running migrations at startup causes severe issues:
+1. **Race Conditions & Deadlocks**: Multiple instances will boot up and try to apply the same SQL migration schema changes at the exact same time.
+2. **Startup Latency**: The application is blocked from serving requests while the database is locked during migration.
+3. **Outages**: If the migration fails (e.g., dropping a column that is still in use), the API crashes and fails to start, causing immediate downtime.
+
+### How to Handle Production Migrations
+Always separate your database deployment from your code deployment:
+1. **CI/CD Scripts**: Use dotnet ef migrations script --idempotent in your CI/CD pipeline to generate a SQL script, and apply it to the database *before* the new API version starts.
+2. **Migration Bundles**: Compile migrations into an executable bundle (dotnet ef migrations bundle) and run it in the deployment pipeline.
+3. **Init Containers**: In Kubernetes, run a dedicated one-shot migration job before spinning up the actual application pods.
