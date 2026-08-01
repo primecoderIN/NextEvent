@@ -384,4 +384,21 @@ dotnet run --project API/API.csproj
 2. **Organizations Seeder (`OrganizationsDataSeeder`)**: Creates default system roles, fine-grained permissions (`organization.read`, `events.create`, etc.), and role-permission mappings.
 3. **Events Seeder (`EventsDataSeeder`)**: Seeds taxonomy categories, category suggestions, and initial sample events.
 
+---
+
+## 13. Multi-Assembly Reflection & Service Registration Rules
+
+In a traditional Layered Monolith, all application logic resides inside a single C# assembly (`Application.dll`). Calling reflection helpers like `AddValidatorsFromAssemblyContaining<T>()` or `RegisterServicesFromAssemblyContaining<T>()` with a single type scans the entire application.
+
+In a **Modular Monolith**, code is split across independent module assemblies (`NextEvent.Modules.Events.dll`, `NextEvent.Modules.Organizations.dll`, `NextEvent.Modules.Identity.dll`). Reflection methods inspect **only the specific `.dll` containing type `T`**.
+
+### Assembly Scanning Matrix
+
+| Technical Tool | Registration Requirement in Modular Monolith | Code Pattern |
+| :--- | :--- | :--- |
+| **FluentValidation** | Must specify one validator type from **each** module assembly | `services.AddValidatorsFromAssemblyContaining<CreateEventCommandValidator>();`<br>`services.AddValidatorsFromAssemblyContaining<CreateOrganizationCommandValidator>();`<br>`services.AddValidatorsFromAssemblyContaining<RegisterCommandValidator>();` |
+| **MediatR** | Must specify one handler type from **each** module assembly | `x.RegisterServicesFromAssemblyContaining<GetEventsListQueryHandler>();`<br>`x.RegisterServicesFromAssemblyContaining<GetOrganizationByIdQueryHandler>();`<br>`x.RegisterServicesFromAssemblyContaining<LoginCommandHandler>();` |
+| **EF Core DbContext Configurations** | Must call `ApplyConfigurationsFromAssembly` inside **each** module's DbContext | `builder.ApplyConfigurationsFromAssembly(typeof(EventsDbContext).Assembly);`<br>`builder.ApplyConfigurationsFromAssembly(typeof(OrganizationsDbContext).Assembly);`<br>`builder.ApplyConfigurationsFromAssembly(typeof(IdentityDbContext).Assembly);` |
+
+
 
