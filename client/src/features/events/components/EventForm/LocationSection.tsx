@@ -33,6 +33,7 @@ export function LocationSection() {
 
   useEffect(() => {
     if (!debouncedSearch.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([])
       return
     }

@@ -21,6 +21,7 @@ export function AdvancedFilterPopover() {
 
   // Sync with URL changes (e.g. back button)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCity(searchParams.get("city") || "")
     setDateFrom(searchParams.get("dateFrom") || "")
     setDateTo(searchParams.get("dateTo") || "")
