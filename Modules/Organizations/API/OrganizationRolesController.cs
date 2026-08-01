@@ -4,6 +4,7 @@ using NextEvent.Modules.Organizations.Application.Organizations.Commands.UpdateO
 using NextEvent.Modules.Organizations.Application.Organizations.DTOs;
 using NextEvent.Modules.Organizations.Application.Organizations.Queries.GetOrganizationRoles;
 using NextEvent.Shared.Constants;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +14,7 @@ namespace NextEvent.Modules.Organizations.API;
 // can reach ANY endpoint in this controller. This prevents basic members or anonymous users from executing 
 // mutating actions or viewing roles (Broken Function Level Authorization).
 [Authorize(Policy = "ActiveOrganizer")]
-public class OrganizationRolesController : BaseApiController
+public class OrganizationRolesController(IMediator mediator) : BaseApiController(mediator)
 {
     /// <summary>
     /// Retrieves all roles for the organization.

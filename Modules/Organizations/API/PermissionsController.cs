@@ -2,12 +2,13 @@ using NextEvent.Shared.Constants;
 using NextEvent.Modules.Organizations.Application.Permissions.DTOs;
 using NextEvent.Modules.Organizations.Application.Permissions.Queries.GetAllPermissions;
 using NextEvent.Shared.Constants;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace NextEvent.Modules.Organizations.API;
 [Route(ApiRouteConstants.Permissions.Base)]
-public class PermissionsController : BaseApiController
+public class PermissionsController(IMediator mediator) : BaseApiController(mediator)
 {
     /// <summary>
     /// Retrieves a list of all available system permissions.

@@ -1,6 +1,7 @@
 using NextEvent.Modules.Events.Persistence.Contexts;
 using NextEvent.Modules.Events.Application.Categories.DTOs;
 using NextEvent.Shared.Interfaces;
+using NextEvent.Shared.Exceptions;
 using NextEvent.Modules.Identity.Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -20,13 +21,13 @@ public class ApproveCategoryCommandHandler(
     public async Task<CategoryDto> Handle(ApproveCategoryCommand request, CancellationToken cancellationToken)
     {
         var reviewerId = currentUserService.GetCurrentUserId()
-            ?? throw new UnauthorizedAccessException("Reviewer must be authenticated.");
+            ?? throw new UnauthorizedException("Reviewer must be authenticated.");
 
         var suggestion = await context.CategorySuggestions
             .FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken);
 
         if (suggestion is null)
-            throw new KeyNotFoundException($"Category suggestion {request.Id} not found.");
+            throw new NotFoundException(nameof(CategorySuggestion), request.Id);
 
         // Idempotent — already approved, return the linked Category
         if (suggestion.Status == CategorySuggestionStatus.Approved && suggestion.ApprovedCategoryId.HasValue)
@@ -43,7 +44,7 @@ public class ApproveCategoryCommandHandler(
             .AnyAsync(c => c.Slug == suggestion.Slug, cancellationToken);
 
         if (slugExists)
-            throw new InvalidOperationException($"A category with slug '{suggestion.Slug}' already exists.");
+            throw new BusinessRuleException($"A category with slug '{suggestion.Slug}' already exists.");
 
         // Create the real Category
         var category = new Category

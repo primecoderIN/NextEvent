@@ -37,10 +37,10 @@ public class ApproveOrganizationCommandHandler(
 
         // ── 2. State guard ────────────────────────────────────────────────────
         // Suspended / rejected orgs require a different admin action — not approve.
-        if (organization.Status is "suspended" or "rejected")
+        if (organization.Status is OrganizationStatus.Suspended or OrganizationStatus.Rejected)
             throw new BusinessRuleException(
                 $"Organization cannot be approved from status '{organization.Status}'. " +
-                "Only 'pending_verification' organizations can be approved.");
+                "Only PendingVerification organizations can be approved.");
 
         var adminUserId = currentUserService.GetCurrentUserId()
             ?? throw new UnauthorizedException("Approving admin user could not be identified.");
@@ -49,10 +49,10 @@ public class ApproveOrganizationCommandHandler(
         // If a previous approval saved the org status but then crashed before the
         // Identity role assignment, an admin retries this endpoint. We skip the
         // redundant DB write and fall through to the idempotent role grant.
-        if (organization.Status != "active")
+        if (organization.Status != OrganizationStatus.Active)
         {
             var now = DateTime.UtcNow;
-            organization.Status           = "active";
+            organization.Status           = OrganizationStatus.Active;
             organization.VerifiedAtUtc    = now;
             organization.VerifiedByUserId = adminUserId;
             organization.UpdatedAtUtc     = now;

@@ -7,15 +7,15 @@ using NextEvent.Modules.Events.Application.Events.Queries.GetEventDetailsById;
 using NextEvent.Modules.Events.Application.Events.DTOs;
 using NextEvent.Shared.Pagination;
 using NextEvent.Modules.Identity.Domain;
-using NextEvent.Shared.Constants;
 using Microsoft.AspNetCore.Authorization;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace NextEvent.Modules.Events.API;
 // Using explicit routing ("api/events") rather than "[controller]" prevents 
 // breaking API contracts if the class name changes in the future.
 [Route(ApiRouteConstants.Events.Base)]
-public class EventsController : BaseApiController
+public class EventsController(IMediator mediator) : BaseApiController(mediator)
 {
     /// <summary>
     /// Retrieves a paginated list of events.

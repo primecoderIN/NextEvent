@@ -72,12 +72,11 @@ public class Organization
 
     /// <summary>
     /// Lifecycle status of the organization.
-    /// Valid values: pending_verification | active | suspended | rejected.
-    /// New organizations always start as "pending_verification".
+    /// New organizations always start as <see cref="OrganizationStatus.PendingVerification"/>.
     /// The Organizer platform role is granted to OwnerUserId only when Status
-    /// transitions to "active" by an Admin.
+    /// transitions to <see cref="OrganizationStatus.Active"/> by an Admin.
     /// </summary>
-    public required string Status { get; set; } = "pending_verification";
+    public OrganizationStatus Status { get; set; } = OrganizationStatus.PendingVerification;
 
     // -------------------------------------------------------------------------
     // Ownership

@@ -1,6 +1,6 @@
 using NextEvent.Modules.Events.Persistence.Contexts;
 using NextEvent.Modules.Events.Application.Categories.DTOs;
-using NextEvent.Shared.Interfaces;
+using NextEvent.Shared.Exceptions;
 using NextEvent.Modules.Identity.Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +13,7 @@ public class CreateCategoryCommandHandler(EventsDbContext context) : IRequestHan
         // Ensure slug uniqueness
         var exists = await context.Categories.AnyAsync(c => c.Slug == request.Slug, cancellationToken);
         if (exists)
-            throw new Exception("A category with the specified slug already exists.");
+            throw new BusinessRuleException("A category with the specified slug already exists.");
 
         var cat = new Category
         {

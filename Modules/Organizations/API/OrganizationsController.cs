@@ -9,11 +9,12 @@ using NextEvent.Modules.Organizations.Application.Organizations.Queries.GetOrgan
 using NextEvent.Modules.Organizations.Application.Organizations.Queries.GetMyOrganization;
 using NextEvent.Shared.Constants;
 using Microsoft.AspNetCore.Authorization;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace NextEvent.Modules.Organizations.API;
 [Route(ApiRouteConstants.Organizations.Base)]
-public class OrganizationsController : BaseApiController
+public class OrganizationsController(IMediator mediator) : BaseApiController(mediator)
 {
     /// <summary>
     /// Retrieves a paginated list of all organizations.

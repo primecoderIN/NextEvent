@@ -1,16 +1,16 @@
+using MediatR;
 using NextEvent.Shared.Constants;
 using NextEvent.Modules.Identity.Application.Authentication.Commands.Login;
 using NextEvent.Modules.Identity.Application.Authentication.Commands.Logout;
 using NextEvent.Modules.Identity.Application.Authentication.Commands.RefreshToken;
 using NextEvent.Modules.Identity.Application.Authentication.Commands.Register;
 using NextEvent.Modules.Identity.Application.Authentication.DTOs;
-using NextEvent.Shared.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace NextEvent.Modules.Identity.API;
 [Route(ApiRouteConstants.Account.Base)]
-public class AccountController : BaseApiController
+public class AccountController(IMediator mediator) : BaseApiController(mediator)
 {
     /// <summary>
     /// Registers a new user account and sets a refresh token.

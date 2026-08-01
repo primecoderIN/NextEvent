@@ -1,4 +1,5 @@
 using NextEvent.Shared.Constants;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using NextEvent.Modules.AI.Application.Interfaces;
@@ -8,7 +9,7 @@ using NextEvent.Shared.Common;
 namespace NextEvent.Modules.AI.API;
 [Route(ApiRouteConstants.Ai.Base)]
 [Authorize]
-public class AiController(IGeminiService geminiService) : BaseApiController
+public class AiController(IGeminiService geminiService, IMediator mediator) : BaseApiController(mediator)
 {
     // -----------------------------------------------------------------------
     // Request DTOs

@@ -7,13 +7,13 @@ using NextEvent.Modules.Events.Application.Categories.Commands.ApproveCategory;
 using NextEvent.Modules.Events.Application.Categories.Commands.RejectCategory;
 using NextEvent.Shared.Constants;
 using NextEvent.Modules.Identity.Domain;
-using NextEvent.Shared.Constants;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace NextEvent.Modules.Events.API;
 [Route(ApiRouteConstants.Categories.Base)]
-public class CategoriesController : BaseApiController
+public class CategoriesController(IMediator mediator) : BaseApiController(mediator)
 {
     /// <summary>
     /// Retrieves all active event taxonomy categories.

@@ -27,18 +27,26 @@ public static class IdentityServiceExtensions
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<IdentityDbContext>(); // Use Identity module's DbContext
 
+        var tokenKey = config["TokenKey"]
+            ?? throw new InvalidOperationException(
+                "TokenKey is not configured. Set it via User Secrets (development) or an environment variable (production).");
+
+        var issuer  = config["Jwt:Issuer"]  ?? "NextEvent.API";
+        var audience = config["Jwt:Audience"] ?? "NextEvent.Client";
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(opt =>
             {
-                var tokenKey = config["TokenKey"] ?? throw new Exception("TokenKey not found");
                 opt.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey)),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer   = true,
+                    ValidIssuer      = issuer,
+                    ValidateAudience = true,
+                    ValidAudience    = audience,
                     ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew        = TimeSpan.Zero
                 };
             });
 

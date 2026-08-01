@@ -10,7 +10,8 @@ public class PagedList<T>
     {
         CurrentPage = pageNumber;
         // Calculate the total number of pages based on the total count and page size.
-        TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+        // Guard against pageSize ≤ 0 to prevent Infinity → int.MaxValue cast.
+        TotalPages = pageSize > 0 ? (int)Math.Ceiling(count / (double)pageSize) : 0;
         PageSize = pageSize;
         TotalCount = count;
         Items = items;

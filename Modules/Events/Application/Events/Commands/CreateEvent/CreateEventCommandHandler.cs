@@ -38,13 +38,12 @@ public class CreateEventCommandHandler(
             .AnyAsync(c => c.Id == request.Event.CategoryId, cancellationToken);
         if (!categoryExists)
         {
-            throw new BusinessRuleException($"Category with ID '{request.Event.CategoryId}' does not exist.");
+            throw new NotFoundException(nameof(Category), request.Event.CategoryId!);
         }
 
         // ── 3. Create the event ────────────────────────────────────────────────
         var eventEntity = new Domain.Event
         {
-            Id             = Guid.NewGuid(),
             OrganizationId = request.Event.OrganizationId,
             Title          = request.Event.Title,
             Description    = request.Event.Description,

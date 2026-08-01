@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Mvc;
 using NextEvent.Shared.Common;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 
 namespace NextEvent.Shared.Controllers;
 
@@ -12,21 +11,12 @@ namespace NextEvent.Shared.Controllers;
 /// plus thin helper methods to produce consistent <see cref="ApiResponse{T}"/> responses.
 /// </summary>
 [ApiController]
-public class BaseApiController : ControllerBase
+public class BaseApiController(IMediator mediator) : ControllerBase
 {
-    // Backing field for lazy initialization
-    private IMediator? _mediator;
-
     /// <summary>
-    /// Gets the IMediator instance from the Dependency Injection container.
-    /// Resolved lazily on first access and then cached for the lifetime of the request.
+    /// Gets the IMediator instance for dispatching CQRS requests.
     /// </summary>
-    protected IMediator Mediator =>
-        _mediator ??=
-            HttpContext.RequestServices.GetService<IMediator>()
-            ?? throw new InvalidOperationException(
-                "IMediator is not available"
-            );
+    protected IMediator Mediator => mediator;
 
     // -----------------------------------------------------------------------
     // ApiResponse<T> helper methods — keep controller actions thin

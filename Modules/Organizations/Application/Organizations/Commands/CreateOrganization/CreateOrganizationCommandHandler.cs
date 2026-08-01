@@ -59,7 +59,7 @@ public class CreateOrganizationCommandHandler(
             WebsiteUrl      = dto.WebsiteUrl,
             ContactEmail    = dto.ContactEmail,
             ContactPhone    = dto.ContactPhone,
-            Status          = "pending_verification",   // Admin must approve before going live
+            Status          = OrganizationStatus.PendingVerification,   // Admin must approve before going live
             OwnerUserId     = userId,
             CreatedByUserId = userId,
             CreatedAtUtc    = now,

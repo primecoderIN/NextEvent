@@ -2,7 +2,6 @@ using NextEvent.Shared.Interfaces;
 using NextEvent.Modules.Identity.Application.Authentication.Interfaces;
 using NextEvent.Modules.Identity.Application.Services;
 using NextEvent.Modules.Organizations.Application.Organizations.Services;
-using NextEvent.Modules.Events.Application.Events.Services;
 using API.Services;
 
 namespace API.Extensions;
@@ -14,7 +13,7 @@ namespace API.Extensions;
 /// </summary>
 public static class ApiServiceExtensions
 {
-    public static IServiceCollection AddApiServices(this IServiceCollection services)
+    public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddEndpointsApiExplorer();
 
@@ -34,6 +33,10 @@ public static class ApiServiceExtensions
 
             });
 
+        // CORS origins are read from configuration so the same binary can serve
+        // different environments (dev / staging / prod) without recompilation.
+        var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+
         services.AddCors(options =>
         {
             options.AddPolicy("CorsPolicy", policy =>
@@ -41,7 +44,7 @@ public static class ApiServiceExtensions
                 policy.AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .WithOrigins("http://localhost:3001");
+                        .WithOrigins(allowedOrigins);
             });
         });
 
@@ -57,7 +60,7 @@ public static class ApiServiceExtensions
         // Register the centralized membership service for querying OrganizationMembers
         services.AddScoped<IOrganizationMemberService, OrganizationMemberService>();
 
-        services.AddScoped<IEventAuthorizationService, EventAuthorizationService>();
+
 
         return services;
     }

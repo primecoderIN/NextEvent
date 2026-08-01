@@ -18,7 +18,7 @@ using NextEvent.Modules.Events.Persistence.Seeders;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddApiServices();
+builder.Services.AddApiServices(builder.Configuration);
 builder.Services.AddDatabaseServices(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddSwaggerServices();
@@ -56,18 +56,21 @@ try
     var orgContext = services.GetRequiredService<NextEvent.Modules.Organizations.Persistence.Contexts.OrganizationsDbContext>();
     var eventsContext = services.GetRequiredService<NextEvent.Modules.Events.Persistence.Contexts.EventsDbContext>();
     
-    // Automatically apply migrations for all modules
-    identityContext.Database.Migrate();
-    orgContext.Database.Migrate();
-    eventsContext.Database.Migrate();
-    
-    var userManager = services.GetRequiredService<UserManager<User>>();
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    
-    // Seed initial data using modular per-module seeders
-    await IdentityDataSeeder.SeedAsync(roleManager, userManager);
-    await OrganizationsDataSeeder.SeedAsync(orgContext);
-    await EventsDataSeeder.SeedAsync(eventsContext, userManager);
+    if (app.Environment.IsDevelopment())
+    {
+        // Automatically apply migrations for all modules in dev mode only
+        identityContext.Database.Migrate();
+        orgContext.Database.Migrate();
+        eventsContext.Database.Migrate();
+        
+        var userManager = services.GetRequiredService<UserManager<User>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        
+        // Seed initial data using modular per-module seeders
+        await IdentityDataSeeder.SeedAsync(roleManager, userManager);
+        await OrganizationsDataSeeder.SeedAsync(orgContext);
+        await EventsDataSeeder.SeedAsync(eventsContext, userManager);
+    }
 }
 catch (Exception ex)
 {

@@ -46,8 +46,10 @@ public static class MassTransitServiceExtensions
                 
                 cfg.Host(rabbitHost, "/", h =>
                 {
-                    h.Username(configuration["RabbitMQ:Username"] ?? "guest");
-                    h.Password(configuration["RabbitMQ:Password"] ?? "guest");
+                    h.Username(configuration["RabbitMQ:Username"]
+                        ?? throw new InvalidOperationException("RabbitMQ:Username is not configured."));
+                    h.Password(configuration["RabbitMQ:Password"]
+                        ?? throw new InvalidOperationException("RabbitMQ:Password is not configured."));
                 });
 
                 cfg.ConfigureEndpoints(context);

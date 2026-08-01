@@ -5,6 +5,17 @@
 
 # dotenv files
 .env
+.env.*
+
+# ASP.NET Core User Secrets — NEVER commit these
+secrets.json
+**/secrets.json
+
+# Environment-specific appsettings that may contain secrets (TokenKey, passwords, etc.)
+# Keep appsettings.json (base template) but ignore per-environment overrides with secrets
+# appsettings.Development.json is intentionally tracked for non-secret dev config
+# If it ever contains secrets again, add it here:
+# appsettings.Development.json
 
 # User-specific files
 *.rsuser

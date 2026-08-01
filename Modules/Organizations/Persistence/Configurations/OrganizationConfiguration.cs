@@ -47,7 +47,14 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
             .IsRequired()
             .HasMaxLength(30)
             .HasColumnType("varchar(30)")
-            .HasDefaultValue("pending_verification");
+            .HasConversion(
+                // Enum → DB string  (e.g. Active → "active")
+                v => v.ToString().ToLowerInvariant().Replace("pendingverification", "pending_verification"),
+                // DB string → Enum  (e.g. "pending_verification" → PendingVerification)
+                v => Enum.Parse<OrganizationStatus>(
+                    v.Replace("pending_verification", "pendingverification"),
+                    ignoreCase: true))
+            .HasDefaultValue(OrganizationStatus.PendingVerification);
 
         builder.Property(o => o.IsDeleted)
             .IsRequired()

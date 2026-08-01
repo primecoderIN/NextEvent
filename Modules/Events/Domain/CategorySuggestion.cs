@@ -42,7 +42,7 @@ public class CategorySuggestion
     public Category? ApprovedCategory { get; set; }
 
     // ─── Timestamps ───────────────────────────────────────────────────────────
-    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAtUtc { get; set; }
 
-    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAtUtc { get; set; }
 }
