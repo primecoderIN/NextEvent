@@ -453,5 +453,35 @@ In a **Modular Monolith**, code is split across independent module assemblies (`
 | **MediatR** | Must specify one handler type from **each** module assembly | `x.RegisterServicesFromAssemblyContaining<GetEventsListQueryHandler>();`<br>`x.RegisterServicesFromAssemblyContaining<GetOrganizationByIdQueryHandler>();`<br>`x.RegisterServicesFromAssemblyContaining<LoginCommandHandler>();` |
 | **EF Core DbContext Configurations** | Must call `ApplyConfigurationsFromAssembly` inside **each** module's DbContext | `builder.ApplyConfigurationsFromAssembly(typeof(EventsDbContext).Assembly);`<br>`builder.ApplyConfigurationsFromAssembly(typeof(OrganizationsDbContext).Assembly);`<br>`builder.ApplyConfigurationsFromAssembly(typeof(IdentityDbContext).Assembly);` |
 
+---
+
+## 14. Swagger XML Comments Setup in Modular Monolith
+
+In a Modular Monolith, API controller endpoints live inside independent module projects (`Modules/Events`, `Modules/Organizations`, `Modules/Identity`, `Modules/AI`). To ensure controller XML summaries, parameter notes, and status code response descriptions appear in Swagger UI:
+
+1. **Enable XML Documentation Generation in `.csproj` files**:
+   Add `<GenerateDocumentationFile>true</GenerateDocumentationFile>` to `API.csproj` and **all** module `.csproj` files:
+   ```xml
+   <PropertyGroup>
+     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+     <NoWarn>$(NoWarn);1591</NoWarn> <!-- Suppresses missing XML comment compiler warnings -->
+   </PropertyGroup>
+   ```
+
+2. **Dynamically Load All Module XML Documentation Files in `SwaggerServiceExtensions.cs`**:
+   Instead of loading only `API.xml`, scan `AppContext.BaseDirectory` for all compiled module `*.xml` files:
+   ```csharp
+   services.AddSwaggerGen(options =>
+   {
+       // Dynamically include XML documentation comments from all compiled module assemblies
+       var xmlFiles = System.IO.Directory.GetFiles(AppContext.BaseDirectory, "*.xml");
+       foreach (var xmlPath in xmlFiles)
+       {
+           options.IncludeXmlComments(xmlPath);
+       }
+   });
+   ```
+
+
 
 
