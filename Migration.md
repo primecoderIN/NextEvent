@@ -35,7 +35,7 @@ dotnet run --project API/API.csproj
 1. The API project configures Dependency Injection, pulling in services from all modules.
 2. It initializes the database connections.
 3. It automatically runs EF Core migrations for all three bounded contexts (`Identity`, `Organizations`, `Events`).
-4. It executes the seeder (`DatabaseInitializer.cs`) to inject default roles, admin users, permissions, and initial events.
+4. It executes the modular per-module seeders (`IdentityDataSeeder`, `OrganizationsDataSeeder`, `EventsDataSeeder`) to inject default roles, admin users, permissions, categories, and initial events.
 5. It spins up the Swagger UI and API endpoints.
 
 ## 3. What Changes Were Made for the Migration

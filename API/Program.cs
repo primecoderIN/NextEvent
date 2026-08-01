@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NextEvent.Modules.Identity.Persistence;
 using NextEvent.Modules.Identity.Domain;
-using API;
+using NextEvent.Modules.Identity.Persistence.Seeders;
+using NextEvent.Modules.Organizations.Persistence.Seeders;
+using NextEvent.Modules.Events.Persistence.Seeders;
 
 // =======================================================================
 // API LAYER (Program.cs)
@@ -35,16 +37,16 @@ if (app.Environment.IsDevelopment())
 // -----------------------------------------------------------------------
 // Global exception handling middleware
 // -----------------------------------------------------------------------
-app.UseCors("CorsPolicy"); //Enable CORS with the defined policy.
+app.UseCors("CorsPolicy");
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
-app.MapControllers(); //When an HTTP request arrives, route it to controller actions.
+app.MapControllers();
 
-// Run migrations for the DbContexts (basic approach for now)
+// Run migrations for the DbContexts and execute per-module seeders
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 
@@ -59,12 +61,13 @@ try
     orgContext.Database.Migrate();
     eventsContext.Database.Migrate();
     
-    // We use our custom Domain.User class (which extends IdentityUser with app-specific properties).
     var userManager = services.GetRequiredService<UserManager<User>>();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     
-    // Seed initial data
-    await DatabaseInitializer.SeedData(identityContext, orgContext, eventsContext, roleManager, userManager); 
+    // Seed initial data using modular per-module seeders
+    await IdentityDataSeeder.SeedAsync(roleManager, userManager);
+    await OrganizationsDataSeeder.SeedAsync(orgContext);
+    await EventsDataSeeder.SeedAsync(eventsContext, userManager);
 }
 catch (Exception ex)
 {
