@@ -26,10 +26,10 @@ Welcome to the **NextEvent** team! This document is your one-stop guide to under
 | Layer | Technology |
 |---|---|
 | API | ASP.NET Core 10 |
-| Architecture | Clean Architecture — Domain / Application / Persistence / API |
+| Architecture | Modular Monolith — Clean Architecture per module (`Events`, `Organizations`, `Identity`, `AI`) |
 | CQRS | MediatR |
 | Validation | FluentValidation + MediatR pipeline behavior |
-| ORM | Entity Framework Core |
+| ORM | Entity Framework Core (Schemas: `evt`, `org`, `identity`) |
 | Database | SQL Server (`NextEventDb`) |
 | Serialisation | `System.Text.Json` with camelCase naming policy |
 
@@ -56,6 +56,7 @@ Our development journey has been highly iterative:
 * **Phase 2 (Refactoring for Scale):** Refactored frontend to **Feature-Sliced Design (FSD)**. On the backend, we strictified Clean Architecture via **MediatR (CQRS)** and **FluentValidation**. We also brought in Dapper for high-speed read queries.
 * **Phase 3 (Organizations & Enterprise RBAC):** Introduced multi-tenancy (`Organizations`) allowing users to act as organizers. We built a custom RBAC system (`OrganizationRoles` mapped to granular `Permissions`).
 * **Phase 4 (Security & Profile Isolation):** Implemented an **Active Profile** concept (Member vs Organizer) embedded into the JWT, preventing "role-bleeding" during UX navigation. Smart frontend guards (`<RequireProfile>`) and backend policies (`ActiveOrganizer`) enforce these boundaries.
+* **Phase 5 (Modular Monolith Migration):** Decomposed monolithic single-project structure into clean, isolated modules (`Modules/Events`, `Modules/Organizations`, `Modules/Identity`, `Modules/AI`). Each module owns its domain logic, EF Core DbContext, and SQL schema (`evt`, `org`, `identity`), mapped via `ExcludeFromMigrations()` for cross-module foreign key integrity.
 
 ---
 
@@ -93,14 +94,25 @@ Every API endpoint returns the exact same JSON shape:
 
 ---
 
-## 5. Backend Deep Dive: Clean Architecture & Layers
+## 5. Backend Deep Dive: Modular Monolith Architecture & Layers
 
-We strictly adhere to Clean Architecture: `API -> Application -> Domain <- Persistence`.
+We strictly adhere to Clean Architecture within each isolated Module under `Modules/`:
 
-1. **`API/` (Presentation):** Contains thin Controllers mapping HTTP to MediatR, global Middleware (`ExceptionMiddleware`), and web Services (`CurrentUserService`).
-2. **`Application/` (Business Use Cases):** Contains core use cases grouped by feature slices (e.g., `Events/`, `Organizations/`). Defines interfaces (`ICurrentUserService`) for outer layers.
-3. **`Domain/` (Enterprise Logic):** Contains Entities (`Event.cs`), Constants, and specific exceptions. References nothing outside itself.
-4. **`Persistence/` (Infrastructure):** Contains EF Core `AppDBContext`, database seeders, and `SqlConnectionFactory` for raw Dapper queries.
+```text
+API Host (API/)
+ ├── Modules/Events          (Domain, Application, Persistence, API) → Schema: evt
+ ├── Modules/Organizations   (Domain, Application, Persistence, API) → Schema: org
+ ├── Modules/Identity        (Domain, Application, Persistence, API) → Schema: identity
+ ├── Modules/AI              (Application, API)
+ └── Shared/                 (Cross-cutting interfaces, DTOs, constants, Dapper handlers)
+```
+
+1. **`API/` (Composition Root):** Configures ASP.NET Core host, Swagger, Exception Middleware, CORS, and multi-assembly reflection registration.
+2. **`Modules/{Name}/Domain`:** Module domain entities, invariants, and business methods.
+3. **`Modules/{Name}/Application`:** CQRS Commands/Queries (MediatR), DTOs, FluentValidation rules.
+4. **`Modules/{Name}/Persistence`:** Module-specific EF Core `DbContext` (`EventsDbContext`, `OrganizationsDbContext`, `IdentityDbContext`), seeders, and schema configuration.
+5. **`Modules/{Name}/API`:** Controllers owning the API endpoints for that module.
+6. **`Shared/`:** Shared interfaces (`ICurrentUserService`, `IOrganizationAuthorizationService`), Dapper connection factories, Dapper type handlers (`UtcDateTimeHandler`), pagination helpers, and core exception types.
 
 ---
 

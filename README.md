@@ -10,10 +10,10 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 | Layer | Technology |
 |---|---|
 | API | ASP.NET Core 10 |
-| Architecture | Clean Architecture — Domain / Application / Persistence / API |
+| Architecture | Modular Monolith — Clean Architecture per module (`Events`, `Organizations`, `Identity`, `AI`) |
 | CQRS | MediatR |
 | Validation | FluentValidation + MediatR pipeline behavior |
-| ORM | Entity Framework Core |
+| ORM | Entity Framework Core (Isolated schemas `evt`, `org`, `identity`) |
 | Database | SQL Server (`NextEventDb`) |
 | Serialisation | `System.Text.Json` with camelCase naming policy |
 | URL style | Lowercase route generation |
@@ -41,6 +41,13 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 | Animations | `tw-animate-css` |
 
 ### Key Design Decisions
+
+- **Modular Monolith Architecture**  
+  The solution is structured as a Modular Monolith where every business domain (`Events`, `Organizations`, `Identity`, `AI`) lives inside its own self-contained module under `Modules/`.
+  - **Clean Architecture per Module**: Each module owns its own `Domain`, `Application`, `Persistence`, and `API` namespaces and its own EF Core `DbContext` (`EventsDbContext`, `OrganizationsDbContext`, `IdentityDbContext`).
+  - **Isolated SQL Database Schemas**: SQL Server tables are strictly partitioned into dedicated schemas (`evt` for Events, `org` for Organizations, `identity` for ASP.NET Users/Roles).
+  - **Cross-Schema Mapping (`ExcludeFromMigrations`)**: Cross-module foreign key relationships (e.g. `Event.OrganizationId` -> `org.Organizations` and `Event.CreatedByUserId` -> `identity.AspNetUsers`) are modeled using `.ToTable("...", "schema", t => t.ExcludeFromMigrations())`. This allows EF Core DbContexts to navigate cross-module relationships while preventing duplicate table creation scripts in module migrations.
+  - **Multi-Assembly Dependency Injection**: Validators, MediatR handlers, and Swagger documentation are registered dynamically across all module assemblies (`NextEvent.Modules.Events`, `NextEvent.Modules.Organizations`, `NextEvent.Modules.Identity`, `NextEvent.Modules.AI`).
 
 - **Date and Time Convention (UTC + TimeZoneId)**  
   We strictly use `DateTime` (in UTC) across the entire solution.

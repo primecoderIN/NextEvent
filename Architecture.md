@@ -1,34 +1,44 @@
 # NextEvent Enterprise Architecture and Implementation Roadmap
 
-Status: planning document only. No implementation has been performed.
+Status: Implemented Modular Monolith Architecture.
 
 ## 1. Existing Project Analysis
 
 ### 1.1 Solution Structure
 
-The solution currently contains four backend projects and one React client:
+The solution is organized as a **Modular Monolith** containing isolated module projects, a composition root, a shared library, and a React client:
 
 ```text
 NextEvent/
-  API/             ASP.NET Core Web API host and composition root
-  Application/     CQRS use cases, DTOs, validators, application interfaces
-  Domain/          Domain entities
-  Persistence/     EF Core DbContext, migrations, seeding, SQL connection factory
-  client/          React + TypeScript SPA
+  API/                             ASP.NET Core Web API host and composition root
+  Modules/
+    Events/                        Events module (NextEvent.Modules.Events.csproj)
+    Organizations/                 Organizations module (NextEvent.Modules.Organizations.csproj)
+    Identity/                      Identity module (NextEvent.Modules.Identity.csproj)
+    AI/                            AI module (NextEvent.Modules.AI.csproj)
+  Shared/                          Shared contracts, interfaces, Dapper handlers (NextEvent.Shared.csproj)
+  client/                          React 19 + Vite 8 SPA
 ```
 
-Project dependency flow:
+Module & Project dependency flow:
 
 ```text
-API -> Application
-API -> Persistence
-Persistence -> Application
-Persistence -> Domain
-Application -> Domain
-Domain -> no project references
+API -> NextEvent.Modules.Events
+API -> NextEvent.Modules.Organizations
+API -> NextEvent.Modules.Identity
+API -> NextEvent.Modules.AI
+API -> NextEvent.Shared
+
+NextEvent.Modules.Events -> NextEvent.Shared
+NextEvent.Modules.Organizations -> NextEvent.Shared
+NextEvent.Modules.Identity -> NextEvent.Shared
+NextEvent.Modules.AI -> NextEvent.Shared
+
+Modules -> No direct C# project references between business modules (loose coupling)
+NextEvent.Shared -> no project references
 ```
 
-The backend follows Clean Architecture with vertical slices inside the `Application` layer. Controllers are thin and dispatch commands/queries through MediatR.
+The backend follows Clean Architecture within each module (`Domain`, `Application`, `Persistence`, `API`). Controllers are thin and dispatch commands/queries through MediatR across module boundaries using `NextEvent.Shared` interfaces.
 
 ### 1.2 Current Backend Architecture
 
@@ -58,26 +68,16 @@ Cross-cutting backend behavior:
 
 ### 1.3 Current Database and Persistence
 
-NextEvent will use SQL Server as the database provider. The current code is already aligned with that decision:
+NextEvent uses SQL Server as the database provider with **schema-based tenant isolation**:
 
 - `UseSqlServer(...)` in `API/Extensions/DatabaseServiceExtensions.cs`
-- `Microsoft.Data.SqlClient` in `Persistence/SqlConnectionFactory.cs`
-- SQL Server column types in the existing migration
-
-Current database tables from the initial migration:
-
-- ASP.NET Identity tables:
-  - `AspNetUsers`
-  - `AspNetRoles`
-  - `AspNetUserRoles`
-  - `AspNetUserClaims`
-  - `AspNetRoleClaims`
-  - `AspNetUserLogins`
-  - `AspNetUserTokens`
-- Business table:
-  - `Events`
-
-Current `AppDBContext` inherits from `IdentityDbContext<User>` and exposes `DbSet<Event> Events`.
+- `Microsoft.Data.SqlClient` in `Shared/Persistence/SqlConnectionFactory.cs`
+- SQL Server schema partitioning across module DbContexts:
+  - **`IdentityDbContext`** (`identity` schema): `AspNetUsers`, `AspNetRoles`, `AspNetUserRoles`, `AspNetUserClaims`, etc.
+  - **`OrganizationsDbContext`** (`org` schema): `Organizations`, `OrganizationMembers`, `OrganizationRoles`, `OrganizationRolePermissions`, `OrganizationMemberRoles`, `Permissions`.
+  - **`EventsDbContext`** (`evt` schema): `Events`, `Categories`, `CategorySuggestions`.
+  - MassTransit Outbox tables per module schema (`InboxState`, `OutboxMessage`, `OutboxState`).
+- **Cross-Schema References (`ExcludeFromMigrations`)**: Cross-module foreign key relationships (e.g. `Event.OrganizationId` -> `org.Organizations` and `Event.CreatedByUserId` -> `identity.AspNetUsers`) are modeled using `builder.Entity<T>().ToTable("...", "schema", t => t.ExcludeFromMigrations())`. This enables EF Core navigation properties while preventing duplicate table creation scripts in module migrations.
 
 ### 1.4 Existing Domain Entities
 
