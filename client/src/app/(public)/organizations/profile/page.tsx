@@ -18,11 +18,19 @@ export function OrganizationProfilePage() {
   if (isError || !profile) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <Building2 className="h-16 w-16 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-bold mb-2">Organization Not Found</h2>
-        <p className="text-muted-foreground max-w-md">
-          We couldn't find the organization you're looking for. It might be pending approval or doesn't exist.
+        <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mb-6">
+          <Building2 className="w-10 h-10 text-amber-500" />
+        </div>
+        <h2 className="text-2xl font-bold mb-2">Organization Pending Approval</h2>
+        <p className="text-muted-foreground max-w-md mb-6">
+          This organization is currently under review by our admin team or does not exist yet. It will become publicly visible once approved.
         </p>
+        <a 
+          href="/"
+          className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm transition-colors hover:bg-primary/90"
+        >
+          Return to Home
+        </a>
       </div>
     )
   }

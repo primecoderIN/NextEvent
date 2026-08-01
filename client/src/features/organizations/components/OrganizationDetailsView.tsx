@@ -9,6 +9,19 @@ interface OrganizationDetailsViewProps {
 export function OrganizationDetailsView({ organization }: OrganizationDetailsViewProps) {
   return (
     <div className="space-y-6">
+      {/* Pending Verification Banner */}
+      {organization.status === "pending_verification" && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-4 text-amber-800 dark:text-amber-300">
+          <Clock className="w-6 h-6 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+          <div>
+            <h3 className="font-semibold text-base">Organization Pending Approval</h3>
+            <p className="text-sm mt-1 text-amber-700/90 dark:text-amber-300/90">
+              Your organization <strong>{organization.name}</strong> is currently under review by our admin team. You can inspect your organization profile details below. Event creation will be enabled once your organization is verified.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
         <div className="h-32 md:h-48 w-full bg-muted relative">
