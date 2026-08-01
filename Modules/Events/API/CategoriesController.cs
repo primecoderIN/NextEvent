@@ -60,7 +60,7 @@ public class CategoriesController : BaseApiController
     /// Can be filtered by status (Pending, Approved, Rejected).
     /// Restricted to platform Admins only.
     /// </summary>
-    /// <param name="queryDto">Query parameter DTO containing optional status filter ("Pending", "Approved", "Rejected").</param>
+    /// <param name="status">Optional status filter ("Pending", "Approved", "Rejected").</param>
     /// <param name="cancellationToken">Propagates cancellation notification.</param>
     /// <response code="200">Category suggestions retrieved successfully.</response>
     /// <response code="401">No valid JWT supplied.</response>
@@ -71,13 +71,13 @@ public class CategoriesController : BaseApiController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<ApiResponse<IEnumerable<CategorySuggestionDto>>>> GetSuggestions(
-        [FromQuery] GetCategorySuggestionsQueryDto queryDto,
+        [FromQuery] string? status,
         CancellationToken cancellationToken)
     {
         CategorySuggestionStatus? statusFilter = null;
 
-        if (!string.IsNullOrWhiteSpace(queryDto.Status) &&
-            Enum.TryParse<CategorySuggestionStatus>(queryDto.Status, ignoreCase: true, out var parsed))
+        if (!string.IsNullOrWhiteSpace(status) &&
+            Enum.TryParse<CategorySuggestionStatus>(status, ignoreCase: true, out var parsed))
         {
             statusFilter = parsed;
         }

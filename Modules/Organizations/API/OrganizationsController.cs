@@ -28,14 +28,14 @@ public class OrganizationsController : BaseApiController
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<ApiResponse<PagedList<OrganizationDetailDto>>>> GetOrganizationsList(
-        [FromQuery] GetOrganizationsQueryDto queryDto,
+        [FromQuery] PaginationParams paginationParams,
         CancellationToken cancellationToken)
     {
         var organizations = await Mediator.Send(
             new GetOrganizationsListQuery 
             { 
-                PageNumber = queryDto.PageNumber, 
-                PageSize = queryDto.PageSize 
+                PageNumber = paginationParams.PageNumber, 
+                PageSize = paginationParams.PageSize 
             }, 
             cancellationToken);
 
