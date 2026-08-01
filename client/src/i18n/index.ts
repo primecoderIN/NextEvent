@@ -13,10 +13,13 @@ import enHome from "./locales/en/home.json"
 import enEventDetail from "./locales/en/eventDetail.json"
 import enCreateEvent from "./locales/en/createEvent.json"
 import enAuth from "./locales/en/auth.json"
+import enOrganizer from "./locales/en/organizer.json"
+import enAdmin from "./locales/en/admin.json"
+import enAuthGuard from "./locales/en/authGuard.json"
 
 // ── Namespace registry ────────────────────────────────────────────────────────
 // Type the namespace names so useTranslation('nav') is type-safe.
-export const NAMESPACES = ["common", "nav", "home", "eventDetail", "createEvent", "auth"] as const
+export const NAMESPACES = ["common", "nav", "home", "eventDetail", "createEvent", "auth", "organizer", "admin", "authGuard"] as const
 export type Namespace = (typeof NAMESPACES)[number]
 
 
@@ -73,6 +76,9 @@ export async function initI18n(): Promise<void> {
         eventDetail: enEventDetail,
         createEvent: enCreateEvent,
         auth: enAuth,
+        organizer: enOrganizer,
+        admin: enAdmin,
+        authGuard: enAuthGuard,
       },
     },
 

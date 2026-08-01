@@ -3,6 +3,7 @@ import { useAuth } from "@/features/auth/context/AuthContext"
 import { Button } from "@/shared/ui/button"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { AlertCircle, RefreshCw, Plus, Home } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 interface ProfileMismatchProps {
   requiredProfiles: string[];
@@ -11,6 +12,7 @@ interface ProfileMismatchProps {
 export function ProfileMismatch({ requiredProfiles }: ProfileMismatchProps) {
   const { user, switchProfile } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation("authGuard")
 
   if (!user) return null
 
@@ -22,9 +24,9 @@ export function ProfileMismatch({ requiredProfiles }: ProfileMismatchProps) {
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-6">
             <AlertCircle className="w-6 h-6 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight mb-2">Organizer Access Required</h2>
+          <h2 className="text-2xl font-bold tracking-tight mb-2">{t("organizerAccessRequired")}</h2>
           <p className="text-muted-foreground mb-8">
-            You need an Organizer account to access this dashboard. Create your first organization to get started!
+            {t("organizerAccessSub")}
           </p>
           <div className="flex flex-col gap-3">
             <Button 
@@ -32,11 +34,11 @@ export function ProfileMismatch({ requiredProfiles }: ProfileMismatchProps) {
               className="w-full gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0"
             >
               <Plus className="w-4 h-4" />
-              Become an Organizer
+              {t("becomeOrganizer")}
             </Button>
             <Button variant="outline" onClick={() => navigate(RoutePaths.Home)} className="w-full gap-2">
               <Home className="w-4 h-4" />
-              Go Home
+              {t("goHome")}
             </Button>
           </div>
         </div>
@@ -52,9 +54,9 @@ export function ProfileMismatch({ requiredProfiles }: ProfileMismatchProps) {
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-6">
             <RefreshCw className="w-6 h-6 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight mb-2">Switch Profile Required</h2>
+          <h2 className="text-2xl font-bold tracking-tight mb-2">{t("switchProfileRequired")}</h2>
           <p className="text-muted-foreground mb-8">
-            You are currently browsing as a Member. Please switch to your Organizer profile to access this area.
+            {t("switchProfileToOrganizer")}
           </p>
           <div className="flex flex-col gap-3">
             <Button 
@@ -65,10 +67,10 @@ export function ProfileMismatch({ requiredProfiles }: ProfileMismatchProps) {
               className="w-full gap-2 bg-primary text-primary-foreground"
             >
               <RefreshCw className="w-4 h-4" />
-              Switch to Organizer Mode
+              {t("switchToOrganizerMode")}
             </Button>
             <Button variant="outline" onClick={() => navigate(-1)} className="w-full">
-              Cancel & Go Back
+              {t("cancelAndGoBack")}
             </Button>
           </div>
         </div>
@@ -84,9 +86,9 @@ export function ProfileMismatch({ requiredProfiles }: ProfileMismatchProps) {
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-6">
             <RefreshCw className="w-6 h-6 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight mb-2">Switch Profile Required</h2>
+          <h2 className="text-2xl font-bold tracking-tight mb-2">{t("switchProfileRequired")}</h2>
           <p className="text-muted-foreground mb-8">
-            You are currently in Organizer mode. Switch back to Member mode to view public pages and events.
+            {t("switchProfileToMember")}
           </p>
           <div className="flex flex-col gap-3">
             <Button 
@@ -97,10 +99,10 @@ export function ProfileMismatch({ requiredProfiles }: ProfileMismatchProps) {
               className="w-full gap-2 bg-primary text-primary-foreground"
             >
               <RefreshCw className="w-4 h-4" />
-              Switch to Member Mode
+              {t("switchToMemberMode")}
             </Button>
             <Button variant="outline" onClick={() => navigate(RoutePaths.OrganizerDashboard)} className="w-full">
-              Cancel & Stay in Organizer
+              {t("cancelAndStayOrganizer")}
             </Button>
           </div>
         </div>
@@ -112,8 +114,8 @@ export function ProfileMismatch({ requiredProfiles }: ProfileMismatchProps) {
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center p-4">
       <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
-        <Button onClick={() => navigate(RoutePaths.Home)}>Return Home</Button>
+        <h2 className="text-2xl font-bold mb-4">{t("accessDenied")}</h2>
+        <Button onClick={() => navigate(RoutePaths.Home)}>{t("goHome")}</Button>
       </div>
     </div>
   )

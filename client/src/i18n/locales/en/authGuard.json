@@ -1,0 +1,14 @@
+{
+  "organizerAccessRequired": "Organizer Access Required",
+  "organizerAccessSub": "You need an Organizer account to access this dashboard. Create your first organization to get started!",
+  "becomeOrganizer": "Become an Organizer",
+  "goHome": "Go Home",
+  "switchProfileRequired": "Switch Profile Required",
+  "switchProfileToOrganizer": "You are currently browsing as a Member. Please switch to your Organizer profile to access this area.",
+  "switchToOrganizerMode": "Switch to Organizer Mode",
+  "cancelAndGoBack": "Cancel & Go Back",
+  "switchProfileToMember": "You are currently in Organizer mode. Switch back to Member mode to view public pages and events.",
+  "switchToMemberMode": "Switch to Member Mode",
+  "cancelAndStayOrganizer": "Cancel & Stay in Organizer",
+  "accessDenied": "Access Denied"
+}

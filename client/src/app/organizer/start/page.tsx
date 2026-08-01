@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Building2, ArrowRight, CheckCircle2, Clock } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Input } from "@/shared/ui/input"
 import { Textarea } from "@/shared/ui/textarea"
@@ -34,6 +35,7 @@ export function StartOrganizerPage() {
   const [isSuccess, setIsSuccess] = useState(false)
   const { data: existingOrg, isLoading: isLoadingOrg } = useMyOrganization()
   const { mutateAsync: createOrganization, isPending } = useCreateOrganization()
+  const { t } = useTranslation("organizer")
   
   const {
     register,
@@ -56,13 +58,10 @@ export function StartOrganizerPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      // Cast is safe since undefined maps seamlessly for JSON serialization
       await createOrganization(data as CreateOrganizationDto)
       setIsSuccess(true)
     } catch (error: any) {
       if (error.response?.data?.errors) {
-
-        // Backend validation errors
         Object.entries(error.response.data.errors).forEach(([field, messages]) => {
           toast.error(`Error with ${field}`, {
             description: (messages as string[])[0]
@@ -91,16 +90,16 @@ export function StartOrganizerPage() {
           <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mb-6">
             <Clock className="w-10 h-10 text-amber-500" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight mb-4">Organization Pending Approval</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-4">{t("pendingApprovalTitle")}</h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
-            Your organization <strong>{existingOrg.name}</strong> is currently under review by our admin team. You'll be able to create events once it is approved.
+            {t("pendingApprovalDesc")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Button asChild size="lg" className="w-full sm:w-auto">
-              <Link to={`/organizer/organizations/${existingOrg.id}`}>View Organization Details</Link>
+              <Link to={`/organizer/organizations/${existingOrg.id}`}>{t("viewOrgDetails")}</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
-              <Link to={RoutePaths.Home}>Return Home</Link>
+              <Link to={RoutePaths.Home}>{t("returnHome")}</Link>
             </Button>
           </div>
         </div>
@@ -115,17 +114,16 @@ export function StartOrganizerPage() {
           <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-6">
             <CheckCircle2 className="w-10 h-10 text-green-500" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight mb-4">Application Submitted!</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-4">{t("appSubmittedTitle")}</h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
-            Your organization profile has been created successfully. It is currently pending admin verification. 
-            We will notify you once it has been approved.
+            {t("appSubmittedDesc")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Button asChild size="lg" className="w-full sm:w-auto">
-              <Link to={`/organizer/organizations/${existingOrg?.id}`}>View Organization Details</Link>
+              <Link to={`/organizer/organizations/${existingOrg?.id}`}>{t("viewOrgDetails")}</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
-              <Link to={RoutePaths.Home}>Return to Home</Link>
+              <Link to={RoutePaths.Home}>{t("returnHome")}</Link>
             </Button>
           </div>
         </div>
@@ -139,9 +137,9 @@ export function StartOrganizerPage() {
         <div className="mx-auto bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-6">
           <Building2 className="w-8 h-8 text-primary" />
         </div>
-        <h1 className="text-4xl font-extrabold tracking-tight mb-4">Become an Organizer</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight mb-4">{t("becomeOrganizer")}</h1>
         <p className="text-xl text-muted-foreground">
-          Create your organization profile to start publishing events and selling tickets.
+          {t("becomeOrganizerSub")}
         </p>
       </div>
 
@@ -149,10 +147,10 @@ export function StartOrganizerPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           
           <div className="space-y-6">
-            <h2 className="text-2xl font-semibold tracking-tight">Basic Information</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">{t("basicInfo")}</h2>
             
             <div className="grid gap-3">
-              <Label htmlFor="name">Organization Name <span className="text-destructive">*</span></Label>
+              <Label htmlFor="name">{t("orgName")} <span className="text-destructive">*</span></Label>
               <Input
                 id="name"
                 placeholder="e.g. Acme Events"
@@ -163,7 +161,7 @@ export function StartOrganizerPage() {
             </div>
 
             <div className="grid gap-3">
-              <Label htmlFor="slug">Profile URL Slug <span className="text-destructive">*</span></Label>
+              <Label htmlFor="slug">{t("profileSlug")} <span className="text-destructive">*</span></Label>
               <Input
                 id="slug"
                 placeholder="acme-events"
@@ -171,16 +169,16 @@ export function StartOrganizerPage() {
                 aria-invalid={!!errors.slug}
               />
               <p className="text-sm text-muted-foreground flex items-center gap-1">
-                Your public profile will be at: <strong className="text-foreground">nextevent.com/org/{currentSlug || "slug"}</strong>
+                {t("publicProfileUrl")} <strong className="text-foreground">nextevent.com/org/{currentSlug || "slug"}</strong>
               </p>
               {errors.slug && <p className="text-sm text-destructive">{errors.slug.message}</p>}
             </div>
 
             <div className="grid gap-3">
-              <Label htmlFor="description">About the Organization</Label>
+              <Label htmlFor="description">{t("aboutOrg")}</Label>
               <Textarea
                 id="description"
-                placeholder="Tell attendees what kind of events you host..."
+                placeholder={t("aboutOrgPlaceholder")}
                 className="min-h-[120px]"
                 {...register("description")}
               />
@@ -188,12 +186,12 @@ export function StartOrganizerPage() {
           </div>
 
           <div className="space-y-6 pt-6 border-t">
-            <h2 className="text-2xl font-semibold tracking-tight">Public Contact Details</h2>
-            <p className="text-sm text-muted-foreground">These will be visible on your public profile page.</p>
+            <h2 className="text-2xl font-semibold tracking-tight">{t("publicContactDetails")}</h2>
+            <p className="text-sm text-muted-foreground">{t("contactDetailsNotice")}</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="contactEmail">Email Address</Label>
+                <Label htmlFor="contactEmail">{t("emailAddress")}</Label>
                 <Input
                   id="contactEmail"
                   type="email"
@@ -205,7 +203,7 @@ export function StartOrganizerPage() {
               </div>
 
               <div className="grid gap-3">
-                <Label htmlFor="contactPhone">Phone Number</Label>
+                <Label htmlFor="contactPhone">{t("phoneNumber")}</Label>
                 <Input
                   id="contactPhone"
                   type="tel"
@@ -216,7 +214,7 @@ export function StartOrganizerPage() {
             </div>
 
             <div className="grid gap-3">
-              <Label htmlFor="websiteUrl">Website</Label>
+              <Label htmlFor="websiteUrl">{t("website")}</Label>
               <Input
                 id="websiteUrl"
                 type="url"
@@ -230,11 +228,11 @@ export function StartOrganizerPage() {
 
           <div className="pt-6">
             <Button type="submit" size="lg" className="w-full text-lg h-14" disabled={isPending}>
-              {isPending ? "Creating Organization..." : "Complete Setup"}
+              {isPending ? t("creatingOrg") : t("completeSetup")}
               {!isPending && <ArrowRight className="ml-2 w-5 h-5" />}
             </Button>
             <p className="text-sm text-center text-muted-foreground mt-4">
-              By continuing, you agree to our Organizer Terms of Service.
+              {t("termsNotice")}
             </p>
           </div>
         </form>

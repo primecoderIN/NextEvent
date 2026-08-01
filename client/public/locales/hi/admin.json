@@ -1,0 +1,12 @@
+{
+  "adminPortal": "व्यवस्थापक पोर्टल",
+  "pendingOrganizations": "लंबित संस्थाएं",
+  "pendingOrganizationsSub": "नए आयोजक पंजीकरण अनुरोधों की समीक्षा और सत्यापन करें।",
+  "approve": "स्वीकृत करें",
+  "reject": "अस्वीकृत करें",
+  "categoryManagement": "श्रेणी प्रबंधन",
+  "categoryManagementSub": "वैश्विक श्रेणियों का प्रबंधन करें और उपयोगकर्ताओं द्वारा दिए गए सुझावों की समीक्षा करें।",
+  "createCategory": "श्रेणी बनाएं",
+  "suggestions": "सुझाव",
+  "systemDashboard": "सिस्टम डैशबोर्ड"
+}

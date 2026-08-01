@@ -1,0 +1,12 @@
+{
+  "adminPortal": "Admin Portal",
+  "pendingOrganizations": "Pending Organizations",
+  "pendingOrganizationsSub": "Review and verify new organizer registration requests.",
+  "approve": "Approve",
+  "reject": "Reject",
+  "categoryManagement": "Category Management",
+  "categoryManagementSub": "Manage global taxonomy categories and review user-submitted suggestions.",
+  "createCategory": "Create Category",
+  "suggestions": "Suggestions",
+  "systemDashboard": "System Dashboard"
+}
