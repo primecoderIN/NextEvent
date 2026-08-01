@@ -156,9 +156,32 @@ Modules/
 
 ---
 
-## 8. How the Folders are Connected (Project Dependencies)
+## 8. How the Folders are Connected (Backend Project Dependencies)
 
-The architecture is designed to enforce modular boundaries. Dependencies flow strictly downwards:
+The architecture is designed to enforce strict modular boundaries. Dependencies flow strictly downwards:
+
+```
+                             ┌─────────────────────────┐
+                             │    API (Starter App)    │
+                             │    Composition Root     │
+                             └────────────┬────────────┘
+                                          │
+            ┌─────────────────────────────┼─────────────────────────────┐
+            │                             │                             │
+            ▼                             ▼                             ▼
+  ┌───────────────────┐         ┌───────────────────┐         ┌───────────────────┐
+  │ NextEvent.Modules.│         │ NextEvent.Modules.│         │ NextEvent.Modules.│
+  │     Identity      │         │   Organizations   │         │      Events       │
+  └─────────┬─────────┘         └─────────┬─────────┘         └─────────┬─────────┘
+            │                             │                             │
+            └─────────────────────────────┼─────────────────────────────┘
+                                          │
+                                          ▼
+                             ┌─────────────────────────┐
+                             │    NextEvent.Shared     │
+                             │     (Shared Kernel)     │
+                             └─────────────────────────┘
+```
 
 ```mermaid
 graph TD
@@ -178,15 +201,45 @@ graph TD
     AI --> Shared
 ```
 
-### The Rules of the Architecture
-- **`API` (Composition Root)**: References everything. It acts as the glue. It registers the DbContexts, MassTransit, and all module DI services in `Program.cs`. 
-- **`Modules/*` (Bounded Contexts)**: 
-  - Modules **ONLY** reference `Shared`. 
-  - **CRITICAL:** A module is **never** allowed to reference another module. (e.g., `Events` cannot reference `Organizations`). 
-  - Each module encapsulates its own Application logic, Domain models, and Persistence layer.
-- **`Shared` (Shared Kernel)**: 
-  - References nothing else in the application. 
-  - Holds shared constants, shared base classes (`Entity`, `BaseApiController`), and the global `User` identity model so that it can be linked via Foreign Keys in other modules' schemas.
+### The 4 Fundamental Rules of Project Dependencies
+
+1. **Rule 1: Dependencies Flow Strictly Downwards (`API` $\rightarrow$ `Modules` $\rightarrow$ `Shared`)**
+   - Higher-level projects depend on lower-level projects. Lower-level projects never depend on higher-level projects.
+
+2. **Rule 2: `API` (Composition Root) References Everything**
+   - **Dependencies**: `API` $\rightarrow$ `Modules.Identity`, `Modules.Organizations`, `Modules.Events`, `Modules.AI`, `Shared`.
+   - **Role**: `API` is the executable project (`Program.cs`). It acts as the "glue" that wires up Dependency Injection (DI), HTTP controllers, MassTransit, Swagger, and EF Core DbContexts for all modules at application startup.
+
+3. **Rule 3: Modules NEVER Reference Each Other**
+   - **Strict Constraint**: `NextEvent.Modules.Events` is **never** allowed to reference `NextEvent.Modules.Organizations` or `NextEvent.Modules.Identity`.
+   - **Why**: Prevents tight coupling and spaghetti code. If `Events` referenced `Organizations` directly in C#, extracting a module into an independent microservice later would be impossible without rewriting application logic.
+
+4. **Rule 4: `Shared` (Shared Kernel) References Nothing**
+   - **Dependencies**: `Shared` $\rightarrow$ None.
+   - **Role**: Holds common cross-cutting concerns:
+     - Shared Exceptions (`NotFoundException`, `BusinessRuleException`)
+     - Generic API response wrappers (`ApiResponse<T>`)
+     - Shared Constants (`RoleConstants`, `PermissionConstants`)
+     - Global Dapper Type Handlers (`UtcDateTimeHandler`)
+     - Base classes (`BaseApiController`, `ValidationBehavior`)
+     - The global `User` identity model so foreign key navigation properties can be mapped across module schemas.
+
+---
+
+### How Modules Communicate Without Direct Dependencies
+
+Since modules cannot directly reference each other in C#, they interact through two distinct patterns depending on the CQRS side:
+
+1. **Asynchronous Writes & State Changes (RabbitMQ / MassTransit Integration Events)**:
+   - When an action in `Organizations` requires `Events` to react (e.g. an organization is deleted or suspended):
+   - `Organizations` publishes an `OrganizationDeletedIntegrationEvent` to **RabbitMQ** via MassTransit.
+   - `Events` listens to the event queue via an event consumer and updates its internal state asynchronously.
+   - MassTransit **Transactional Outbox** guarantees message delivery even if RabbitMQ experiences temporary downtime.
+
+2. **Synchronous Reads (CQRS Query Side - Dapper Raw SQL)**:
+   - When a UI page needs to fetch an Event along with its Organization name:
+   - The query handler inside `Events` uses **Dapper** to execute raw SQL joining `[evt].[Events]` with `[org].[Organizations]`.
+   - Read-only queries do not mutate domain state, so cross-schema SQL joins provide high performance with zero domain boundary violations.
 
 ---
 
