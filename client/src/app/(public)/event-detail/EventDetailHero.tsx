@@ -1,8 +1,7 @@
 import { Calendar, MapPin, Star } from "lucide-react"
-import { format, parseISO } from "date-fns"
 import { useTranslation } from "react-i18next"
 import type { Event } from "@/types/Event"
-import { formatDate, getEventImage, getCategoryBadgeClass } from "@/app/(public)/widgets/common/helpers"
+import { getEventImage, getCategoryBadgeClass } from "@/app/(public)/widgets/common/helpers"
 
 interface EventDetailHeroProps {
   event: Event

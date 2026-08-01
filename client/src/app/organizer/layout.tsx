@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom"
 import { useState } from "react"
-import { Bell, Search, User, ChevronDown, LogOut, Menu, X, RefreshCw } from "lucide-react"
+import { Bell, Search, Menu, X, RefreshCw } from "lucide-react"
 import { useAuth } from "@/features/auth/context/AuthContext"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { OrganizerSidebar } from "./layouts/OrganizerSidebar"
@@ -15,7 +15,6 @@ import {
   CalendarDays,
   Briefcase,
 } from "lucide-react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
 
 const mobileNavItems = [
   { icon: LayoutDashboard, label: "Dashboard",             to: RoutePaths.OrganizerDashboard },
@@ -27,8 +26,7 @@ const mobileNavItems = [
 ]
 
 export function OrganizerLayout() {
-  const { user, switchProfile, logout } = useAuth()
-  const [profileOpen, setProfileOpen] = useState(false)
+  const { user, switchProfile } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const navigate = useNavigate()
 

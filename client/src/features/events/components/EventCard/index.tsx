@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Heart, Calendar, MapPin } from "lucide-react"
-import { format } from "date-fns"
 import type { Event } from "@/types/Event"
 import { getEventImage, getCategoryBadgeClass } from "@/app/(public)/widgets/common/helpers"
 import { Button } from "@/shared/ui/button"

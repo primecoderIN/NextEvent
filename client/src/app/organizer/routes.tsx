@@ -1,13 +1,11 @@
 import { lazy, Suspense } from "react"
 import type { RouteObject } from "react-router-dom"
 import { RoutePaths } from "@/shared/constants/routePaths"
-import { RequirePermission, RequireRole } from "@/authorization"
-import { Roles } from "@/shared/constants/roles"
+import { RequirePermission } from "@/authorization"
 import { Permissions } from "@/shared/constants/permissions"
 
 const CreateEventPage = lazy(() => import("./create-event/page").then((m) => ({ default: m.CreateEventPage })))
 const UpdateEventPage = lazy(() => import("./update-event/page").then((m) => ({ default: m.UpdateEventPage })))
-const StartOrganizerPage = lazy(() => import("./start/page").then((m) => ({ default: m.StartOrganizerPage })))
 const OrganizerManageRolesPage = lazy(() => import("./roles/page").then((m) => ({ default: m.OrganizerManageRolesPage })))
 const OrganizerOrganizationDetailPage = lazy(() => import("./organizations/detail/page").then((m) => ({ default: m.OrganizerOrganizationDetailPage })))
 const OrganizerDashboardPage = lazy(() => import("./dashboard/page").then((m) => ({ default: m.OrganizerDashboardPage })))
@@ -39,16 +37,6 @@ export const organizerRoutes: RouteObject[] = [
         <RequirePermission permission={Permissions.EventsUpdate} redirectTo={RoutePaths.Login}>
           <UpdateEventPage />
         </RequirePermission>
-      </Suspense>
-    )
-  },
-  {
-    path: RoutePaths.StartOrganizer,
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <RequireRole role={[Roles.Member, Roles.Organizer, Roles.Admin]} redirectTo={RoutePaths.Login}>
-          <StartOrganizerPage />
-        </RequireRole>
       </Suspense>
     )
   },

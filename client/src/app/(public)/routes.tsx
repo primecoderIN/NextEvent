@@ -4,10 +4,14 @@ import type { RouteObject } from "react-router-dom"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { useEvents } from "@/shared/hooks/useEvents"
 
+import { RequireRole } from "@/authorization"
+import { Roles } from "@/shared/constants/roles"
+
 const HomePage = lazy(() => import("./home/page").then((m) => ({ default: m.HomePage })))
 const EventDetailPage = lazy(() => import("./event-detail/page").then((m) => ({ default: m.EventDetailPage })))
 const OrganizationProfilePage = lazy(() => import("./organizations/profile/page").then((m) => ({ default: m.OrganizationProfilePage })))
 const ProfilePage = lazy(() => import("./profile/page").then((m) => ({ default: m.ProfilePage })))
+const StartOrganizerPage = lazy(() => import("@/app/organizer/start/page").then((m) => ({ default: m.StartOrganizerPage })))
 
 // Auth pages (technically public as they are non-gated)
 const LoginPage = lazy(() => import("@/features/auth/index").then((m) => ({ default: m.LoginPage })))
@@ -88,6 +92,16 @@ export const publicRoutes: RouteObject[] = [
     element: (
       <Suspense fallback={<PageLoader />}>
         <RegisterPage />
+      </Suspense>
+    )
+  },
+  {
+    path: RoutePaths.StartOrganizer,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <RequireRole role={[Roles.Member, Roles.Organizer, Roles.Admin]} redirectTo={RoutePaths.Login}>
+          <StartOrganizerPage />
+        </RequireRole>
       </Suspense>
     )
   }
