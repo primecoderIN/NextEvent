@@ -48,8 +48,13 @@ public class AccountController : BaseApiController
         return OkResponse(result.User, "Logged in successfully");
     }
 
+public class RefreshTokenRequestDto
+{
+    public string? RefreshToken { get; set; }
+}
+
     /// <summary>
-    /// Issues a new JWT access token using the refresh token cookie.
+    /// Issues a new JWT access token using the refresh token cookie or request body.
     /// </summary>
     /// <response code="200">Token refreshed successfully.</response>
     /// <response code="401">Refresh token is missing or invalid.</response>
@@ -57,9 +62,9 @@ public class AccountController : BaseApiController
     [HttpPost(ApiRouteConstants.Account.RefreshToken)]
     [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<ApiResponse<LoginResponseDto>>> RefreshToken()
+    public async Task<ActionResult<ApiResponse<LoginResponseDto>>> RefreshToken([FromBody] RefreshTokenRequestDto? body = null)
     {
-        var refreshToken = Request.Cookies["refreshToken"];
+        var refreshToken = Request.Cookies["refreshToken"] ?? body?.RefreshToken;
 
         if (string.IsNullOrEmpty(refreshToken))
             return Unauthorized(ApiResponse.Fail("Refresh token is missing"));
@@ -108,12 +113,14 @@ public class AccountController : BaseApiController
 
     private void SetRefreshTokenCookie(string refreshToken)
     {
+        var isHttps = Request.IsHttps;
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
             Expires  = DateTime.UtcNow.AddDays(7),
-            Secure   = true,
-            SameSite = SameSiteMode.None
+            Secure   = isHttps,
+            SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+            Path     = "/"
         };
 
         Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);

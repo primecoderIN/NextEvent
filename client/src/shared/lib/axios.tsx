@@ -29,8 +29,17 @@ axiosHttpAgent.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+    const requestUrl = originalRequest.url || "";
+    const isAuthEndpoint =
+      requestUrl.includes("/account/refresh-token") ||
+      requestUrl.includes("/account/login") ||
+      requestUrl.includes("/account/register");
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthEndpoint
+    ) {
       originalRequest._retry = true;
       try {
         // refresh-token now returns ApiResponse<UserDTO> — payload is in .data.data
