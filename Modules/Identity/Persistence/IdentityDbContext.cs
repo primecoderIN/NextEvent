@@ -18,15 +18,15 @@ public class IdentityDbContext(DbContextOptions<IdentityDbContext> options)
     {
         base.OnModelCreating(builder);
 
-        // Define module-specific schema
+        // Define module-specific schema ("identity") to isolate ASP.NET Core Identity tables
         builder.HasDefaultSchema("identity");
 
-        // Add MassTransit Outbox configuration
+        // MassTransit Outbox tables for guaranteed asynchronous event delivery across modules
         builder.AddInboxStateEntity();
         builder.AddOutboxMessageEntity();
         builder.AddOutboxStateEntity();
 
-        // Apply all entity configurations in this assembly
+        // Automatically discover and apply all IEntityTypeConfiguration<T> classes in this assembly
         builder.ApplyConfigurationsFromAssembly(typeof(IdentityDbContext).Assembly);
     }
 }

@@ -4,6 +4,10 @@ using Dapper;
 
 namespace NextEvent.Shared.Persistence.DapperTypeHandlers;
 
+/// <summary>
+/// Global Dapper type handler that automatically sets DateTimeKind.Utc on DateTime properties read from SQL Server.
+/// Registered in DatabaseServiceExtensions.
+/// </summary>
 public class UtcDateTimeHandler : SqlMapper.TypeHandler<DateTime>
 {
     public override void SetValue(IDbDataParameter parameter, DateTime value)
@@ -17,6 +21,10 @@ public class UtcDateTimeHandler : SqlMapper.TypeHandler<DateTime>
     }
 }
 
+/// <summary>
+/// Global Dapper type handler for nullable DateTime properties that automatically sets DateTimeKind.Utc.
+/// Registered in DatabaseServiceExtensions.
+/// </summary>
 public class NullableUtcDateTimeHandler : SqlMapper.TypeHandler<DateTime?>
 {
     public override void SetValue(IDbDataParameter parameter, DateTime? value)

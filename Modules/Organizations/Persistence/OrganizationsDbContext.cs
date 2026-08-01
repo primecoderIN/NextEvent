@@ -28,18 +28,22 @@ public class OrganizationsDbContext(DbContextOptions<OrganizationsDbContext> opt
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        // Define module-specific schema ("org") to isolate tables in SQL Server
         builder.HasDefaultSchema("org");
 
-        // Map User to identity schema — EF knows about it for FK modelling
-        // but won't create or migrate the table (it belongs to IdentityDbContext).
+        // Map User entity to "identity.AspNetUsers" for foreign key modeling.
+        // ExcludeFromMigrations() tells EF Core that this DbContext can reference User for FK navigation
+        // properties (e.g. Organization.Owner), but MUST NOT generate a duplicate CREATE TABLE script
+        // in this module's migrations (since identity.AspNetUsers is created and owned by IdentityDbContext).
         builder.Entity<User>().ToTable("AspNetUsers", "identity", t => t.ExcludeFromMigrations());
 
-        // MassTransit Outbox tables for guaranteed message delivery
+        // MassTransit Outbox tables for guaranteed asynchronous event delivery across modules
         builder.AddInboxStateEntity();
         builder.AddOutboxMessageEntity();
         builder.AddOutboxStateEntity();
 
-        // Apply all entity configurations in this assembly
+        // Automatically discover and apply all IEntityTypeConfiguration<T> classes in this assembly
         builder.ApplyConfigurationsFromAssembly(typeof(OrganizationsDbContext).Assembly);
     }
 }

@@ -5,8 +5,15 @@ using NextEvent.Shared.Constants;
 
 namespace NextEvent.Modules.Organizations.Persistence.Seeders;
 
+/// <summary>
+/// Seeder responsible for populating system permissions in the Organizations module.
+/// Executes idempotently during application startup.
+/// </summary>
 public static class OrganizationsDataSeeder
 {
+    /// <summary>
+    /// Seeds fine-grained system permissions into the org.Permissions table if missing or updated.
+    /// </summary>
     public static async Task SeedAsync(OrganizationsDbContext orgContext)
     {
         var existingCodes = await orgContext.Permissions

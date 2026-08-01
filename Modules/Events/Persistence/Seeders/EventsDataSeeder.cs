@@ -6,8 +6,15 @@ using NextEvent.Modules.Identity.Domain;
 
 namespace NextEvent.Modules.Events.Persistence.Seeders;
 
+/// <summary>
+/// Seeder responsible for populating event categories, category suggestions, and initial sample events.
+/// Executes idempotently during application startup.
+/// </summary>
 public static class EventsDataSeeder
 {
+    /// <summary>
+    /// Seeds categories, category suggestions, and sample event records into the evt schema if empty.
+    /// </summary>
     public static async Task SeedAsync(
         EventsDbContext eventsContext,
         UserManager<User> userManager)

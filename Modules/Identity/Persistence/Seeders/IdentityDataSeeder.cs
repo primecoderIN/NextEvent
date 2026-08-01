@@ -4,8 +4,15 @@ using NextEvent.Shared.Constants;
 
 namespace NextEvent.Modules.Identity.Persistence.Seeders;
 
+/// <summary>
+/// Seeder responsible for seeding ASP.NET Core Identity roles and initial admin/organizer/member accounts.
+/// Executes idempotently during application startup.
+/// </summary>
 public static class IdentityDataSeeder
 {
+    /// <summary>
+    /// Seeds default application roles (Admin, Organizer, Member) and default user accounts if not present.
+    /// </summary>
     public static async Task SeedAsync(
         RoleManager<IdentityRole> roleManager,
         UserManager<User> userManager)
