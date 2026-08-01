@@ -4,6 +4,70 @@ A full-stack event discovery and management platform. Browse upcoming events, vi
 
 ---
 
+## Solution & Directory Structure
+
+```text
+NextEvent/
+├── API/                                 # ASP.NET Core Web API Host & Composition Root
+│   ├── Extensions/                      # Startup Service Extensions
+│   │   ├── ApiServiceExtensions.cs      # Core services (CurrentUserService, AuthorizationServices)
+│   │   ├── ApplicationServiceExtensions.cs # Multi-assembly MediatR & FluentValidation scanning
+│   │   ├── DatabaseServiceExtensions.cs # DbContexts (Events, Orgs, Identity), Seeders, Dapper
+│   │   ├── IdentityServiceExtensions.cs # ASP.NET Core Identity, JWT Bearer, ActiveOrganizer Policy
+│   │   ├── MassTransitServiceExtensions.cs # MassTransit Transactional Outbox per DbContext
+│   │   └── SwaggerServiceExtensions.cs  # SwaggerGen + Dynamic XML Comments scanning
+│   ├── Middleware/                      # Global ExceptionMiddleware (standardized envelope)
+│   ├── Services/                        # Web implementation of CurrentUserService
+│   └── Program.cs                       # Web API entry point & middleware pipeline
+│
+├── Modules/                             # Bounded Business Modules (Clean Architecture per module)
+│   ├── Events/                          # Events Module (schema: evt)
+│   │   ├── API/                         # Controllers (EventsController, CategoriesController)
+│   │   ├── Application/                 # CQRS (Events, Categories, Suggestions)
+│   │   ├── Domain/                      # Entities (Event, Category, CategorySuggestion)
+│   │   ├── Persistence/                 # EventsDbContext, Configurations, Migrations
+│   │   └── NextEvent.Modules.Events.csproj
+│   │
+│   ├── Organizations/                   # Organizations Module (schema: org)
+│   │   ├── API/                         # Controllers (OrganizationsController, RolesController, PermissionsController)
+│   │   ├── Application/                 # CQRS (Organizations, Members, Roles, Permissions)
+│   │   ├── Domain/                      # Entities (Organization, Member, Role, Permission)
+│   │   ├── Persistence/                 # OrganizationsDbContext, Seeders, Migrations
+│   │   └── NextEvent.Modules.Organizations.csproj
+│   │
+│   ├── Identity/                        # Identity Module (schema: identity)
+│   │   ├── API/                         # Controllers (AccountController)
+│   │   ├── Application/                 # CQRS (Login, Register, RefreshToken, SwitchProfile)
+│   │   ├── Domain/                      # Entities (User, Role)
+│   │   ├── Persistence/                 # IdentityDbContext, UserConfiguration, Seeders, Migrations
+│   │   └── NextEvent.Modules.Identity.csproj
+│   │
+│   └── AI/                              # AI Module
+│       ├── API/                         # Controllers (AiEventDescriptionController)
+│       ├── Application/                 # AI Event Description Generator use case
+│       └── NextEvent.Modules.AI.csproj
+│
+├── Shared/                              # Cross-Cutting Shared Library (NextEvent.Shared.csproj)
+│   ├── Behaviors/                       # ValidationBehavior pipeline
+│   ├── Common/                          # ApiResponse envelope
+│   ├── Constants/                       # ApiRouteConstants, PermissionConstants, RoleConstants
+│   ├── Controllers/                     # BaseApiController
+│   ├── Exceptions/                      # NotFoundException, BusinessRuleException, UnauthorizedException
+│   ├── Interfaces/                      # ICurrentUserService, IOrganizationAuthorizationService, ISqlConnectionFactory
+│   ├── Pagination/                      # PagedList, PaginationParams
+│   └── Persistence/                     # Dapper UtcDateTimeHandler & SqlConnectionFactory
+│
+└── client/                              # React 19 + TypeScript + Vite 8 SPA
+    ├── src/
+    │   ├── app/                         # App Router, Layouts (Public, Organizer, Admin)
+    │   ├── authorization/               # RequireRole, RequirePermission, RequireProfile guards
+    │   ├── features/                    # Feature slices (Auth, Events, Organizations)
+    │   ├── shared/                      # Shared UI components, Hooks, Axios agent
+    │   └── types/                       # TypeScript models & API envelopes
+```
+
+---
+
 ## Tech Stack
 
 ### Backend — ASP.NET Core Web API
