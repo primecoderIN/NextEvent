@@ -541,3 +541,28 @@ Always separate your database deployment from your code deployment:
 1. **CI/CD Scripts**: Use dotnet ef migrations script --idempotent in your CI/CD pipeline to generate a SQL script, and apply it to the database *before* the new API version starts.
 2. **Migration Bundles**: Compile migrations into an executable bundle (dotnet ef migrations bundle) and run it in the deployment pipeline.
 3. **Init Containers**: In Kubernetes, run a dedicated one-shot migration job before spinning up the actual application pods.
+
+### Reverting Failed Migrations in Production (CI/CD)
+
+When a deployment fails due to a bad migration, reverting the changes requires extreme care to prevent data loss. **Never** blindly run EF Core's `Down()` methods (via `dotnet ef database update <PreviousMigration>`) against production, as they often contain destructive commands like `DROP TABLE` or `DROP COLUMN`.
+
+Here is the professional standard for managing EF Core rollbacks in a CI/CD environment:
+
+1. **The Safest Approach: "Roll Forward" (Fix-Forward)**
+   Instead of rolling the database backwards, create a **new** migration in your codebase that undoes the bad changes (e.g., re-adding a dropped table structure), and push this "fix" migration through your CI/CD pipeline. This preserves the integrity of your `__EFMigrationsHistory` table and keeps code and schema perfectly synchronized.
+
+2. **Pre-Deployment Database Snapshots / Backups**
+   Before your CI/CD pipeline executes an idempotent migration script on the Production database, it should trigger an automated database snapshot or transaction log backup (via AWS RDS, Azure SQL, etc.). If catastrophic data corruption occurs, you do not use EF Core rollback commands. Instead, you restore the database from the snapshot taken immediately prior to the deployment.
+
+3. **Using SQL Rollback Scripts (Manual Intervention)**
+   If you absolutely must manually revert a migration, EF Core can generate a specific rollback SQL script:
+   ```bash
+   dotnet ef migrations script BadMigrationName LastGoodMigrationName -o rollback.sql
+   ```
+   **Warning:** A DBA must manually review `rollback.sql` before execution to ensure no destructive operations wipe out user data.
+
+4. **Expand and Contract Pattern (Zero Downtime)**
+   The best way to handle rollbacks is to **avoid destructive migrations entirely**. Instead of renaming or dropping a column in a single deployment, use the Expand and Contract pattern:
+   - **Phase 1 (Expand):** Add the new column. Deploy. Both old and new columns coexist. (If you must rollback the API code, the database won't break).
+   - **Phase 2 (Migrate Data):** Copy data from the old column to the new column in the background.
+   - **Phase 3 (Contract):** Weeks later, once the new system is verified, deploy a migration to drop the old column.
