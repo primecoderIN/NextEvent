@@ -11,12 +11,9 @@ namespace NextEvent.Modules.Events.Persistence.Contexts;
 /// Owns: Event, Category, CategorySuggestion.
 /// Uses schema "evt" to isolate from other modules.
 /// </summary>
-public class EventsDbContext : DbContext
+public class EventsDbContext(DbContextOptions<EventsDbContext> options)
+    : DbContext(options)
 {
-    public EventsDbContext(DbContextOptions<EventsDbContext> options)
-        : base(options)
-    {
-    }
 
     // ── Events ───────────────────────────────────────────────────────────
     public DbSet<Event> Events { get; set; } = null!;

@@ -10,12 +10,9 @@ namespace NextEvent.Modules.Identity.Persistence;
 /// Owns: ASP.NET Core Identity tables (Users, Roles, UserRoles, etc.)
 /// Uses schema "identity" to isolate from other modules.
 /// </summary>
-public class IdentityDbContext : IdentityDbContext<User>
+public class IdentityDbContext(DbContextOptions<IdentityDbContext> options)
+    : IdentityDbContext<User>(options)
 {
-    public IdentityDbContext(DbContextOptions<IdentityDbContext> options)
-        : base(options)
-    {
-    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

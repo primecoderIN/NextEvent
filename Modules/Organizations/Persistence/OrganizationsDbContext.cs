@@ -13,12 +13,9 @@ namespace NextEvent.Modules.Organizations.Persistence.Contexts;
 /// User entity is mapped read-only to "identity.AspNetUsers" (ExcludeFromMigrations)
 /// so EF can model FK relationships without owning the table.
 /// </summary>
-public class OrganizationsDbContext : DbContext
+public class OrganizationsDbContext(DbContextOptions<OrganizationsDbContext> options)
+    : DbContext(options)
 {
-    public OrganizationsDbContext(DbContextOptions<OrganizationsDbContext> options)
-        : base(options)
-    {
-    }
 
     // ── Organizations ────────────────────────────────────────────────────
     public DbSet<Organization> Organizations { get; set; } = null!;
