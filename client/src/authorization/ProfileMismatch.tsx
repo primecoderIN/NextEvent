@@ -31,7 +31,7 @@ export function ProfileMismatch({ requiredProfiles }: ProfileMismatchProps) {
           <div className="flex flex-col gap-3">
             <Button 
               onClick={() => navigate(RoutePaths.StartOrganizer)}
-              className="w-full gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0"
+              className="w-full gap-2 bg-linear-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0"
             >
               <Plus className="w-4 h-4" />
               {t("becomeOrganizer")}

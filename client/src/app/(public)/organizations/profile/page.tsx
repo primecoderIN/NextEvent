@@ -46,7 +46,7 @@ export function OrganizationProfilePage() {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-primary/10 to-primary/5">
+          <div className="w-full h-full flex items-center justify-center bg-linear-to-r from-primary/10 to-primary/5">
             <Building2 className="w-24 h-24 text-primary/20" />
           </div>
         )}
@@ -114,7 +114,7 @@ export function OrganizationProfilePage() {
                         {event.bannerImageUrl ? (
                           <img src={event.bannerImageUrl} alt={event.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
+                          <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-primary/5 to-primary/10">
                             <CalendarDays className="w-12 h-12 text-primary/20" />
                           </div>
                         )}

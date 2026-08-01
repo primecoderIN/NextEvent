@@ -179,7 +179,7 @@ export function StartOrganizerPage() {
               <Textarea
                 id="description"
                 placeholder={t("aboutOrgPlaceholder")}
-                className="min-h-[120px]"
+                className="min-h-30"
                 {...register("description")}
               />
             </div>

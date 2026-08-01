@@ -142,7 +142,7 @@ export function DesktopSidebar() {
             <item.icon className="h-5 w-5 shrink-0" />
             <span className="flex-1">{t(item.labelKey, { ns: "nav" })}</span>
             {item.badge > 0 && (
-              <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+              <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4.5 text-center">
                 {item.badge}
               </span>
             )}

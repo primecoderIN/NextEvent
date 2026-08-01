@@ -45,7 +45,7 @@ export const Navbar = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container mx-auto flex h-14 max-w-7xl items-center px-4">
           {/* Logo */}
           <div className="flex items-center gap-2 mr-6">
@@ -76,7 +76,7 @@ export const Navbar = () => {
                     <RequireRole role={Roles.Admin}>
                       <>{/* Placeholder for admin if needed, otherwise just empty */}</>
                     </RequireRole>
-                    <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.CreateEvent)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
+                    <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.CreateEvent)} className="gap-2 bg-linear-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
                       <Plus className="h-4 w-4" />
                       {t("createEvent", { ns: "common" })}
                     </Button>
@@ -88,7 +88,7 @@ export const Navbar = () => {
                       Pending Approval
                     </Button>
                   ) : (
-                    <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.StartOrganizer)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
+                    <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.StartOrganizer)} className="gap-2 bg-linear-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
                       <Plus className="h-4 w-4" />
                       Become Organizer
                     </Button>

@@ -32,7 +32,7 @@ export function OrganizationDetailsView({ organization }: OrganizationDetailsVie
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-primary/10 to-primary/5">
+            <div className="w-full h-full flex items-center justify-center bg-linear-to-r from-primary/10 to-primary/5">
               <Building2 className="w-16 h-16 text-primary/20" />
             </div>
           )}
