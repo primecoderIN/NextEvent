@@ -19,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard",             to: RoutePaths.OrganizerDashboard },
-  { icon: Building2,       label: "My Organizations",      to: "/organizer/organizations" },
+  { icon: Building2,       label: "My Organizations",      to: RoutePaths.OrganizerMyOrganization },
   { icon: Calendar,        label: "Events",                to: RoutePaths.OrganizerEvents }, 
   { icon: Users,           label: "Attendees",             to: "/organizer/attendees" },
   { icon: BarChart3,       label: "Analytics",             to: "/organizer/analytics" },

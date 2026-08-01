@@ -14,6 +14,7 @@ export const RoutePaths = {
   EditEvent: "/organizer/events/:id/edit",
   StartOrganizer: "/organizer/start",
   OrganizerManageRoles: "/organizer/organizations/:id/roles",
+  OrganizerMyOrganization: "/organizer/organizations",
   OrganizerOrganizationDetail: "/organizer/organizations/:id",
   OrganizerDashboard: "/organizer/dashboard",
   OrganizerEvents: "/organizer/events",

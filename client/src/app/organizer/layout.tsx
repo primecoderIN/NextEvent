@@ -18,8 +18,8 @@ import {
 
 const mobileNavItems = [
   { icon: LayoutDashboard, label: "Dashboard",             to: RoutePaths.OrganizerDashboard },
-  { icon: Building2,       label: "My Organizations",      to: RoutePaths.OrganizerOrganizationDetail },
-  { icon: Calendar,        label: "Events",                to: RoutePaths.EditEvent }, 
+  { icon: Building2,       label: "My Organizations",      to: RoutePaths.OrganizerMyOrganization },
+  { icon: Calendar,        label: "Events",                to: RoutePaths.OrganizerEvents }, 
   { icon: Users,           label: "Attendees",             to: "#" },
   { icon: BarChart3,       label: "Analytics",             to: "#" },
   { icon: Settings,        label: "Settings",              to: "#" },

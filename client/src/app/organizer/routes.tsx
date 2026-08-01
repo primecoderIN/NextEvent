@@ -8,6 +8,7 @@ const CreateEventPage = lazy(() => import("./create-event/page").then((m) => ({ 
 const UpdateEventPage = lazy(() => import("./update-event/page").then((m) => ({ default: m.UpdateEventPage })))
 const OrganizerManageRolesPage = lazy(() => import("./roles/page").then((m) => ({ default: m.OrganizerManageRolesPage })))
 const OrganizerOrganizationDetailPage = lazy(() => import("./organizations/detail/page").then((m) => ({ default: m.OrganizerOrganizationDetailPage })))
+const OrganizerMyOrganizationPage = lazy(() => import("./organizations/page").then((m) => ({ default: m.OrganizerMyOrganizationPage })))
 const OrganizerDashboardPage = lazy(() => import("./dashboard/page").then((m) => ({ default: m.OrganizerDashboardPage })))
 const OrganizerEventsPage = lazy(() => import("./events/page").then((m) => ({ default: m.OrganizerEventsPage })))
 
@@ -57,6 +58,14 @@ export const organizerRoutes: RouteObject[] = [
         <RequirePermission permission={Permissions.OrganizationView} redirectTo={RoutePaths.Login}>
           <OrganizerOrganizationDetailPage />
         </RequirePermission>
+      </Suspense>
+    )
+  },
+  {
+    path: RoutePaths.OrganizerMyOrganization,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <OrganizerMyOrganizationPage />
       </Suspense>
     )
   },
