@@ -16,6 +16,8 @@ public static class ApplicationServiceExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddValidatorsFromAssemblyContaining<CreateEventCommandValidator>();
+        services.AddValidatorsFromAssemblyContaining<NextEvent.Modules.Organizations.Application.Organizations.Commands.CreateOrganization.CreateOrganizationCommandValidator>();
+        services.AddValidatorsFromAssemblyContaining<NextEvent.Modules.Identity.Application.Authentication.Commands.Register.RegisterCommandValidator>();
         services.AddHttpClient<IGeminiService, GeminiService>();
 
         services.AddMediatR(x =>

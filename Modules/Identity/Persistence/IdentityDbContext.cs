@@ -25,5 +25,8 @@ public class IdentityDbContext(DbContextOptions<IdentityDbContext> options)
         builder.AddInboxStateEntity();
         builder.AddOutboxMessageEntity();
         builder.AddOutboxStateEntity();
+
+        // Apply all entity configurations in this assembly
+        builder.ApplyConfigurationsFromAssembly(typeof(IdentityDbContext).Assembly);
     }
 }

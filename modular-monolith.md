@@ -246,6 +246,8 @@ The database has been segregated into three distinct schemas: `identity`, `org`,
   - Updated MassTransit Outbox table schema definitions and indexes for MassTransit v8 compatibility.
 - **`20260731112656_FixMassTransitDowngrade2`**:
   - Adjusted outbox table column types, index definitions, and sequence constraints.
+- **`20260801074730_RestoreUserConstraints`**:
+  - **Restored User Entity Configuration**: Created `UserConfiguration` and configured property bounds (`DisplayName` max 160, `Bio` max 500, `ImageUrl` max 2048, `RefreshToken` max 256, `ActiveProfile` max 30 default `"Member"`, `RefreshTokenExpiryTime` `datetime2(3)`).
 
 #### 2. Organizations Module (`org` schema)
 - **`20260731111452_InitialOrganizations`**:
