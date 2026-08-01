@@ -14,10 +14,10 @@ export function OrganizerDashboardPage() {
   const navigate = useNavigate()
   const { data: organization, isLoading: isLoadingOrg, isError: isErrorOrg } = useMyOrganization()
   
-  // We only fetch events if we know the organization ID
+  // We only fetch events if we know the organization ID and it is active (not pending verification)
   const { events, loading: isLoadingEvents } = useMyEvents(
     { organizationId: organization?.id },
-    { enabled: !!organization?.id }
+    { enabled: !!organization?.id && organization?.status === "active" }
   )
 
   if (isLoadingOrg) {

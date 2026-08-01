@@ -14,10 +14,10 @@ export function OrganizerEventsPage() {
   const navigate = useNavigate()
   const { data: organization, isLoading: isLoadingOrg } = useMyOrganization()
   
-  // Fetch events belonging to the organizer
+  // Fetch events belonging to the organizer (only if active)
   const { events, loading: isLoadingEvents } = useMyEvents(
     { organizationId: organization?.id },
-    { enabled: !!organization?.id }
+    { enabled: !!organization?.id && organization?.status === "active" }
   )
 
   if (isLoadingOrg) {
@@ -38,6 +38,24 @@ export function OrganizerEventsPage() {
         </p>
         <Button onClick={() => navigate(RoutePaths.StartOrganizer)}>
           Create Organization
+        </Button>
+      </div>
+    )
+  }
+
+  // Organization exists, check status
+  if (organization.status === "pending_verification") {
+    return (
+      <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
+        <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mb-6">
+          <Building2 className="w-10 h-10 text-amber-500" />
+        </div>
+        <h2 className="text-2xl font-bold mb-2">Organization Pending Approval</h2>
+        <p className="text-muted-foreground max-w-md mb-6">
+          Your organization <strong>{organization.name}</strong> is currently under review by our admin team. You'll be able to manage events once it is approved.
+        </p>
+        <Button variant="outline" onClick={() => navigate(`/organizer/organizations/${organization.id}`)}>
+          View Organization Details
         </Button>
       </div>
     )
