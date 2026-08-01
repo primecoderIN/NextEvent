@@ -2,10 +2,10 @@ using NextEvent.Shared.Interfaces;
 using NextEvent.Modules.Organizations.Application.Permissions.DTOs;
 using Dapper;
 using MediatR;
-
 using NextEvent.Shared.Constants;
 
 namespace NextEvent.Modules.Organizations.Application.Permissions.Queries.GetAllPermissions;
+
 public class GetAllPermissionsQueryHandler(
     ISqlConnectionFactory connectionFactory,
     IOrganizationAuthorizationService authorizationService) 
@@ -15,7 +15,6 @@ public class GetAllPermissionsQueryHandler(
         GetAllPermissionsQuery request, 
         CancellationToken cancellationToken)
     {
-        // Require the 'roles.manage' permission to view available permissions
         await authorizationService.AuthorizeAsync(request.OrganizationId, PermissionConstants.RolesManage, cancellationToken);
         using var connection = connectionFactory.CreateConnection();
 
@@ -25,7 +24,7 @@ public class GetAllPermissionsQueryHandler(
                    Name, 
                    Description, 
                    Category
-            FROM Permissions
+            FROM [org].[Permissions]
             ORDER BY Category, Name
             """;
 

@@ -5,6 +5,7 @@ using Dapper;
 using MediatR;
 
 namespace NextEvent.Modules.Organizations.Application.Organizations.Queries.GetMyOrganization;
+
 public class GetMyOrganizationQueryHandler(
     ISqlConnectionFactory connectionFactory,
     ICurrentUserService currentUserService) : IRequestHandler<GetMyOrganizationQuery, OrganizationDetailDto>
@@ -25,8 +26,8 @@ public class GetMyOrganizationQueryHandler(
                 o.Id, o.Name, o.Slug, o.Description, o.LogoUrl, o.CoverImageUrl, o.WebsiteUrl,
                 o.ContactEmail, o.ContactPhone, o.Status, o.OwnerUserId,
                 u.DisplayName AS OwnerDisplayName, o.CreatedAtUtc
-            FROM Organizations o
-            JOIN AspNetUsers u ON o.OwnerUserId = u.Id
+            FROM [org].[Organizations] o
+            JOIN [identity].[AspNetUsers] u ON o.OwnerUserId = u.Id
             WHERE o.Id = @OrgId AND o.IsDeleted = 0";
 
         var org = await connection.QueryFirstOrDefaultAsync<OrganizationDetailDto>(sql, new { OrgId = orgId });

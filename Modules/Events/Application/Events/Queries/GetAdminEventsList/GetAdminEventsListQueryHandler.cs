@@ -5,6 +5,7 @@ using Dapper;
 using MediatR;
 
 namespace NextEvent.Modules.Events.Application.Events.Queries.GetAdminEventsList;
+
 public class GetAdminEventsListQueryHandler(ISqlConnectionFactory connectionFactory) : IRequestHandler<GetAdminEventsListQuery, PagedList<EventResponseDto>>
 {
     public async Task<PagedList<EventResponseDto>> Handle(GetAdminEventsListQuery request, CancellationToken cancellationToken)
@@ -54,7 +55,7 @@ public class GetAdminEventsListQueryHandler(ISqlConnectionFactory connectionFact
         var whereSql = whereClauses.Count > 0 ? "WHERE " + string.Join(" AND ", whereClauses) : "";
 
         var sql = $@"
-            SELECT COUNT(e.Id) FROM Events e {whereSql};
+            SELECT COUNT(e.Id) FROM [evt].[Events] e {whereSql};
 
             SELECT e.Id,
                    e.Title,
@@ -72,9 +73,9 @@ public class GetAdminEventsListQueryHandler(ISqlConnectionFactory connectionFact
                    o.Name AS OrganizationName,
                    o.Slug AS OrganizationSlug,
                    o.LogoUrl AS OrganizationLogoUrl
-            FROM Events e
-            LEFT JOIN Categories c ON e.CategoryId = c.Id
-            LEFT JOIN Organizations o ON e.OrganizationId = o.Id
+            FROM [evt].[Events] e
+            LEFT JOIN [evt].[Categories] c ON e.CategoryId = c.Id
+            LEFT JOIN [org].[Organizations] o ON e.OrganizationId = o.Id
             {whereSql}
             ORDER BY e.Date DESC
             OFFSET @Offset ROWS 

@@ -2,10 +2,10 @@ using NextEvent.Shared.Interfaces;
 using NextEvent.Modules.Organizations.Application.Organizations.DTOs;
 using Dapper;
 using MediatR;
-
 using NextEvent.Shared.Constants;
 
 namespace NextEvent.Modules.Organizations.Application.Organizations.Queries.GetOrganizationRoles;
+
 public class GetOrganizationRolesListQueryHandler(
     ISqlConnectionFactory connectionFactory,
     IOrganizationAuthorizationService authorizationService)
@@ -21,13 +21,13 @@ public class GetOrganizationRolesListQueryHandler(
 
         const string sql = """
             SELECT r.Id, r.Name, r.Description, r.IsSystemRole
-            FROM OrganizationRoles r
+            FROM [org].[OrganizationRoles] r
             WHERE r.OrganizationId = @OrganizationId AND r.IsDeleted = 0;
 
             SELECT rp.OrganizationRoleId, p.Code
-            FROM OrganizationRolePermissions rp
-            INNER JOIN Permissions p ON rp.PermissionId = p.Id
-            INNER JOIN OrganizationRoles r ON rp.OrganizationRoleId = r.Id
+            FROM [org].[OrganizationRolePermissions] rp
+            INNER JOIN [org].[Permissions] p ON rp.PermissionId = p.Id
+            INNER JOIN [org].[OrganizationRoles] r ON rp.OrganizationRoleId = r.Id
             WHERE r.OrganizationId = @OrganizationId AND r.IsDeleted = 0;
             """;
 

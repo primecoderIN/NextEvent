@@ -6,6 +6,7 @@ using MediatR;
 using NextEvent.Shared.Constants;
 
 namespace NextEvent.Modules.Events.Application.Events.Queries.GetMyEventsList;
+
 public class GetMyEventsListQueryHandler(
     ISqlConnectionFactory connectionFactory,
     ICurrentUserService currentUserService) : IRequestHandler<GetMyEventsListQuery, PagedList<EventResponseDto>>
@@ -56,7 +57,6 @@ public class GetMyEventsListQueryHandler(
         var currentOrgId = currentUserService.GetCurrentOrganizationId();
         
         // Organizers can only see events for their active organization.
-        // We eliminate expensive database subqueries by relying on the OrganizationId extracted directly from the JWT.
         if (currentOrgId.HasValue)
         {
             whereClauses.Add("e.OrganizationId = @CurrentOrgId");
@@ -64,14 +64,13 @@ public class GetMyEventsListQueryHandler(
         }
         else
         {
-            // If they somehow hit this endpoint without an active org in their token, return no results.
             whereClauses.Add("1 = 0");
         }
 
         var whereSql = whereClauses.Count > 0 ? "WHERE " + string.Join(" AND ", whereClauses) : "";
 
         var sql = $@"
-            SELECT COUNT(e.Id) FROM Events e {whereSql};
+            SELECT COUNT(e.Id) FROM [evt].[Events] e {whereSql};
 
             SELECT e.Id,
                    e.Title,
@@ -89,9 +88,9 @@ public class GetMyEventsListQueryHandler(
                    o.Name AS OrganizationName,
                    o.Slug AS OrganizationSlug,
                    o.LogoUrl AS OrganizationLogoUrl
-            FROM Events e
-            LEFT JOIN Categories c ON e.CategoryId = c.Id
-            LEFT JOIN Organizations o ON e.OrganizationId = o.Id
+            FROM [evt].[Events] e
+            LEFT JOIN [evt].[Categories] c ON e.CategoryId = c.Id
+            LEFT JOIN [org].[Organizations] o ON e.OrganizationId = o.Id
             {whereSql}
             ORDER BY e.Date DESC
             OFFSET @Offset ROWS 
