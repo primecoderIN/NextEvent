@@ -31,5 +31,8 @@ public class EventsDbContext(DbContextOptions<EventsDbContext> options)
         builder.AddInboxStateEntity();
         builder.AddOutboxMessageEntity();
         builder.AddOutboxStateEntity();
+
+        // Apply all entity configurations in this assembly
+        builder.ApplyConfigurationsFromAssembly(typeof(EventsDbContext).Assembly);
     }
 }

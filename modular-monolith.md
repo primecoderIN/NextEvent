@@ -259,6 +259,9 @@ The database has been segregated into three distinct schemas: `identity`, `org`,
   - **Altered Foreign Keys & Relationships**: Fixed shadow foreign key columns (`OwnerId`, `CreatedById`, `VerifiedById`, `UpdatedById`) on `Organization` and `OrganizationRole` entities. Explicitly bound navigation properties to existing string FK columns (`OwnerUserId`, `CreatedByUserId`, `VerifiedByUserId`, `UpdatedByUserId`) to prevent EF Core from auto-generating duplicate shadow FK columns across schemas.
 - **`20260731115919_FixOrgMemberFKColumns`**:
   - **Altered Columns**: Corrected `OrganizationMember` foreign key column types and nullability constraints.
+- **`20260801072803_RestoreOrgConstraints`**:
+  - **Restored Entity Configurations**: Re-introduced `OrganizationConfiguration`, `OrganizationMemberConfiguration`, `OrganizationRoleConfiguration`, `OrganizationMemberRoleConfiguration`, `OrganizationRolePermissionConfiguration`, and `PermissionConfiguration`.
+  - **Altered Schema Constraints**: Added `varchar` column bounds, unique indexes (`UX_Organizations_Slug`, `UX_Permissions_Code`, `UX_OrganizationRoles_OrganizationId_Name`, `UX_OrganizationMembers_Active`), `RowVersion` optimistic concurrency token, default values, and index optimizations.
 
 #### 3. Events Module (`evt` schema)
 - **`20260731103959_InitialEvents`**:
@@ -270,3 +273,113 @@ The database has been segregated into three distinct schemas: `identity`, `org`,
   - Configured `User` entity in `EventsDbContext` to reference `identity.AspNetUsers` with `ExcludeFromMigrations()`, preventing duplicate `AspNetUsers` table creation in the `evt` schema.
 - **`20260731113922_FixUserTableMapping2`**:
   - Refined table mapping and foreign key constraints for read-only user references in `evt`.
+- **`20260801072840_RestoreEventConstraints`**:
+  - **Restored Entity Configurations**: Re-introduced `EventConfiguration`, `CategoryConfiguration`, and `CategorySuggestionConfiguration`.
+  - **Altered Schema Constraints**: Added max length caps (`Title`, `Description`, `City`, `Venue`, `TimeZoneId`), defaults, unique index on category `Slug`, and `IX_Events_OrganizationId` index.
+
+---
+
+## 12. EF Core Per-Module Migration CLI Reference
+
+Because database contexts are segregated per module (`IdentityDbContext`, `OrganizationsDbContext`, `EventsDbContext`), running `dotnet ef` migration commands requires explicitly specifying the `--project`, `--startup-project`, and `--context` flags.
+
+### A. Adding a New Migration for a Module
+
+- **Organizations Module (`OrganizationsDbContext`):**
+  ```bash
+  dotnet ef migrations add <MigrationName> --project Modules/Organizations/NextEvent.Modules.Organizations.csproj --startup-project API/API.csproj --context OrganizationsDbContext
+  ```
+  *Example:*
+  ```bash
+  dotnet ef migrations add RestoreOrgConstraints --project Modules/Organizations/NextEvent.Modules.Organizations.csproj --startup-project API/API.csproj --context OrganizationsDbContext
+  ```
+
+- **Events Module (`EventsDbContext`):**
+  ```bash
+  dotnet ef migrations add <MigrationName> --project Modules/Events/NextEvent.Modules.Events.csproj --startup-project API/API.csproj --context EventsDbContext
+  ```
+  *Example:*
+  ```bash
+  dotnet ef migrations add RestoreEventConstraints --project Modules/Events/NextEvent.Modules.Events.csproj --startup-project API/API.csproj --context EventsDbContext
+  ```
+
+- **Identity Module (`IdentityDbContext`):**
+  ```bash
+  dotnet ef migrations add <MigrationName> --project Modules/Identity/NextEvent.Modules.Identity.csproj --startup-project API/API.csproj --context IdentityDbContext
+  ```
+
+---
+
+### B. Applying Migrations to Database Manually
+
+- **Organizations Module:**
+  ```bash
+  dotnet ef database update --project Modules/Organizations/NextEvent.Modules.Organizations.csproj --startup-project API/API.csproj --context OrganizationsDbContext
+  ```
+
+- **Events Module:**
+  ```bash
+  dotnet ef database update --project Modules/Events/NextEvent.Modules.Events.csproj --startup-project API/API.csproj --context EventsDbContext
+  ```
+
+- **Identity Module:**
+  ```bash
+  dotnet ef database update --project Modules/Identity/NextEvent.Modules.Identity.csproj --startup-project API/API.csproj --context IdentityDbContext
+  ```
+
+---
+
+### C. Removing the Last Unapplied Migration
+
+- **Organizations Module:**
+  ```bash
+  dotnet ef migrations remove --project Modules/Organizations/NextEvent.Modules.Organizations.csproj --startup-project API/API.csproj --context OrganizationsDbContext
+  ```
+
+- **Events Module:**
+  ```bash
+  dotnet ef migrations remove --project Modules/Events/NextEvent.Modules.Events.csproj --startup-project API/API.csproj --context EventsDbContext
+  ```
+
+- **Identity Module:**
+  ```bash
+  dotnet ef migrations remove --project Modules/Identity/NextEvent.Modules.Identity.csproj --startup-project API/API.csproj --context IdentityDbContext
+  ```
+
+---
+
+### D. Resetting, Migrating, and Seeding the Database from Scratch
+
+When you need to drop the existing database, re-apply all per-module schema migrations, and trigger fresh data seeding from scratch:
+
+#### Step 1: Drop the Database
+Purge all existing database tables and schemas (`identity`, `org`, `evt`):
+```bash
+dotnet ef database drop --project Modules/Identity/NextEvent.Modules.Identity.csproj --startup-project API/API.csproj --context IdentityDbContext --force
+```
+
+#### Step 2: Apply Migrations for All Bounded Contexts
+Apply EF Core migrations across all 3 module contexts:
+```bash
+# 1. Identity Context (identity schema)
+dotnet ef database update --project Modules/Identity/NextEvent.Modules.Identity.csproj --startup-project API/API.csproj --context IdentityDbContext
+
+# 2. Organizations Context (org schema)
+dotnet ef database update --project Modules/Organizations/NextEvent.Modules.Organizations.csproj --startup-project API/API.csproj --context OrganizationsDbContext
+
+# 3. Events Context (evt schema)
+dotnet ef database update --project Modules/Events/NextEvent.Modules.Events.csproj --startup-project API/API.csproj --context EventsDbContext
+```
+
+#### Step 3: Execute Fresh Seeding
+Run the starter project (`API`) to trigger the automatic modular database seeders:
+```bash
+dotnet run --project API/API.csproj
+```
+
+**Seeding Execution Order on Startup:**
+1. **Identity Seeder (`IdentityDataSeeder`)**: Creates ASP.NET Core Identity roles (`Admin`, `Organizer`, `Member`) and default accounts.
+2. **Organizations Seeder (`OrganizationsDataSeeder`)**: Creates default system roles, fine-grained permissions (`organization.read`, `events.create`, etc.), and role-permission mappings.
+3. **Events Seeder (`EventsDataSeeder`)**: Seeds taxonomy categories, category suggestions, and initial sample events.
+
+
