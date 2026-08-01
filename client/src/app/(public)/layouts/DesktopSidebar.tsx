@@ -14,7 +14,8 @@ import {
   User,
   ChevronDown,
   LogOut,
-  RefreshCw
+  RefreshCw,
+  Clock
 } from "lucide-react"
 import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui/popover"
 import { useNavigate, Link } from "react-router-dom"
@@ -25,6 +26,7 @@ import { Roles } from "@/shared/constants/roles"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { RequireRole, useAuthorization } from "@/authorization"
 import { Permissions } from "@/shared/constants/permissions"
+import { useMyOrganization } from "@/shared/hooks/useMyOrganization"
 
 const navItems = [
   { icon: Home, labelKey: "home", href: RoutePaths.Home, active: true },
@@ -47,6 +49,7 @@ export function DesktopSidebar() {
   const { t } = useTranslation(["nav", "common"])
   const { user, switchProfile, logout } = useAuth()
   const { can } = useAuthorization()
+  const { data: myOrg } = useMyOrganization()
   const canCreateEvents = can(Permissions.EventsCreate)
 
   return (
@@ -96,14 +99,24 @@ export function DesktopSidebar() {
             {t("createEvent", { ns: "common" })}
           </button>
         ) : !user?.availableProfiles?.includes("Organizer") ? (
-          <button
-            onClick={() => navigate(RoutePaths.StartOrganizer)}
-            className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
-            style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
-          >
-            <Plus className="h-4 w-4" />
-            Become Organizer
-          </button>
+          myOrg?.status === "pending_verification" ? (
+            <button
+              onClick={() => navigate(`/organizer/organizations/${myOrg.id}`)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-amber-500/30 text-amber-600 bg-amber-500/10 hover:bg-amber-500/20 text-sm font-semibold transition-colors"
+            >
+              <Clock className="h-4 w-4 text-amber-500" />
+              Pending Approval
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate(RoutePaths.StartOrganizer)}
+              className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+              style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
+            >
+              <Plus className="h-4 w-4" />
+              Become Organizer
+            </button>
+          )
         ) : null}
         
         {/* Removed redundant organizer button because popover switcher exists */}

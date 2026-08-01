@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Building2, ArrowRight, CheckCircle2 } from "lucide-react"
+import { Building2, ArrowRight, CheckCircle2, Clock } from "lucide-react"
 
 import { Input } from "@/shared/ui/input"
 import { Textarea } from "@/shared/ui/textarea"
@@ -11,6 +11,7 @@ import { Button } from "@/shared/ui/button"
 import { Label } from "@/shared/ui/label"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { useCreateOrganization } from "@/shared/hooks/useCreateOrganization"
+import { useMyOrganization } from "@/shared/hooks/useMyOrganization"
 import { toast } from "sonner"
 import type { CreateOrganizationDto } from "@/types/Organization"
 
@@ -31,6 +32,7 @@ type FormData = z.infer<typeof organizationSchema>
 
 export function StartOrganizerPage() {
   const [isSuccess, setIsSuccess] = useState(false)
+  const { data: existingOrg, isLoading: isLoadingOrg } = useMyOrganization()
   const { mutateAsync: createOrganization, isPending } = useCreateOrganization()
   
   const {
@@ -74,6 +76,38 @@ export function StartOrganizerPage() {
     }
   }
 
+  if (isLoadingOrg) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    )
+  }
+
+  if (existingOrg && existingOrg.status === "pending_verification") {
+    return (
+      <div className="container max-w-2xl mx-auto py-24 px-4 sm:px-6 text-center">
+        <div className="bg-card border rounded-3xl shadow-sm p-10 flex flex-col items-center">
+          <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mb-6">
+            <Clock className="w-10 h-10 text-amber-500" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight mb-4">Organization Pending Approval</h1>
+          <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
+            Your organization <strong>{existingOrg.name}</strong> is currently under review by our admin team. You'll be able to create events once it is approved.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <Button asChild size="lg" className="w-full sm:w-auto">
+              <Link to={`/organizer/organizations/${existingOrg.id}`}>View Organization Details</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
+              <Link to={RoutePaths.Home}>Return Home</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (isSuccess) {
     return (
       <div className="container max-w-2xl mx-auto py-24 px-4 sm:px-6 text-center">
@@ -88,10 +122,10 @@ export function StartOrganizerPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Button asChild size="lg" className="w-full sm:w-auto">
-              <Link to={RoutePaths.Home}>Return to Home</Link>
+              <Link to={`/organizer/organizations/${existingOrg?.id}`}>View Organization Details</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
-              <Link to={RoutePaths.Profile}>View Profile</Link>
+              <Link to={RoutePaths.Home}>Return to Home</Link>
             </Button>
           </div>
         </div>

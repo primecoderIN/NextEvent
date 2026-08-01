@@ -14,6 +14,7 @@ import {
   User,
   Pencil,
   RefreshCw,
+  Clock,
 } from "lucide-react"
 import { Button } from "@/shared/ui/button"
 import { BottomSheet } from "@/shared/ui/sheet"
@@ -23,6 +24,7 @@ import { RoutePaths } from "@/shared/constants/routePaths"
 import { Roles } from "@/shared/constants/roles"
 import { RequireRole, useAuthorization } from "@/authorization"
 import { Permissions } from "@/shared/constants/permissions"
+import { useMyOrganization } from "@/shared/hooks/useMyOrganization"
 
 const navItems = [
   { icon: Home, labelKey: "home", href: RoutePaths.Home },
@@ -38,6 +40,7 @@ export const Navbar = () => {
   const { t } = useTranslation(["nav", "common"])
   const { user, logout, switchProfile } = useAuth()
   const { can } = useAuthorization()
+  const { data: myOrg } = useMyOrganization()
   const canCreateEvents = can(Permissions.EventsCreate)
 
   return (
@@ -79,10 +82,17 @@ export const Navbar = () => {
                     </Button>
                   </>
                 ) : !user?.availableProfiles?.includes("Organizer") ? (
-                  <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.StartOrganizer)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
-                    <Plus className="h-4 w-4" />
-                    Become Organizer
-                  </Button>
+                  myOrg?.status === "pending_verification" ? (
+                    <Button variant="outline" size="sm" onClick={() => navigate(`/organizer/organizations/${myOrg.id}`)} className="gap-2 border-amber-500/30 text-amber-600 bg-amber-500/10 hover:bg-amber-500/20">
+                      <Clock className="h-4 w-4 text-amber-500" />
+                      Pending Approval
+                    </Button>
+                  ) : (
+                    <Button variant="default" size="sm" onClick={() => navigate(RoutePaths.StartOrganizer)} className="gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 text-white border-0">
+                      <Plus className="h-4 w-4" />
+                      Become Organizer
+                    </Button>
+                  )
                 ) : null}
                 <span className="text-sm font-semibold">{user.displayName}</span>
                 <Button variant="outline" size="sm" onClick={logout}>
