@@ -24,26 +24,19 @@ public class EventsController : BaseApiController
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<PagedList<EventResponseDto>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<PagedList<EventResponseDto>>>> GetEvents(
-        [FromQuery] string? q = null,
-        [FromQuery] Guid? categoryId = null,
-        [FromQuery] string? city = null,
-        [FromQuery] DateTime? dateFrom = null,
-        [FromQuery] DateTime? dateTo = null,
-        [FromQuery] Guid? organizationId = null,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10,
+        [FromQuery] GetEventsQueryDto queryDto,
         CancellationToken cancellationToken = default)
     {
         var query = new GetEventsListQuery 
         { 
-            Q = q,
-            CategoryId = categoryId,
-            City = city,
-            DateFrom = dateFrom,
-            DateTo = dateTo,
-            OrganizationId = organizationId,
-            PageNumber = pageNumber, 
-            PageSize = pageSize 
+            Q = queryDto.Q,
+            CategoryId = queryDto.CategoryId,
+            City = queryDto.City,
+            DateFrom = queryDto.DateFrom,
+            DateTo = queryDto.DateTo,
+            OrganizationId = queryDto.OrganizationId,
+            PageNumber = queryDto.PageNumber, 
+            PageSize = queryDto.PageSize 
         };
         var events = await Mediator.Send(query, cancellationToken);
         return OkResponse(events, "Events retrieved successfully");
@@ -56,26 +49,19 @@ public class EventsController : BaseApiController
     [HttpGet("my")]
     [ProducesResponseType(typeof(ApiResponse<PagedList<EventResponseDto>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<PagedList<EventResponseDto>>>> GetMyEvents(
-        [FromQuery] string? q = null,
-        [FromQuery] Guid? categoryId = null,
-        [FromQuery] string? city = null,
-        [FromQuery] DateTime? dateFrom = null,
-        [FromQuery] DateTime? dateTo = null,
-        [FromQuery] Guid? organizationId = null,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10,
+        [FromQuery] GetEventsQueryDto queryDto,
         CancellationToken cancellationToken = default)
     {
         var query = new Application.Events.Queries.GetMyEventsList.GetMyEventsListQuery 
         { 
-            Q = q,
-            CategoryId = categoryId,
-            City = city,
-            DateFrom = dateFrom,
-            DateTo = dateTo,
-            OrganizationId = organizationId,
-            PageNumber = pageNumber, 
-            PageSize = pageSize 
+            Q = queryDto.Q,
+            CategoryId = queryDto.CategoryId,
+            City = queryDto.City,
+            DateFrom = queryDto.DateFrom,
+            DateTo = queryDto.DateTo,
+            OrganizationId = queryDto.OrganizationId,
+            PageNumber = queryDto.PageNumber, 
+            PageSize = queryDto.PageSize 
         };
         var events = await Mediator.Send(query, cancellationToken);
         return OkResponse(events, "Events retrieved successfully");
@@ -88,26 +74,19 @@ public class EventsController : BaseApiController
     [HttpGet("admin")]
     [ProducesResponseType(typeof(ApiResponse<PagedList<EventResponseDto>>), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse<PagedList<EventResponseDto>>>> GetAdminEvents(
-        [FromQuery] string? q = null,
-        [FromQuery] Guid? categoryId = null,
-        [FromQuery] string? city = null,
-        [FromQuery] DateTime? dateFrom = null,
-        [FromQuery] DateTime? dateTo = null,
-        [FromQuery] Guid? organizationId = null,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10,
+        [FromQuery] GetEventsQueryDto queryDto,
         CancellationToken cancellationToken = default)
     {
         var query = new Application.Events.Queries.GetAdminEventsList.GetAdminEventsListQuery 
         { 
-            Q = q,
-            CategoryId = categoryId,
-            City = city,
-            DateFrom = dateFrom,
-            DateTo = dateTo,
-            OrganizationId = organizationId,
-            PageNumber = pageNumber, 
-            PageSize = pageSize 
+            Q = queryDto.Q,
+            CategoryId = queryDto.CategoryId,
+            City = queryDto.City,
+            DateFrom = queryDto.DateFrom,
+            DateTo = queryDto.DateTo,
+            OrganizationId = queryDto.OrganizationId,
+            PageNumber = queryDto.PageNumber, 
+            PageSize = queryDto.PageSize 
         };
         var events = await Mediator.Send(query, cancellationToken);
         return OkResponse(events, "Events retrieved successfully");
