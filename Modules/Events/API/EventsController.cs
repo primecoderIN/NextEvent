@@ -133,10 +133,15 @@ public class EventsController : BaseApiController
     }
 
     /// <summary>
-    /// Creates a new event and returns the new resource's ID.
+    /// Creates a new event.
+    /// Restricted to organizers holding the ActiveOrganizer authorization policy.
     /// </summary>
-    /// <response code="201">Event created successfully.</response>
-    /// <response code="400">Validation failure.</response>
+    /// <param name="dto">Event creation payload (title, description, category, date, venue, location).</param>
+    /// <param name="cancellationToken">Propagates cancellation notification.</param>
+    /// <response code="201">Event created successfully. Returns the new Event Id.</response>
+    /// <response code="400">Validation failure (e.g. past date or missing fields).</response>
+    /// <response code="401">No valid JWT supplied.</response>
+    /// <response code="403">Caller does not satisfy the ActiveOrganizer policy.</response>
     // SECURITY (BFLA): The 'ActiveOrganizer' policy guarantees that ONLY users with an active organizer profile
     // can reach this endpoint. This prevents basic members or anonymous users from executing mutating actions 
     // (Broken Function Level Authorization).
@@ -144,6 +149,8 @@ public class EventsController : BaseApiController
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<ApiResponse<object>>> CreateNewEvent(
         [FromBody] CreateEventDto dto,
         CancellationToken cancellationToken)
