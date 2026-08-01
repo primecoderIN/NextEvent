@@ -78,26 +78,30 @@ export function OrganizerLayout() {
                 {item.label}
               </NavLink>
             ))}
-            <div className="border-t border-border/40 mt-2 pt-4 px-2">
-              <p className="text-xs text-muted-foreground mb-2">Switch Profile</p>
-              {user?.availableProfiles?.map(profile => (
-                  <button
-                    key={profile}
-                    onClick={() => {
-                      if (user.activeProfile !== profile) {
-                        switchProfile(profile as "Member" | "Organizer");
-                        if (profile === "Organizer") navigate(RoutePaths.OrganizerDashboard);
-                        else navigate(RoutePaths.Home);
-                      }
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm w-full transition-colors ${user.activeProfile === profile ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-muted text-foreground'}`}
-                  >
-                    <RefreshCw className="h-4.5 w-4.5" />
-                    Switch to {profile}
-                  </button>
-                ))}
-            </div>
+            {user?.availableProfiles && user.availableProfiles.length > 1 && (
+              <div className="border-t border-border/40 mt-2 pt-4 px-2">
+                <p className="text-xs text-muted-foreground mb-2">Switch Profile</p>
+                {user.availableProfiles
+                  .filter(profile => profile !== user.activeProfile)
+                  .map(profile => (
+                    <button
+                      key={profile}
+                      onClick={() => {
+                        if (user.activeProfile !== profile) {
+                          switchProfile(profile as "Member" | "Organizer");
+                          if (profile === "Organizer") navigate(RoutePaths.OrganizerDashboard);
+                          else navigate(RoutePaths.Home);
+                        }
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm w-full transition-colors hover:bg-muted text-foreground"
+                    >
+                      <RefreshCw className="h-4.5 w-4.5" />
+                      Switch to {profile}
+                    </button>
+                  ))}
+              </div>
+            )}
           </nav>
         </div>
       )}

@@ -198,25 +198,29 @@ export const Navbar = () => {
           {/* CTA */}
           {user && (
             <div className="mt-2 mb-2 flex flex-col gap-2">
-              {user.availableProfiles?.map(profile => (
-                  <button
-                    key={profile}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm transition-colors ${user.activeProfile === profile ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-foreground'}`}
-                    onClick={async () => { 
-                      setSheetOpen(false);
-                      if (user.activeProfile !== profile) {
-                        await switchProfile(profile as "Member" | "Organizer");
-                        if (profile === "Organizer") navigate(RoutePaths.OrganizerDashboard);
-                        else navigate(RoutePaths.Home);
-                      }
-                    }}
-                  >
-                    <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${user.activeProfile === profile ? 'bg-primary/20' : 'bg-muted'}`}>
-                      <RefreshCw className="h-4 w-4" />
-                    </div>
-                    Switch to {profile}
-                  </button>
-              ))}
+              {user.availableProfiles && user.availableProfiles.length > 1 && (
+                user.availableProfiles
+                  .filter(profile => profile !== user.activeProfile)
+                  .map(profile => (
+                    <button
+                      key={profile}
+                      className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm transition-colors hover:bg-muted text-foreground"
+                      onClick={async () => { 
+                        setSheetOpen(false);
+                        if (user.activeProfile !== profile) {
+                          await switchProfile(profile as "Member" | "Organizer");
+                          if (profile === "Organizer") navigate(RoutePaths.OrganizerDashboard);
+                          else navigate(RoutePaths.Home);
+                        }
+                      }}
+                    >
+                      <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-muted">
+                        <RefreshCw className="h-4 w-4" />
+                      </div>
+                      Switch to {profile}
+                    </button>
+                  ))
+              )}
               {canCreateEvents ? (
                 <button
                   className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-80"

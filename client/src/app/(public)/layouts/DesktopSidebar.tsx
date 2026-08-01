@@ -161,22 +161,26 @@ export function DesktopSidebar() {
                   <p className="text-sm font-medium">{user.displayName}</p>
                   <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </div>
-                {user.availableProfiles?.map((profile: string) => (
-                  <button
-                    key={profile}
-                    onClick={async () => {
-                      if (user.activeProfile !== profile) {
-                        await switchProfile(profile as "Member" | "Organizer");
-                        if (profile === "Organizer") navigate(RoutePaths.OrganizerDashboard);
-                        else navigate(RoutePaths.Home);
-                      }
-                    }}
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors ${user.activeProfile === profile ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-muted text-foreground'}`}
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                    Switch to {profile}
-                  </button>
-                ))}
+                {user.availableProfiles && user.availableProfiles.length > 1 && (
+                  user.availableProfiles
+                    .filter((profile: string) => profile !== user.activeProfile)
+                    .map((profile: string) => (
+                      <button
+                        key={profile}
+                        onClick={async () => {
+                          if (user.activeProfile !== profile) {
+                            await switchProfile(profile as "Member" | "Organizer");
+                            if (profile === "Organizer") navigate(RoutePaths.OrganizerDashboard);
+                            else navigate(RoutePaths.Home);
+                          }
+                        }}
+                        className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm hover:bg-muted text-foreground transition-colors"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                        Switch to {profile}
+                      </button>
+                    ))
+                )}
                 <button
                   onClick={() => logout()}
                   className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-red-500 hover:bg-red-500/10 transition-colors mt-1 border-t border-border/40 pt-2"
