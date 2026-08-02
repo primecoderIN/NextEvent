@@ -37,11 +37,16 @@ public class TokenService(IConfiguration config, IDateTimeProvider dateTimeProvi
 
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
+        var issuer = config["Jwt:Issuer"] ?? "NextEvent.API";
+        var audience = config["Jwt:Audience"] ?? "NextEvent.Client";
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
             Expires = dateTimeProvider.UtcNow.AddMinutes(10), // Short lived access token
-            SigningCredentials = creds
+            SigningCredentials = creds,
+            Issuer = issuer,
+            Audience = audience
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

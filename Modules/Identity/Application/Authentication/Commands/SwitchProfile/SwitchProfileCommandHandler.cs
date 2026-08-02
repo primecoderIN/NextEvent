@@ -12,7 +12,8 @@ public class SwitchProfileCommandHandler(
     UserManager<User> userManager, 
     ITokenService tokenService, 
     IOrganizationMemberService memberService,
-    ICurrentUserService currentUserService) 
+    ICurrentUserService currentUserService,
+    IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<SwitchProfileCommand, AuthResult<LoginResponseDto>>
 {
     public async Task<AuthResult<LoginResponseDto>> Handle(SwitchProfileCommand request, CancellationToken cancellationToken)
@@ -48,8 +49,8 @@ public class SwitchProfileCommandHandler(
         
         // We also want to refresh the token since the frontend relies on receiving a new token & user state when logging in/refreshing
         var newRefreshToken = tokenService.GenerateRefreshToken();
-        user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        user.RefreshToken = tokenService.HashRefreshToken(newRefreshToken);
+        user.RefreshTokenExpiryTime = dateTimeProvider.UtcNow.AddDays(7);
 
         await userManager.UpdateAsync(user);
 

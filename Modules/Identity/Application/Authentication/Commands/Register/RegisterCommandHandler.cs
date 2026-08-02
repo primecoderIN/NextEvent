@@ -7,9 +7,10 @@ using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NextEvent.Shared.Interfaces;
 
 namespace NextEvent.Modules.Identity.Application.Authentication.Commands.Register;
-public class RegisterCommandHandler(UserManager<User> userManager, ITokenService tokenService) : IRequestHandler<RegisterCommand, AuthResult<RegisterResponseDto>>
+public class RegisterCommandHandler(UserManager<User> userManager, ITokenService tokenService, IDateTimeProvider dateTimeProvider) : IRequestHandler<RegisterCommand, AuthResult<RegisterResponseDto>>
 {
     public async Task<AuthResult<RegisterResponseDto>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
@@ -47,8 +48,8 @@ public class RegisterCommandHandler(UserManager<User> userManager, ITokenService
         await userManager.AddToRoleAsync(user, RoleConstants.Member);
 
         var refreshToken = tokenService.GenerateRefreshToken();
-        user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        user.RefreshToken = tokenService.HashRefreshToken(refreshToken);
+        user.RefreshTokenExpiryTime = dateTimeProvider.UtcNow.AddDays(7);
         await userManager.UpdateAsync(user);
 
         var roles = await userManager.GetRolesAsync(user);
