@@ -28,8 +28,8 @@ public static class ApiServiceExtensions
         services.AddControllers()
             .AddJsonOptions(options =>
             {
-                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase; //Use camel case for JSON property names in response
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true; //Accept any case of property names in request body
 
             });
 

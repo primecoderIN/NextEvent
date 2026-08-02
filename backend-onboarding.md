@@ -127,6 +127,7 @@ public class UpdateEventCommandValidator : AbstractValidator<UpdateEventCommand>
     }
 }
 ```
+> **Note on Architecture:** MediatR and FluentValidation are completely separate libraries created by different teams. MediatR knows nothing about your validators! We bridge this gap in `ApplicationServiceExtensions.cs` by registering a MediatR "Pipeline Behavior" (`ValidationBehavior`). This middleware tells MediatR: *"Before executing the handler, check the DI container for any FluentValidation rules that match this command, and run them first."*
 
 ### Step 3: The Handler (The Business Logic)
 This is where the actual work happens. MediatR routes the command here.

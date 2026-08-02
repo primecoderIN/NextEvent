@@ -25,13 +25,18 @@ public static class DatabaseServiceExtensions
         {
             options.UseSqlServer(connectionString, sqlOptions =>
             {
+                // Instructs EF Core to look for database migration files within the specific module's assembly, keeping modules isolated.
                 sqlOptions.MigrationsAssembly(migrationsAssembly);
+
+                // Connection Resiliency: Automatically intercepts transient network blips or DB failovers and retries the query up to 5 times instead of crashing.
                 sqlOptions.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
+                
+                // By default, if a SQL query takes longer than 30 seconds to run, EF Core will cancel it and throw a Timeout Exception.
                 sqlOptions.CommandTimeout(60);
             });
         }
 
-        // We configure all three DbContexts.
+        // We configure all three DbContexts and tell ef core to look for migration file in provided folder.
         services.AddDbContext<IdentityDbContext>(options => ConfigureSqlOptions(options, "NextEvent.Modules.Identity"));
         services.AddDbContext<OrganizationsDbContext>(options => ConfigureSqlOptions(options, "NextEvent.Modules.Organizations"));
         services.AddDbContext<EventsDbContext>(options => ConfigureSqlOptions(options, "NextEvent.Modules.Events"));
