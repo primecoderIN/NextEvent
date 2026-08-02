@@ -21,7 +21,7 @@ public interface ICurrentUserService
     /// Gets the unique identifier of the user's active organization from their token.
     /// Returns null if the user does not have an active organization claim.
     /// </summary>
-    Guid? GetCurrentOrganizationId();
+    Guid? GetCurrentUserOrganizationId();
 
     /// <summary>
     /// Checks if the current authenticated user has the specified role.

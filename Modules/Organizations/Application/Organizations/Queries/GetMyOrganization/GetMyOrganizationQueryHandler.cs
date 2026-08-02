@@ -16,7 +16,7 @@ public class GetMyOrganizationQueryHandler(
         if (string.IsNullOrEmpty(userId))
             throw new UnauthorizedException("User is not authenticated");
 
-        var orgId = currentUserService.GetCurrentOrganizationId();
+        var orgId = currentUserService.GetCurrentUserOrganizationId();
         if (orgId == null)
             throw new NotFoundException("Organization", "My");
 

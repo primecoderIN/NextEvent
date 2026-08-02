@@ -15,7 +15,7 @@ public class GetMyEventsListQueryHandler(
     {
         using var connection = connectionFactory.CreateConnection();
         
-        var currentOrgId = currentUserService.GetCurrentOrganizationId();
+        var currentOrgId = currentUserService.GetCurrentUserOrganizationId();
         
         var builder = new EventQueryBuilder(request.PageNumber, request.PageSize)
             .WithSearch(request.Q)
