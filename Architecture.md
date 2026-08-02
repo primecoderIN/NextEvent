@@ -49,6 +49,8 @@ Current runtime composition happens in `API/Program.cs`:
 - `AddApplicationServices()`
 - `AddSwaggerServices()`
 - `AddIdentityServices(configuration)`
+- `AddMassTransitServices(configuration)`
+- `AddRedisServices(configuration)` ← permission cache (Redis)
 - `UseCors("CorsPolicy")`
 - `UseMiddleware<ExceptionMiddleware>()`
 - `UseAuthentication()`
@@ -2213,3 +2215,119 @@ dotnet ef migrations remove --startup-project API --project Persistence
 ```
 
 > The `--project Persistence` flag is shown for explicitness and is safe to omit only when `MigrationsAssembly` is configured as above.
+
+---
+
+## 11. Caching Architecture — Redis Permission Cache
+
+### 11.1 Overview
+
+NextEvent uses **Redis** as a distributed cache for organization-level permission resolution. This was introduced to fix a hot-path performance issue (PERF-01) where `OrganizationAuthorizationService.HasPermissionAsync` executed a 4-level EF Core join on every permission-guarded request.
+
+**Infrastructure**: Redis 7 Alpine runs as a Docker container, pre-configured in `docker-compose.yml`.
+
+```bash
+docker-compose up -d redis
+docker exec nextevent-redis redis-cli PING  # → PONG
+```
+
+Configuration key: `Redis:ConnectionString` (default: `localhost:6379`)
+
+---
+
+### 11.2 Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Command Handler (e.g. CreateEventCommandHandler)               │
+│                 │                                               │
+│                 ▼                                               │
+│  IOrganizationAuthorizationService.AuthorizeAsync()             │
+│                 │                                               │
+│                 ▼                                               │
+│  OrganizationAuthorizationService.HasPermissionAsync()          │
+│        │                                                        │
+│  ┌─────┴──────┐                                                 │
+│  │ Redis HIT  │   Redis MISS                                    │
+│  │  (< 1ms)   │        │                                        │
+│  │            │        ▼                                        │
+│  │  return    │  EF Core 4-level JOIN (DB round-trip)           │
+│  │  result    │        │                                        │
+│  │            │  SetPermissionsAsync → Redis (TTL 5 min)        │
+│  └────────────┘        │                                        │
+│                        ▼                                        │
+│                    return result                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 11.3 Cache Key Schema
+
+| Key Pattern | Type | Value | TTL |
+|---|---|---|---|
+| `NextEvent:perm:{userId}:{orgId}` | String | JSON array of permission codes | 5 min |
+| `NextEvent:perm:org:{orgId}:keys` | Set | All active perm keys for an org | 6 min |
+
+The `NextEvent:` prefix is the `InstanceName` configured in `API/Extensions/RedisServiceExtensions.cs`.
+
+---
+
+### 11.4 Invalidation Strategy
+
+Two invalidation mechanisms work in tandem:
+
+| Mechanism | Trigger | Scope |
+|---|---|---|
+| **TTL expiry** (primary) | Automatic after 5 minutes | Per entry |
+| **Explicit eviction** (secondary) | `UpdateOrganizationRoleCommandHandler` after `SaveChangesAsync` | Entire org (all member entries) |
+
+Explicit eviction uses the org tracking Set (`perm:org:{orgId}:keys`) to bulk-delete all member entries in a single Redis pipeline — avoiding a costly `KEYS` scan.
+
+---
+
+### 11.5 Resilience
+
+`RedisPermissionCacheService` wraps every Redis operation in a `try/catch`. On failure:
+- **Read failure** → returns `null` (cache miss) → DB path taken → request succeeds
+- **Write failure** → logged as warning → next request re-populates the cache
+- **Invalidation failure** → logged as warning → TTL expiry handles cleanup within 5 minutes
+
+The application is **fully operational** even when Redis is unavailable.
+
+---
+
+### 11.6 DI Registration
+
+```csharp
+// API/Extensions/RedisServiceExtensions.cs
+services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect(connectionString));  // Singleton: thread-safe, designed to be shared
+
+services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = connectionString;
+    options.InstanceName  = "NextEvent:";
+});
+
+services.AddScoped<IPermissionCacheService, RedisPermissionCacheService>();
+```
+
+**Lifetime rationale:**
+- `IConnectionMultiplexer` → **Singleton** (StackExchange.Redis is explicitly designed for long-lived shared instances)
+- `IDistributedCache` → Managed by framework (effectively singleton)
+- `IPermissionCacheService` → **Scoped** (because `ICurrentUserService`, which it transitively depends on, is Scoped)
+
+---
+
+### 11.7 Key Files
+
+| File | Role |
+|---|---|
+| `Shared/Interfaces/IPermissionCacheService.cs` | Abstraction — decouples modules from Redis |
+| `Modules/Organizations/Application/Organizations/Services/RedisPermissionCacheService.cs` | Redis implementation |
+| `Modules/Organizations/Application/Organizations/Services/OrganizationAuthorizationService.cs` | Consumes cache; implements cache-first pattern |
+| `Modules/Organizations/Application/Organizations/Commands/UpdateOrganizationRole/UpdateOrganizationRoleCommandHandler.cs` | Calls `InvalidateOrganizationAsync` post-save |
+| `API/Extensions/RedisServiceExtensions.cs` | DI wiring |
+| `docker-compose.yml` | Redis container definition |
+| `API/appsettings.Development.json` | `Redis:ConnectionString` config |

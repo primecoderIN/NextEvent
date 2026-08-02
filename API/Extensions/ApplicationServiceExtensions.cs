@@ -19,6 +19,8 @@ public static class ApplicationServiceExtensions
         services.AddValidatorsFromAssemblyContaining<NextEvent.Modules.Organizations.Application.Organizations.Commands.CreateOrganization.CreateOrganizationCommandValidator>();
         services.AddValidatorsFromAssemblyContaining<NextEvent.Modules.Identity.Application.Authentication.Commands.Register.RegisterCommandValidator>();
         services.AddHttpClient<IGeminiService, GeminiService>();
+        
+        services.AddSingleton<NextEvent.Shared.Interfaces.IDateTimeProvider, NextEvent.Shared.Providers.SystemDateTimeProvider>();
 
         services.AddMediatR(x =>
         {

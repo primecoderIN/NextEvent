@@ -45,6 +45,9 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             .IsRequired()
             .HasColumnType("datetime2(3)");
 
+        builder.HasIndex(e => e.Date)
+            .HasDatabaseName("IX_Events_Date");
+
         builder.Property(e => e.TimeZoneId)
             .IsRequired()
             .HasMaxLength(50)

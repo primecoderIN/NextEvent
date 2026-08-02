@@ -10,7 +10,8 @@ namespace NextEvent.Modules.Organizations.Application.Organizations.Commands.Upd
 public class UpdateOrganizationRoleCommandHandler(
     OrganizationsDbContext context,
     ICurrentUserService currentUserService,
-    IOrganizationAuthorizationService authorizationService)
+    IOrganizationAuthorizationService authorizationService,
+    IPermissionCacheService permissionCache)
     : IRequestHandler<UpdateOrganizationRoleCommand>
 {
     public async Task Handle(
@@ -112,5 +113,11 @@ public class UpdateOrganizationRoleCommandHandler(
         role.UpdatedByUserId = userId;
 
         await context.SaveChangesAsync(cancellationToken);
+
+        // ── Invalidate Redis permission cache for all members of this org ────────
+        // Permission codes changed — every cached entry for this org is now stale.
+        // TTL would eventually evict them, but explicit invalidation ensures zero
+        // stale reads after a role update.
+        await permissionCache.InvalidateOrganizationAsync(request.OrganizationId, cancellationToken);
     }
 }

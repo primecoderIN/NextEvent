@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using NextEvent.Shared.Interfaces;
 
 namespace NextEvent.Modules.Identity.Application.Authentication.Commands.Login;
-public class LoginCommandHandler(UserManager<User> userManager, ITokenService tokenService, IOrganizationMemberService memberService) 
+public class LoginCommandHandler(UserManager<User> userManager, ITokenService tokenService, IOrganizationMemberService memberService, IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<LoginCommand, AuthResult<LoginResponseDto>>
 {
     public async Task<AuthResult<LoginResponseDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -21,8 +21,8 @@ public class LoginCommandHandler(UserManager<User> userManager, ITokenService to
         }
 
         var refreshToken = tokenService.GenerateRefreshToken();
-        user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        user.RefreshToken = tokenService.HashRefreshToken(refreshToken);
+        user.RefreshTokenExpiryTime = dateTimeProvider.UtcNow.AddDays(7);
         
         // Heal legacy accounts (seeded before ActiveProfile existed) where DB contains NULL or empty string
         if (string.IsNullOrEmpty(user.ActiveProfile))

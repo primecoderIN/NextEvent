@@ -20,9 +20,12 @@ This architecture gives you the operational simplicity of deploying a single app
 ## 2. How to Run the Application
 
 ### Prerequisites
-- **RabbitMQ**: The application uses MassTransit with RabbitMQ for cross-module event publishing (Transactional Outbox). Ensure you have RabbitMQ running locally. You can start it via Docker:
+- **RabbitMQ**: The application uses MassTransit with RabbitMQ for cross-module event publishing (Transactional Outbox). Ensure you have RabbitMQ running locally.
+- **Redis**: The application uses Redis for permission caching (`IPermissionCacheService`). Ensure Redis is running locally.
+
+Both infrastructure services are pre-configured in `docker-compose.yml`. Start them with:
   ```bash
-  docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+  docker-compose up -d
   ```
 
 ### Starter Project
@@ -566,3 +569,145 @@ Here is the professional standard for managing EF Core rollbacks in a CI/CD envi
    - **Phase 1 (Expand):** Add the new column. Deploy. Both old and new columns coexist. (If you must rollback the API code, the database won't break).
    - **Phase 2 (Migrate Data):** Copy data from the old column to the new column in the background.
    - **Phase 3 (Contract):** Weeks later, once the new system is verified, deploy a migration to drop the old column.
+
+
+---
+
+## 17. Redis Distributed Permission Cache
+
+### Why Redis?
+
+The `OrganizationAuthorizationService.HasPermissionAsync` method previously executed a **4-level EF Core join** on every mutating request that requires a permission check (e.g. `CreateEvent`, `InviteOrganizationMember`, `UpdateOrganizationRole`):
+
+```
+OrganizationMembers → MemberRoles → OrganizationRoles → RolePermissions → Permissions
+```
+
+This is now **cache-first**: the DB join only runs on a cache miss, and the resolved permission set is stored in Redis for **5 minutes**.
+
+### Cache Key Design
+
+| Key | Value | TTL |
+|---|---|---|
+| `NextEvent:perm:{userId}:{organizationId}` | JSON array of permission codes, e.g. `["events.create","events.update"]` | 5 minutes |
+| `NextEvent:perm:org:{organizationId}:keys` | Redis Set of all active perm keys for that org (used for bulk invalidation) | 6 minutes |
+
+The `NextEvent:` prefix is the `InstanceName` set in `RedisServiceExtensions`.
+
+### Request Flow
+
+```
+Request → HasPermissionAsync(orgId, "events.create")
+              │
+    ┌─────────┴──────────┐
+    │ Cache HIT (< 1ms)  │ Cache MISS (first call / TTL expired)
+    │                    │
+    ▼                    ▼
+ contains check    EF 4-level JOIN query   ← only runs once per 5 min
+                         │
+                   SetPermissionsAsync (TTL 5 min)
+                         │
+                      return result
+```
+
+### Cache Invalidation
+
+**TTL-based (primary)**: Every entry expires automatically after 5 minutes.
+
+**Explicit (on role mutation)**: `UpdateOrganizationRoleCommandHandler` calls `permissionCache.InvalidateOrganizationAsync(organizationId)` immediately after saving role changes. This batch-deletes all `perm:{userId}:{orgId}` keys for every member of that org via the tracking Set, ensuring zero stale reads after a role update.
+
+### Resilience
+
+Both `GetPermissionsAsync` and `SetPermissionsAsync` catch all exceptions and silently fall back to the DB. If Redis goes down, the application continues working — just without caching.
+
+```csharp
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Redis GET failed. Falling back to DB.");
+    return null; // cache miss path
+}
+```
+
+### Key Files
+
+| File | Purpose |
+|---|---|
+| `Shared/Interfaces/IPermissionCacheService.cs` | Abstraction — `Get`, `Set`, `InvalidateOrganization` |
+| `Modules/Organizations/.../RedisPermissionCacheService.cs` | Redis implementation using `IDistributedCache` + `IConnectionMultiplexer` |
+| `API/Extensions/RedisServiceExtensions.cs` | DI registration: Redis, `IDistributedCache`, `IPermissionCacheService` |
+| `Modules/Organizations/.../OrganizationAuthorizationService.cs` | Cache-first `HasPermissionAsync` |
+| `Modules/Organizations/.../UpdateOrganizationRoleCommandHandler.cs` | Invalidates cache after role update |
+
+### Docker Setup
+
+Redis is pre-configured in `docker-compose.yml`:
+
+```yaml
+redis:
+  image: redis:7-alpine
+  container_name: nextevent-redis
+  ports:
+    - "6379:6379"
+  volumes:
+    - redis_data:/data
+  command: redis-server --appendonly yes
+```
+
+**Start Redis:**
+```bash
+docker-compose up -d redis
+```
+
+**Verify:**
+```bash
+docker exec nextevent-redis redis-cli PING
+# → PONG
+
+# Inspect cached keys after an API call:
+docker exec nextevent-redis redis-cli KEYS "NextEvent:perm:*"
+```
+
+### Testing Without Redis
+
+In test projects, swap Redis for in-memory (no Docker required):
+
+```csharp
+services.AddDistributedMemoryCache();  // IDistributedCache in-memory
+services.AddSingleton<IConnectionMultiplexer>(
+    Substitute.For<IConnectionMultiplexer>());
+services.AddScoped<IPermissionCacheService, RedisPermissionCacheService>();
+
+// Or mock entirely:
+var cache = Substitute.For<IPermissionCacheService>();
+cache.GetPermissionsAsync(default!, default).ReturnsForAnyArgs((IReadOnlySet<string>?)null);
+```
+
+---
+
+## 18. Recent Codebase Audit Improvements
+
+To improve the robustness, security, performance, and domain integrity of the NextEvent application, several critical architectural refinements were implemented following a comprehensive codebase audit:
+
+### A. Reliability and Startup Fail-Fast (BP-01)
+Instead of swallowing Entity Framework Core migration exceptions silently (which leaves the application running against a potentially mismatched database schema), the `Program.cs` now properly catches migration failures, logs a critical error, and **re-throws**. This ensures the application crashes immediately ("fails fast") in orchestration environments (Kubernetes/Docker), allowing the deployment pipeline to detect the failure and trigger a rollback.
+
+### B. Security Hardening (SEC-04, SEC-06)
+- **Rate Limiting:** Built-in .NET 8 Rate Limiting is now active on all critical authentication endpoints (`/login`, `/register`, `/refresh-token`). It uses a fixed-window policy (5 requests per minute, partitioned by Client IP) to prevent brute-force and credential stuffing attacks.
+- **Refresh Token Hashing:** Raw refresh tokens are no longer stored in plain text in the `AspNetUsers` table. The `TokenService` computes a **SHA-256 hash** of the refresh token before database storage. When a user submits a raw token for renewal, the application hashes it and looks up the hashed value. This protects all active user sessions if the database is ever compromised.
+
+### C. Performance Optimization (PERF-04)
+A dedicated database index (`IX_Events_Date`) was added to the `Events` table via EF Core Migrations. This eliminates full-table scans for chronological queries (e.g., retrieving upcoming events), significantly reducing CPU and memory overhead on the database engine.
+
+### D. Testability and Determinism (REUSE-05)
+All usages of `DateTime.UtcNow` have been replaced with the injected `IDateTimeProvider` (implemented by `SystemDateTimeProvider` in the Shared kernel). This architectural change allows unit tests to easily mock the current time, making time-sensitive assertions (like token expiration or event date validation) 100% deterministic.
+
+### E. Rich Domain Models (BP-04)
+The `Organization` entity was refactored away from an anemic domain model. 
+- All property setters are now `private set`.
+- State mutations are exclusively handled through intention-revealing domain methods (`Verify()`, `Suspend()`, `UpdateDetails()`) and rich constructors.
+- This ensures that domain invariants (e.g., verification timestamps being set when a status changes) are enforced centrally within the entity itself, preventing invalid state from being written by higher-level command handlers.
+
+### F. Strict Module Boundary Enforcement (MODULE)
+A boundary violation was fixed in the Organizations module. Previously, `InviteOrganizationMemberCommandHandler` directly injected the Identity module's `UserManager<User>` to look up an invited user's ID by their email. This coupled the Organizations write-side logic directly to the Identity write-side abstraction.
+- **The Fix:** The `UserManager` dependency was removed. Instead, the handler uses **Dapper** with the DbContext's connection to execute a lightweight cross-schema read query (`SELECT Id FROM [identity].[AspNetUsers] WHERE NormalizedEmail = @Email`).
+- This perfectly aligns with our CQRS rules: Cross-schema queries are allowed for reads, but modules must never inject each other's write-side abstractions (repositories/managers).

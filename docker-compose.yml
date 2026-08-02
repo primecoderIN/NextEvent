@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   rabbitmq:
     image: rabbitmq:3-management
@@ -13,3 +11,19 @@ services:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
     restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: nextevent-redis
+    ports:
+      # Redis default port — used by the API via IDistributedCache / StackExchange.Redis
+      - "6379:6379"
+    # Persist data across container restarts using a named volume
+    volumes:
+      - redis_data:/data
+    # Enable AOF persistence so cache survives a restart (optional but recommended)
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+volumes:
+  redis_data:

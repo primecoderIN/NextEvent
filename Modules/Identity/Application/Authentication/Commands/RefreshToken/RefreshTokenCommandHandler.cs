@@ -9,21 +9,22 @@ using Microsoft.EntityFrameworkCore;
 using NextEvent.Shared.Interfaces;
 
 namespace NextEvent.Modules.Identity.Application.Authentication.Commands.RefreshToken;
-public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenService tokenService, IOrganizationMemberService memberService) 
+public class RefreshTokenCommandHandler(UserManager<User> userManager, ITokenService tokenService, IOrganizationMemberService memberService, IDateTimeProvider dateTimeProvider) 
     : IRequestHandler<RefreshTokenCommand, AuthResult<LoginResponseDto>>
 {
     public async Task<AuthResult<LoginResponseDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        var user = await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == request.Token, cancellationToken);
+        var hashedRequestToken = tokenService.HashRefreshToken(request.Token);
+        var user = await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == hashedRequestToken, cancellationToken);
 
-        if (user == null || user.RefreshTokenExpiryTime == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+        if (user == null || user.RefreshTokenExpiryTime == null || user.RefreshTokenExpiryTime <= dateTimeProvider.UtcNow)
         {
             throw new UnauthorizedException("Invalid refresh token");
         }
 
         var newRefreshToken = tokenService.GenerateRefreshToken();
-        user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        user.RefreshToken = tokenService.HashRefreshToken(newRefreshToken);
+        user.RefreshTokenExpiryTime = dateTimeProvider.UtcNow.AddDays(7);
         
         // Heal legacy accounts (seeded before ActiveProfile existed) where DB contains NULL or empty string
         if (string.IsNullOrEmpty(user.ActiveProfile))

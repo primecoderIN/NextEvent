@@ -207,5 +207,83 @@ public class OrganizationDeletedConsumer(EventsDbContext context)
 4. **Constructor Injection is mandatory.** Do not use the service locator anti-pattern (`HttpContext.RequestServices`). Use C# 12 Primary Constructors for cleaner code.
 5. **Dapper for Reads, EF Core for Writes.**
 6. **Always use CancellationToken.** Pass `ct` or `cancellationToken` down to all database calls (`ToListAsync(ct)`, `SaveChangesAsync(ct)`) so long-running queries cancel if the user closes their browser.
+7. **Never call `HasPermissionAsync` from raw DB queries.** It is already cache-first via Redis — injecting `IOrganizationAuthorizationService` is sufficient. Do not duplicate the permission join.
 
 Welcome to the team! 🎉 You are now equipped to build scalable features in NextEvent.
+
+---
+
+## Part 7: Redis Permission Cache (PERF-01)
+
+### The Problem
+Every command that checks whether a user can perform an action in an organization (create events, invite members, update roles) previously ran a **4-level SQL JOIN**:
+
+```
+OrganizationMembers → MemberRoles → OrganizationRoles → RolePermissions → Permissions
+```
+
+This hit the database on **every authenticated mutating request**.
+
+### The Solution: Redis Distributed Cache
+`OrganizationAuthorizationService` is now **cache-first**:
+1. Check Redis for `perm:{userId}:{orgId}` — if HIT, return immediately (no DB).
+2. On MISS, run the 4-level join, store the result in Redis with a **5-minute TTL**.
+3. When a role's permissions change (`UpdateOrganizationRole`), all cached entries for that org are immediately evicted.
+
+### Infrastructure
+Redis runs as a Docker container defined in `docker-compose.yml`:
+```bash
+# Start Redis (and RabbitMQ)
+docker-compose up -d
+
+# Verify Redis is running
+docker exec nextevent-redis redis-cli PING   # → PONG
+```
+
+Configuration in `appsettings.Development.json`:
+```json
+"Redis": {
+  "ConnectionString": "localhost:6379"
+}
+```
+
+### Key Abstractions
+
+| Interface | Where | What it does |
+|---|---|---|
+| `IPermissionCacheService` | `Shared/Interfaces/` | `GetPermissionsAsync`, `SetPermissionsAsync`, `InvalidateOrganizationAsync` |
+| `RedisPermissionCacheService` | `Modules/Organizations/.../Services/` | Production Redis implementation |
+
+### Writing a New Permission-Guarded Handler
+You do not need to touch the cache yourself. Just inject `IOrganizationAuthorizationService` and call `AuthorizeAsync` as usual:
+
+```csharp
+public class MyNewCommandHandler(
+    EventsDbContext context,
+    IOrganizationAuthorizationService authorizationService)
+    : IRequestHandler<MyNewCommand>
+{
+    public async Task Handle(MyNewCommand request, CancellationToken ct)
+    {
+        // This is cache-first — Redis is checked before the DB join runs.
+        await authorizationService.AuthorizeAsync(
+            request.OrganizationId,
+            PermissionConstants.EventsCreate,
+            ct);
+
+        // ... your handler logic
+    }
+}
+```
+
+### Testing Without Redis
+In test projects, register an in-memory distributed cache:
+```csharp
+services.AddDistributedMemoryCache();
+services.AddSingleton<IConnectionMultiplexer>(Substitute.For<IConnectionMultiplexer>());
+services.AddScoped<IPermissionCacheService, RedisPermissionCacheService>();
+
+// Or mock IPermissionCacheService entirely to force a DB path:
+var cache = Substitute.For<IPermissionCacheService>();
+cache.GetPermissionsAsync(default!, default).ReturnsForAnyArgs((IReadOnlySet<string>?)null);
+```

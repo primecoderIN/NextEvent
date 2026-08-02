@@ -4,8 +4,9 @@ using NextEvent.Shared.Interfaces;
 using NextEvent.Modules.Identity.Domain;
 using NextEvent.Shared.Constants;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
+using Dapper;
 
 namespace NextEvent.Modules.Organizations.Application.Organizations.Commands.InviteOrganizationMember;
 
@@ -14,7 +15,7 @@ public class InviteOrganizationMemberCommandHandler(
     ICurrentUserService currentUserService,
     IOrganizationAuthorizationService authorizationService,
     IOrganizationMemberService memberService,
-    UserManager<User> userManager) : IRequestHandler<InviteOrganizationMemberCommand, Guid>
+    IDateTimeProvider dateTimeProvider) : IRequestHandler<InviteOrganizationMemberCommand, Guid>
 {
     public async Task<Guid> Handle(
         InviteOrganizationMemberCommand request,
@@ -26,18 +27,21 @@ public class InviteOrganizationMemberCommandHandler(
         // 1. Authorize: Does the user have 'members.invite' in this organization?
         await authorizationService.AuthorizeAsync(request.OrganizationId, PermissionConstants.MembersInvite, cancellationToken);
 
-        // 2. Look up the user by email
-        var invitedUser = await userManager.FindByEmailAsync(request.Email)
+        // 2. Look up the user by email using Dapper (CQRS read model across schema boundaries)
+        var connection = context.Database.GetDbConnection();
+        var invitedUserId = await connection.QuerySingleOrDefaultAsync<string>(
+            "SELECT Id FROM [identity].[AspNetUsers] WHERE NormalizedEmail = @Email", 
+            new { Email = request.Email.ToUpperInvariant() })
             ?? throw new NotFoundException("User", request.Email);
 
         // 3. Enforce Single-Org Business Rule: Are they already an active member of ANY org?
-        var isActiveAnywhere = await memberService.IsActiveMemberOfAnyOrganizationAsync(invitedUser.Id, cancellationToken);
+        var isActiveAnywhere = await memberService.IsActiveMemberOfAnyOrganizationAsync(invitedUserId, cancellationToken);
         if (isActiveAnywhere)
             throw new BusinessRuleException("This user is already an active member of an organization and cannot be invited.");
 
         // 4. Check if they are already a member or invited to THIS org
         var existingMembership = await context.OrganizationMembers
-            .FirstOrDefaultAsync(m => m.OrganizationId == request.OrganizationId && m.UserId == invitedUser.Id, cancellationToken);
+            .FirstOrDefaultAsync(m => m.OrganizationId == request.OrganizationId && m.UserId == invitedUserId, cancellationToken);
 
         if (existingMembership != null)
         {
@@ -58,10 +62,10 @@ public class InviteOrganizationMemberCommandHandler(
         var newMember = new OrganizationMember
         {
             OrganizationId = request.OrganizationId,
-            UserId = invitedUser.Id,
+            UserId = invitedUserId,
             Status = OrganizationMemberStatus.Invited,
             CreatedByUserId = currentUserId,
-            CreatedAtUtc = DateTime.UtcNow
+            CreatedAtUtc = dateTimeProvider.UtcNow
         };
 
         // 7. Assign the Member role

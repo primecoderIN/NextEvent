@@ -24,6 +24,8 @@ builder.Services.AddApplicationServices();
 builder.Services.AddSwaggerServices();
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddMassTransitServices(builder.Configuration);
+builder.Services.AddRedisServices(builder.Configuration);
+builder.Services.AddRateLimiterServices();
 
 var app = builder.Build();
 
@@ -39,6 +41,7 @@ if (app.Environment.IsDevelopment())
 // -----------------------------------------------------------------------
 app.UseCors("CorsPolicy");
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -75,7 +78,8 @@ try
 catch (Exception ex)
 {
     var logger = services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex, "An error occured during initialization");
+    logger.LogCritical(ex, "A critical error occurred during database initialization. The application will terminate.");
+    throw;
 }
 
 app.Run();

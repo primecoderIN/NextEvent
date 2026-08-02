@@ -51,19 +51,19 @@ public class CreateOrganizationCommandHandler(
         var now = DateTime.UtcNow;
 
         // ── 2. Create Organization ────────────────────────────────────────────
-        var organization = new Organization
-        {
-            Name            = dto.Name,
-            Slug            = dto.Slug,
-            Description     = dto.Description,
-            WebsiteUrl      = dto.WebsiteUrl,
-            ContactEmail    = dto.ContactEmail,
-            ContactPhone    = dto.ContactPhone,
-            Status          = OrganizationStatus.PendingVerification,   // Admin must approve before going live
-            OwnerUserId     = userId,
-            CreatedByUserId = userId,
-            CreatedAtUtc    = now,
-        };
+        var organization = new Organization(
+            dto.Name,
+            dto.Slug,
+            userId,
+            now);
+
+        organization.UpdateDetails(
+            dto.Description,
+            dto.WebsiteUrl,
+            dto.ContactEmail,
+            dto.ContactPhone,
+            userId,
+            now);
         context.Organizations.Add(organization);
 
         // ── 3. Load the permission catalogue (keyed by Code) ─────────────────

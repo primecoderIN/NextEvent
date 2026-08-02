@@ -32,43 +32,43 @@ public class Organization
     /// <summary>
     /// Display name of the organization. Max 160 characters.
     /// </summary>
-    public required string Name { get; set; }
+    public string Name { get; private set; }
 
     /// <summary>
     /// URL-friendly unique identifier for the organization (e.g., "acme-events").
     /// Max 180 characters. Must be unique across all organizations.
     /// </summary>
-    public required string Slug { get; set; }
+    public string Slug { get; private set; }
 
     /// <summary>
     /// Optional long-form description of the organization.
     /// </summary>
-    public string? Description { get; set; }
+    public string? Description { get; private set; }
 
     /// <summary>
     /// URL pointing to the organization's logo image. Nullable.
     /// </summary>
-    public string? LogoUrl { get; set; }
+    public string? LogoUrl { get; private set; }
 
     /// <summary>
     /// URL pointing to the organization's cover/banner image. Nullable.
     /// </summary>
-    public string? CoverImageUrl { get; set; }
+    public string? CoverImageUrl { get; private set; }
 
     /// <summary>
     /// Public website URL for the organization. Nullable.
     /// </summary>
-    public string? WebsiteUrl { get; set; }
+    public string? WebsiteUrl { get; private set; }
 
     /// <summary>
     /// Public contact email address. Max 256 characters. Nullable.
     /// </summary>
-    public string? ContactEmail { get; set; }
+    public string? ContactEmail { get; private set; }
 
     /// <summary>
     /// Public contact phone number. Max 40 characters. Nullable.
     /// </summary>
-    public string? ContactPhone { get; set; }
+    public string? ContactPhone { get; private set; }
 
     /// <summary>
     /// Lifecycle status of the organization.
@@ -76,7 +76,7 @@ public class Organization
     /// The Organizer platform role is granted to OwnerUserId only when Status
     /// transitions to <see cref="OrganizationStatus.Active"/> by an Admin.
     /// </summary>
-    public OrganizationStatus Status { get; set; } = OrganizationStatus.PendingVerification;
+    public OrganizationStatus Status { get; private set; } = OrganizationStatus.PendingVerification;
 
     // -------------------------------------------------------------------------
     // Ownership
@@ -87,7 +87,7 @@ public class Organization
     /// The user who currently owns and controls this organization.
     /// Restricted delete: a User cannot be deleted while they own an Organization.
     /// </summary>
-    public required string OwnerUserId { get; set; }
+    public string OwnerUserId { get; private set; }
 
     /// <summary>
     /// Navigation property for the owner user.
@@ -101,12 +101,12 @@ public class Organization
     /// <summary>
     /// UTC timestamp of when the organization was verified by an Admin. Nullable.
     /// </summary>
-    public DateTime? VerifiedAtUtc { get; set; }
+    public DateTime? VerifiedAtUtc { get; private set; }
 
     /// <summary>
     /// FK → AspNetUsers.Id. The Admin who performed the verification. Nullable.
     /// </summary>
-    public string? VerifiedByUserId { get; set; }
+    public string? VerifiedByUserId { get; private set; }
 
     /// <summary>
     /// Navigation property for the verifying admin user.
@@ -121,12 +121,12 @@ public class Organization
     /// UTC timestamp of when this record was created. Required.
     /// Maps to SQL Server datetime2(3).
     /// </summary>
-    public DateTime CreatedAtUtc { get; set; }
+    public DateTime CreatedAtUtc { get; private set; }
 
     /// <summary>
     /// FK → AspNetUsers.Id. The user who created this record. Immutable after insert.
     /// </summary>
-    public required string CreatedByUserId { get; set; }
+    public string CreatedByUserId { get; private set; }
 
     /// <summary>
     /// Navigation property for the creating user.
@@ -136,12 +136,12 @@ public class Organization
     /// <summary>
     /// UTC timestamp of the last update to this record. Nullable.
     /// </summary>
-    public DateTime? UpdatedAtUtc { get; set; }
+    public DateTime? UpdatedAtUtc { get; private set; }
 
     /// <summary>
     /// FK → AspNetUsers.Id. The user who last updated this record. Nullable.
     /// </summary>
-    public string? UpdatedByUserId { get; set; }
+    public string? UpdatedByUserId { get; private set; }
 
     // -------------------------------------------------------------------------
     // Soft delete fields
@@ -173,4 +173,53 @@ public class Organization
     /// to prevent lost-update race conditions.
     /// </summary>
     public byte[] RowVersion { get; set; } = [];
+
+    // -------------------------------------------------------------------------
+    // Constructors and Domain Methods
+    // -------------------------------------------------------------------------
+
+    // Parameterless constructor for EF Core
+    private Organization() 
+    { 
+        Name = null!;
+        Slug = null!;
+        OwnerUserId = null!;
+        CreatedByUserId = null!;
+    }
+
+    public Organization(string name, string slug, string ownerUserId, DateTime createdAtUtc)
+    {
+        Name = name;
+        Slug = slug;
+        OwnerUserId = ownerUserId;
+        CreatedByUserId = ownerUserId;
+        CreatedAtUtc = createdAtUtc;
+        Status = OrganizationStatus.PendingVerification;
+    }
+
+    public void UpdateDetails(string? description, string? websiteUrl, string? contactEmail, string? contactPhone, string updatedByUserId, DateTime updatedAtUtc)
+    {
+        Description = description;
+        WebsiteUrl = websiteUrl;
+        ContactEmail = contactEmail;
+        ContactPhone = contactPhone;
+        UpdatedByUserId = updatedByUserId;
+        UpdatedAtUtc = updatedAtUtc;
+    }
+
+    public void Verify(string adminUserId, DateTime verifiedAtUtc)
+    {
+        Status = OrganizationStatus.Active;
+        VerifiedByUserId = adminUserId;
+        VerifiedAtUtc = verifiedAtUtc;
+        UpdatedByUserId = adminUserId;
+        UpdatedAtUtc = verifiedAtUtc;
+    }
+
+    public void Suspend(string adminUserId, DateTime suspendedAtUtc)
+    {
+        Status = OrganizationStatus.Suspended;
+        UpdatedByUserId = adminUserId;
+        UpdatedAtUtc = suspendedAtUtc;
+    }
 }

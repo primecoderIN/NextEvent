@@ -6,8 +6,10 @@ using NextEvent.Modules.Identity.Domain;
 using Microsoft.IdentityModel.Tokens;
 using NextEvent.Modules.Identity.Application.Authentication.Interfaces;
 
+using NextEvent.Shared.Interfaces;
+
 namespace NextEvent.Modules.Identity.Application.Services;
-public class TokenService(IConfiguration config) : ITokenService
+public class TokenService(IConfiguration config, IDateTimeProvider dateTimeProvider) : ITokenService
 {
     public string CreateToken(User user, IList<string> roles, string activeProfile, Guid? organizationId = null)
     {
@@ -38,7 +40,7 @@ public class TokenService(IConfiguration config) : ITokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(10), // Short lived access token
+            Expires = dateTimeProvider.UtcNow.AddMinutes(10), // Short lived access token
             SigningCredentials = creds
         };
 
@@ -55,5 +57,12 @@ public class TokenService(IConfiguration config) : ITokenService
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomNumber);
         return Convert.ToBase64String(randomNumber);
+    }
+
+    public string HashRefreshToken(string token)
+    {
+        var tokenBytes = Encoding.UTF8.GetBytes(token);
+        var hashBytes = SHA256.HashData(tokenBytes);
+        return Convert.ToBase64String(hashBytes);
     }
 }

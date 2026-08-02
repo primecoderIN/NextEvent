@@ -23,7 +23,8 @@ namespace NextEvent.Modules.Organizations.Application.Organizations.Commands.App
 public class ApproveOrganizationCommandHandler(
     OrganizationsDbContext context,
     ICurrentUserService currentUserService,
-    IIdentityService identityService)
+    IIdentityService identityService,
+    IDateTimeProvider dateTimeProvider)
     : IRequestHandler<ApproveOrganizationCommand>
 {
     public async Task Handle(
@@ -51,12 +52,8 @@ public class ApproveOrganizationCommandHandler(
         // redundant DB write and fall through to the idempotent role grant.
         if (organization.Status != OrganizationStatus.Active)
         {
-            var now = DateTime.UtcNow;
-            organization.Status           = OrganizationStatus.Active;
-            organization.VerifiedAtUtc    = now;
-            organization.VerifiedByUserId = adminUserId;
-            organization.UpdatedAtUtc     = now;
-            organization.UpdatedByUserId  = adminUserId;
+            var now = dateTimeProvider.UtcNow;
+            organization.Verify(adminUserId, now);
 
             // ── 4. Persist org status change ──────────────────────────────────
             await context.SaveChangesAsync(cancellationToken);

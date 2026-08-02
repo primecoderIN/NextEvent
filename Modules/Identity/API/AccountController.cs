@@ -7,6 +7,7 @@ using NextEvent.Modules.Identity.Application.Authentication.Commands.Register;
 using NextEvent.Modules.Identity.Application.Authentication.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace NextEvent.Modules.Identity.API;
 [Route(ApiRouteConstants.Account.Base)]
@@ -19,6 +20,7 @@ public class AccountController(IMediator mediator) : BaseApiController(mediator)
     /// <response code="200">User registered successfully.</response>
     /// <response code="400">Validation failed.</response>
     [AllowAnonymous]
+    [EnableRateLimiting("Auth")]
     [HttpPost(ApiRouteConstants.Account.Register)]
     [ProducesResponseType(typeof(ApiResponse<RegisterResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -37,6 +39,7 @@ public class AccountController(IMediator mediator) : BaseApiController(mediator)
     /// <response code="400">Validation failed.</response>
     /// <response code="401">Invalid credentials.</response>
     [AllowAnonymous]
+    [EnableRateLimiting("Auth")]
     [HttpPost(ApiRouteConstants.Account.Login)]
     [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -59,6 +62,7 @@ public class RefreshTokenRequestDto
     /// <response code="200">Token refreshed successfully.</response>
     /// <response code="401">Refresh token is missing or invalid.</response>
     [AllowAnonymous]
+    [EnableRateLimiting("Auth")]
     [HttpPost(ApiRouteConstants.Account.RefreshToken)]
     [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
