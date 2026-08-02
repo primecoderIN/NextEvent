@@ -26,9 +26,9 @@ const iconMap: Record<string, any> = {
 
 export function CategoryCarousel({ active, onChange }: CategoryCarouselProps) {
   const { t } = useTranslation("home")
-  const { data: apiCategories, isLoading } = useCategories()
+  const { data: apiCategories, isLoading, fetchStatus } = useCategories()
 
-  if (isLoading) {
+  if (isLoading && fetchStatus !== "idle") {
     return <div className="h-20 flex items-center justify-center animate-pulse bg-muted rounded-2xl w-full" />
   }
 
