@@ -23,17 +23,25 @@ Everything in C# is a Class or a Record. Types are strictly enforced at compile 
 ### 1.3 Dependency Injection (DI) - The Heart of .NET
 In Node.js, you might `require()` a database connection pool in a file. **In .NET, you almost never manually instantiate services using `new`.**
 Instead, .NET has a built-in Dependency Injection container.
-1. You register a service when the app starts in `Program.cs`.
+1. You register a service when the app starts in `Program.cs` (or extension methods like `ApiServiceExtensions.cs`).
 2. When you need that service, you simply ask for it in your class's constructor. The framework automatically passes it in!
 
-We use **C# 12 Primary Constructors** to make this incredibly clean:
+We use **C# 12 Primary Constructors** to make this incredibly clean.
+
+**Example: The Magic of `IHttpContextAccessor`**
+If you look at `CurrentUserService.cs`, it needs access to the HTTP request to find the logged-in user:
 ```csharp
-// The database connection (EventsDbContext) is automatically injected!
-public class MyService(EventsDbContext context) 
+public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
 {
-    public void DoSomething() => context.Events.Add(new Event());
+    // It uses httpContextAccessor.HttpContext?.User behind the scenes!
 }
 ```
+You never call `new CurrentUserService(...)`. Instead, in `ApiServiceExtensions.cs`, we register it:
+```csharp
+services.AddHttpContextAccessor(); // Tells .NET how to provide IHttpContextAccessor
+services.AddScoped<ICurrentUserService, CurrentUserService>(); // Tells .NET how to provide ICurrentUserService
+```
+When a controller asks for `ICurrentUserService`, the framework automatically builds `CurrentUserService`, automatically injects the `IHttpContextAccessor` into it, and hands the fully built object to the controller!
 
 **Service Lifetimes (Crucial to understand):**
 - **Transient**: A brand new instance is created every time it's injected.
