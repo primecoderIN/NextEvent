@@ -628,6 +628,18 @@ catch (Exception ex)
 }
 ```
 
+### Prevention of BOLA and BFLA (Security Best Practices)
+
+The caching implementation adheres strictly to **Zero Trust (Deny-by-Default)** and serves as the primary defense against two critical OWASP API vulnerabilities:
+
+1. **BOLA (Broken Object Level Authorization):**
+   - **The Vulnerability:** A user accesses or manipulates an object (e.g., an Organization or Event) they do not own or belong to by guessing its ID.
+   - **How Caching Prevents It:** The cache key is strictly scoped to `NextEvent:perm:{userId}:{orgId}`. If a user attempts an action against a random `{orgId}`, the system checks that specific cache key, finds no permissions, and immediately rejects the request. Permissions from Org A can never bleed into Org B.
+
+2. **BFLA (Broken Function Level Authorization):**
+   - **The Vulnerability:** A regular user invokes an administrative function (e.g., inviting members or deleting roles) because the API fails to verify their exact privileges.
+   - **How Caching Prevents It:** Instead of caching broad roles (like "Admin" or "Member"), the cache stores the exact **granular permission codes** (e.g., `["members.invite", "roles.update"]`). Controllers enforce these specific codes using `[RequirePermission("members.invite")]`, ensuring that the user possesses the precise capability needed for that exact function.
+
 ### Key Files
 
 | File | Purpose |
