@@ -68,6 +68,45 @@ NextEvent/
 
 ---
 
+## Getting Started (Docker)
+
+The entire NextEvent platform (SQL Server, Redis, RabbitMQ, .NET API, and React Client) is fully containerized using Docker.
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/primecoderIN/NextEvent.git
+   cd NextEvent
+   ```
+
+2. **Configure Environment Variables:**
+   Create a `.env` file at the root of the project with your secrets (these are automatically injected into the containers):
+   ```env
+   SA_PASSWORD=YourStrong!Password
+   TOKEN_KEY=SuperSecretDevelopmentKeyForNextEventApp123456789012345678901234567890!
+   ```
+
+3. **Start the Infrastructure:**
+   ```powershell
+   docker-compose up --build -d
+   ```
+   *(The first run will take a few minutes to download the base images. Subsequent runs are nearly instant thanks to multi-stage builds and `.dockerignore` optimization).*
+
+4. **Access the Application:**
+   - **Frontend (React SPA):** [http://localhost:3000](http://localhost:3000)
+   - **Backend API (Swagger):** [http://localhost:5000/swagger](http://localhost:5000/swagger)
+   - **RabbitMQ Dashboard:** [http://localhost:15672](http://localhost:15672) (guest/guest)
+   - **SQL Server:** `localhost,1433` (sa / YourStrong!Password)
+
+> [!TIP]
+> **Test Accounts:**
+> - `admin@test.com` / `Pa$$w0rd`
+> - `organizer@test.com` / `Pa$$w0rd`
+> - `member@test.com` / `Pa$$w0rd`
+
+For detailed information on the Docker setup, networking, and multi-stage builds, please see the [Docker Notes](docker-notes.md) and [Backend Onboarding](backend-onboarding.md) guides.
+
+---
+
 ## Tech Stack
 
 ### Backend — ASP.NET Core Web API

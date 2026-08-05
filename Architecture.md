@@ -2331,3 +2331,30 @@ services.AddScoped<IPermissionCacheService, RedisPermissionCacheService>();
 | `API/Extensions/RedisServiceExtensions.cs` | DI wiring |
 | `docker-compose.yml` | Redis container definition |
 | `API/appsettings.Development.json` | `Redis:ConnectionString` config |
+
+---
+
+## 13. Cloud-Native Containerization & Docker Infrastructure
+
+The NextEvent platform has been completely containerized using Docker, enabling a seamless transition from local development to production-ready deployments.
+
+### 13.1 Multi-Stage Builds
+Both the API and the React Client utilize Docker multi-stage builds.
+- **Backend (`API/Dockerfile`)**: Uses `mcr.microsoft.com/dotnet/sdk:10.0` to compile the solution (Layer 1) and `dotnet/aspnet:10.0` as the final runtime (Layer 2). The final image is lightweight and contains zero source code or SDK bloat.
+- **Frontend (`client/Dockerfile`)**: Uses `node:22-alpine` to build the static React assets via Vite, and `nginx:alpine` to serve them. The `nginx.conf` has been specifically customized with `try_files $uri $uri/ /index.html;` to seamlessly support React Single Page Application (SPA) routing (preventing 404s on page reloads).
+
+### 13.2 Orchestration (`docker-compose.yml`)
+The local infrastructure is managed entirely via Docker Compose, which spins up 5 inter-connected services:
+1. `sql-server`: Microsoft SQL Server 2022 (Persistent volume mapped)
+2. `rabbitmq`: MassTransit Message Broker
+3. `redis`: Distributed Permission Cache
+4. `backend-api`: ASP.NET Core 10 Web API
+5. `frontend-client`: NGINX serving React 19
+
+**Networking:**
+Services communicate using Docker's internal DNS. The `backend-api` natively resolves `rabbitmq` and `redis` as hostnames. The frontend accesses the API via the host machine's exposed port (`localhost:5000`).
+
+### 13.3 Secret Management
+Hardcoded secrets (like `SA_PASSWORD` and JWT `TokenKey`) have been completely purged from source control.
+- **Local / Docker Compose:** Secrets are securely managed via a root `.env` file (ignored in `.gitignore`) and injected into the containers.
+- **Production (Azure):** The application is designed to seamlessly integrate with **Azure Key Vault**. Using Managed Identities, the production App Service or AKS cluster will authenticate and pull the SQL connection strings and TokenKey directly into memory without them ever touching the disk.

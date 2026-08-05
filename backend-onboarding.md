@@ -292,7 +292,40 @@ services.AddDistributedMemoryCache();
 services.AddSingleton<IConnectionMultiplexer>(Substitute.For<IConnectionMultiplexer>());
 services.AddScoped<IPermissionCacheService, RedisPermissionCacheService>();
 
-// Or mock IPermissionCacheService entirely to force a DB path:
 var cache = Substitute.For<IPermissionCacheService>();
 cache.GetPermissionsAsync(default!, default).ReturnsForAnyArgs((IReadOnlySet<string>?)null);
 ```
+
+---
+
+## Part 8: Docker Infrastructure & Secret Management
+
+The NextEvent platform is now fully containerized. You do not need to install SQL Server, RabbitMQ, or Redis on your host machine.
+
+### 8.1 Starting the Infrastructure
+To start the entire stack (Database, Caches, API, and Frontend), simply run:
+```bash
+docker-compose up --build -d
+```
+The API is accessible at `http://localhost:5000/swagger`. The Frontend is at `http://localhost:3000`.
+
+### 8.2 Secret Management (`.env` vs `secrets.json`)
+We have completely removed hardcoded secrets from `docker-compose.yml` and `appsettings.json`.
+
+1. **When running via Docker (The Standard Way):**
+   You must create a `.env` file at the root of the project. Docker Compose will automatically inject these variables into the containers.
+   ```env
+   SA_PASSWORD=YourStrong!Password
+   TOKEN_KEY=SuperSecretDevelopmentKeyForNextEventApp123456789012345678901234567890!
+   ```
+   *(Note: The `.env` file is in `.gitignore` and will never be committed).*
+
+2. **When running via Visual Studio (The "Hybrid" Debugging Way):**
+   If you choose to run the `backend-api` outside of Docker (using the Play button in Visual Studio) so you can hit breakpoints faster, the `.NET` application will **not** read the `.env` file. Instead, you must use the **.NET User Secrets** tool to store the `TokenKey`. 
+   
+   Run this in the `API/` folder:
+   ```bash
+   dotnet user-secrets set "TokenKey" "SuperSecretDevelopmentKeyForNextEventApp123456789012345678901234567890!"
+   ```
+
+For a comprehensive deep-dive into how the multi-stage Dockerfiles work, how NGINX handles SPA routing, and how Docker network resolution works, please read the **[Docker Notes](docker-notes.md)** file!
