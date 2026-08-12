@@ -33,6 +33,8 @@ const rolePermissions: Record<RoleName, Permission[]> = {
   [Roles.Organizer]: [
     Permissions.OrganizationView,
     Permissions.OrganizationUpdate,
+    Permissions.OrganizationMembersInvite,
+    Permissions.OrganizationMembersRemove,
     Permissions.OrganizationRolesManage,
     Permissions.EventsCreate,
     Permissions.EventsUpdate,
