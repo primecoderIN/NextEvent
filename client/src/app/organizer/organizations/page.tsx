@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom"
 import { useMyOrganization } from "@/shared/hooks/useMyOrganization"
 import { Building2, Shield, CalendarPlus } from "lucide-react"
 import { OrganizationDetailsView } from "@/features/organizations/components/OrganizationDetailsView"
+import { OrganizationMembersView } from "@/features/organizations/components/OrganizationMembersView"
 import { Button } from "@/shared/ui/button"
 import { RequirePermission } from "@/authorization"
 import { Permissions } from "@/shared/constants/permissions"
@@ -58,7 +59,10 @@ export function OrganizerMyOrganizationPage() {
         </div>
       </div>
 
-      <OrganizationDetailsView organization={organization} />
+      <div className="space-y-6">
+        <OrganizationDetailsView organization={organization} />
+        <OrganizationMembersView organization={organization} />
+      </div>
     </div>
   )
 }

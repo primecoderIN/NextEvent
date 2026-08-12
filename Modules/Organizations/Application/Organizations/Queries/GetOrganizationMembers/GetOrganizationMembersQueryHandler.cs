@@ -25,7 +25,7 @@ public class GetOrganizationMembersQueryHandler(
             {
                 Id = m.Id,
                 UserId = m.UserId,
-                UserName = m.User != null ? m.User.DisplayName : "Unknown",
+                UserName = m.User != null ? (m.User.DisplayName ?? "Unknown") : "Unknown",
                 UserEmail = m.User != null ? m.User.Email! : "Unknown",
                 Status = m.Status.ToString(),
                 JoinedAtUtc = m.JoinedAtUtc,

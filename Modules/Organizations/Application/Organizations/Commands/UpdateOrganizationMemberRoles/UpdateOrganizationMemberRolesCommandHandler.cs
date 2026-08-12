@@ -23,7 +23,7 @@ public class UpdateOrganizationMemberRolesCommandHandler(
 
         if (member == null)
         {
-            throw new NotFoundException($"Member {request.MemberId} not found in organization.");
+            throw new NotFoundException("OrganizationMember", request.MemberId);
         }
 
         // Validate that all requested roles belong to this organization
@@ -33,7 +33,7 @@ public class UpdateOrganizationMemberRolesCommandHandler(
 
         if (validRoles.Count != request.RoleIds.Count)
         {
-            throw new ValidationException("One or more roles do not exist or belong to a different organization.");
+            throw new BusinessRuleException("One or more roles do not exist or belong to a different organization.");
         }
 
         // The owner must always have the Owner role (if they are the owner)

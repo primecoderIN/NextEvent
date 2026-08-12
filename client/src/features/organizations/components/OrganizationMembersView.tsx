@@ -4,7 +4,9 @@ import type { Organization } from "@/types/Organization"
 import { Badge } from "@/shared/ui/badge"
 import { Button } from "@/shared/ui/button"
 import { toast } from "sonner"
-import { useOrganizationMembersList, useUpdateOrganizationMemberRoles } from "@/shared/hooks/useOrganizationMembers"
+import { Input } from "@/shared/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/ui/dialog"
+import { useOrganizationMembersList, useUpdateOrganizationMemberRoles, useInviteOrganizationMember } from "@/shared/hooks/useOrganizationMembers"
 import { useOrganizationRolesList } from "@/shared/hooks/useOrganizationRoles"
 import { useAuthorization } from "@/authorization/useAuthorization"
 import { Permissions } from "@/shared/constants/permissions"
@@ -22,9 +24,13 @@ export function OrganizationMembersView({ organization }: OrganizationMembersVie
   const { can } = useAuthorization()
 
   const canManageRoles = can(Permissions.OrganizationRolesManage)
+  const canInviteMembers = can(Permissions.OrganizationMembersInvite)
 
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null)
   const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+  const [inviteEmail, setInviteEmail] = useState("")
+  const [isInviteOpen, setIsInviteOpen] = useState(false)
+  const { mutate: inviteMember, isPending: isInviting } = useInviteOrganizationMember()
 
   if (isLoadingMembers || isLoadingRoles) {
     return <div className="p-8 text-center text-muted-foreground">{t("loadingMembers")}</div>
@@ -55,6 +61,22 @@ export function OrganizationMembersView({ organization }: OrganizationMembersVie
     })
   }
 
+  const handleInvite = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!inviteEmail) return
+
+    inviteMember({ id: organization.id, email: inviteEmail }, {
+      onSuccess: () => {
+        toast.success(t("inviteSuccess", { email: inviteEmail }))
+        setInviteEmail("")
+        setIsInviteOpen(false)
+      },
+      onError: (error) => {
+        toast.error(t("inviteFailed") + ": " + (error.response?.data?.message || error.message))
+      }
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
@@ -67,6 +89,39 @@ export function OrganizationMembersView({ organization }: OrganizationMembersVie
               {t("membersDesc")}
             </p>
           </div>
+          
+          {canInviteMembers && (
+            <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
+              <DialogTrigger asChild>
+                <Button>{t("btnInviteMember")}</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("inviteMemberTitle")}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleInvite} className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">{t("inviteEmailLabel")}</label>
+                    <Input 
+                      type="email" 
+                      placeholder={t("inviteEmailPlaceholder")} 
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="ghost" onClick={() => setIsInviteOpen(false)} disabled={isInviting}>
+                      {t("btnCancel")}
+                    </Button>
+                    <Button type="submit" disabled={isInviting || !inviteEmail}>
+                      {isInviting ? t("inviting") : t("btnInvite")}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         <div className="overflow-x-auto">

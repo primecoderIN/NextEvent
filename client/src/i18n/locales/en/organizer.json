@@ -39,9 +39,17 @@
   "tableStatus": "Status",
   "tableRoles": "Roles",
   "tableActions": "Actions",
-  "noRoles": "No roles",
+  "noRoles": "No roles assigned",
   "btnCancel": "Cancel",
   "btnSave": "Save",
   "btnEditRoles": "Edit Roles",
-  "noMembersFound": "No members found."
+  "noMembersFound": "No members found.",
+  "btnInviteMember": "Invite Member",
+  "inviteMemberTitle": "Invite Member",
+  "inviteEmailLabel": "Email Address",
+  "inviteEmailPlaceholder": "member@example.com",
+  "btnInvite": "Send Invite",
+  "inviting": "Inviting...",
+  "inviteSuccess": "Successfully invited {{email}}",
+  "inviteFailed": "Failed to invite member"
 }

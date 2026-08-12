@@ -13,6 +13,7 @@ using NextEvent.Modules.Organizations.Application.Organizations.Queries.GetOrgan
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using NextEvent.Modules.Organizations.Application.Organizations.Queries.GetMyInvitations;
 
 namespace NextEvent.Modules.Organizations.API;
 [Route(ApiRouteConstants.Organizations.Base)]
@@ -112,6 +113,22 @@ public class OrganizationsController(IMediator mediator) : BaseApiController(med
     {
         var org = await Mediator.Send(new GetMyOrganizationQuery(), cancellationToken);
         return OkResponse(org, "Organization retrieved successfully.");
+    }
+
+    /// <summary>
+    /// Retrieves all pending organization invitations for the current authenticated user.
+    /// </summary>
+    /// <response code="200">Invitations retrieved.</response>
+    /// <response code="401">No valid JWT supplied.</response>
+    [Authorize]
+    [HttpGet("my-invitations")]
+    [ProducesResponseType(typeof(ApiResponse<List<OrganizationInvitationDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<ApiResponse<List<OrganizationInvitationDto>>>> GetMyInvitations(
+        CancellationToken cancellationToken)
+    {
+        var invitations = await Mediator.Send(new GetMyInvitationsQuery(), cancellationToken);
+        return OkResponse(invitations, "Invitations retrieved successfully.");
     }
 
     /// <summary>

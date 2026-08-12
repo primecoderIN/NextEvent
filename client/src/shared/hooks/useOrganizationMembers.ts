@@ -38,3 +38,24 @@ export const useUpdateOrganizationMemberRoles = () => {
     }
   })
 }
+
+export const useInviteOrganizationMember = () => {
+  const queryClient = useQueryClient()
+  return useMutation<
+    unknown,
+    AxiosError<ApiResponse<unknown>>,
+    { id: string; email: string }
+  >({
+    mutationFn: async ({ id, email }) => {
+      const res = await axiosHttpAgent.post<ApiResponse<unknown>>(
+        OrganizationApiRoutes.MemberInvite(id),
+        { email }
+      )
+      return res.data.data
+    },
+    onSuccess: (_, { id }) => {
+      // Invalidate the members list to show the new invited member
+      queryClient.invalidateQueries({ queryKey: ["organization-members", id] })
+    }
+  })
+}

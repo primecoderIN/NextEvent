@@ -39,7 +39,17 @@ public class AcceptOrganizationInvitationCommandHandler(
         membership.Status = OrganizationMemberStatus.Active;
         membership.JoinedAtUtc = DateTime.UtcNow;
 
-        // 3. Grant the Organizer platform role if they don't already have it
+        // 3. Remove/Decline all other pending invitations for this user
+        var otherInvitations = await context.OrganizationMembers
+            .Where(m => m.UserId == currentUserId && m.Status == OrganizationMemberStatus.Invited && m.Id != membership.Id && !m.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+        foreach (var invite in otherInvitations)
+        {
+            invite.Status = OrganizationMemberStatus.Declined;
+        }
+
+        // 4. Grant the Organizer platform role if they don't already have it
         var user = await userManager.FindByIdAsync(currentUserId)
             ?? throw new UnauthorizedException("User not found.");
 

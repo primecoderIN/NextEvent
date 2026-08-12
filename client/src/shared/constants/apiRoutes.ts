@@ -14,7 +14,8 @@ export const OrganizationApiRoutes = {
   Roles: (id: string) => `/organizations/${id}/roles`,
   RoleUpdate: (id: string, roleId: string) => `/organizations/${id}/roles/${roleId}`,
   Members: (id: string) => `/organizations/${id}/members`,
-  MemberRoles: (id: string, memberId: string) => `/organizations/${id}/members/${memberId}/roles`
+  MemberRoles: (id: string, memberId: string) => `/organizations/${id}/members/${memberId}/roles`,
+  MemberInvite: (id: string) => `/organizations/${id}/members/invite`
 };
 
 export const PermissionApiRoutes = {
