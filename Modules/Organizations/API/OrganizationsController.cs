@@ -8,6 +8,8 @@ using NextEvent.Modules.Organizations.Application.Organizations.Queries.GetOrgan
 using NextEvent.Modules.Organizations.Application.Organizations.Queries.GetOrganizationsList;
 using NextEvent.Modules.Organizations.Application.Organizations.Queries.GetMyOrganization;
 using NextEvent.Shared.Constants;
+using NextEvent.Modules.Organizations.Application.Organizations.Commands.UpdateOrganizationMemberRoles;
+using NextEvent.Modules.Organizations.Application.Organizations.Queries.GetOrganizationMembers;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -166,6 +168,63 @@ public class OrganizationsController(IMediator mediator) : BaseApiController(med
 
         return OkResponse(profile, "Organization profile retrieved successfully.");
     }
+    /// <summary>
+    /// Retrieves all members belonging to an organization.
+    /// Caller must have the organization.view permission.
+    /// </summary>
+    /// <response code="200">List of members retrieved.</response>
+    /// <response code="401">No valid JWT supplied.</response>
+    /// <response code="403">Caller lacks the required permission.</response>
+    [Authorize]
+    [HttpGet("{id:guid}/members")]
+    [ProducesResponseType(typeof(ApiResponse<List<OrganizationMemberDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<ApiResponse<List<OrganizationMemberDto>>>> GetOrganizationMembers(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var members = await Mediator.Send(
+            new GetOrganizationMembersQuery { OrganizationId = id },
+            cancellationToken);
+
+        return OkResponse(members, "Members retrieved successfully.");
+    }
+
+    /// <summary>
+    /// Updates the roles for a given member.
+    /// Caller must have the organization.roles.manage permission.
+    /// </summary>
+    /// <response code="200">Roles updated successfully.</response>
+    /// <response code="400">Validation failure (e.g. invalid roles).</response>
+    /// <response code="401">No valid JWT supplied.</response>
+    /// <response code="403">Caller lacks the required permission.</response>
+    /// <response code="404">Member not found.</response>
+    [Authorize]
+    [HttpPut("{id:guid}/members/{memberId:guid}/roles")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<object>>> UpdateMemberRoles(
+        Guid id,
+        Guid memberId,
+        [FromBody] List<Guid> roleIds,
+        CancellationToken cancellationToken)
+    {
+        await Mediator.Send(
+            new UpdateOrganizationMemberRolesCommand 
+            { 
+                OrganizationId = id, 
+                MemberId = memberId, 
+                RoleIds = roleIds 
+            },
+            cancellationToken);
+
+        return OkResponse<object>(null!, "Member roles updated successfully.");
+    }
+
     /// <summary>
     /// Invites a registered user to join the organization.
     /// The invited user receives the 'Member' system role by default.
