@@ -29,5 +29,19 @@
   "rolesManagement": "Roles & Permissions",
   "myEvents": "My Events",
   "createEvent": "Create Event",
-  "settings": "Settings"
+  "settings": "Settings",
+  "membersTitle": "Members",
+  "membersDesc": "Manage the people in your organization and their roles.",
+  "loadingMembers": "Loading members...",
+  "rolesUpdatedSuccess": "Member roles updated successfully",
+  "rolesUpdateFailed": "Failed to update member roles",
+  "tableUser": "User",
+  "tableStatus": "Status",
+  "tableRoles": "Roles",
+  "tableActions": "Actions",
+  "noRoles": "No roles",
+  "btnCancel": "Cancel",
+  "btnSave": "Save",
+  "btnEditRoles": "Edit Roles",
+  "noMembersFound": "No members found."
 }
