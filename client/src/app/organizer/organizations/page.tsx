@@ -3,6 +3,7 @@ import { useMyOrganization } from "@/shared/hooks/useMyOrganization"
 import { Building2, Shield, CalendarPlus } from "lucide-react"
 import { OrganizationDetailsView } from "@/features/organizations/components/OrganizationDetailsView"
 import { OrganizationMembersView } from "@/features/organizations/components/OrganizationMembersView"
+import { MyInvitationsView } from "@/features/organizations/components/MyInvitationsView"
 import { Button } from "@/shared/ui/button"
 import { RequirePermission } from "@/authorization"
 import { Permissions } from "@/shared/constants/permissions"
@@ -22,8 +23,10 @@ export function OrganizerMyOrganizationPage() {
 
   if (isError || !organization) {
     return (
-      <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
-        <Building2 className="h-16 w-16 text-muted-foreground mb-4" />
+      <div className="flex-1 p-6 flex flex-col min-h-full">
+        <MyInvitationsView />
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
+          <Building2 className="h-16 w-16 text-muted-foreground mb-4" />
         <h2 className="text-2xl font-bold mb-2">No Organization Found</h2>
         <p className="text-muted-foreground max-w-md mb-6">
           You don't have an organization set up yet. Create an organization profile to get started!
@@ -32,6 +35,7 @@ export function OrganizerMyOrganizationPage() {
           <CalendarPlus className="w-4 h-4 mr-2" />
           Create Organization
         </Button>
+        </div>
       </div>
     )
   }

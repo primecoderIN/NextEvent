@@ -59,3 +59,42 @@ export const useInviteOrganizationMember = () => {
     }
   })
 }
+
+export interface OrganizationInvitation {
+  organizationId: string;
+  organizationName: string;
+  organizationLogoUrl: string | null;
+  invitedAtUtc: string;
+}
+
+export const useMyInvitations = () => {
+  return useQuery<OrganizationInvitation[], AxiosError>({
+    queryKey: ["my-invitations"],
+    queryFn: async () => {
+      const res = await axiosHttpAgent.get<ApiResponse<OrganizationInvitation[]>>(
+        OrganizationApiRoutes.MyInvitations
+      )
+      return res.data.data!
+    }
+  })
+}
+
+export const useAcceptOrganizationInvitation = () => {
+  const queryClient = useQueryClient()
+  return useMutation<
+    unknown,
+    AxiosError<ApiResponse<unknown>>,
+    string // organizationId
+  >({
+    mutationFn: async (organizationId) => {
+      const res = await axiosHttpAgent.post<ApiResponse<unknown>>(
+        OrganizationApiRoutes.AcceptInvite(organizationId)
+      )
+      return res.data.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-invitations"] })
+      queryClient.invalidateQueries({ queryKey: ["my-organization"] })
+    }
+  })
+}
