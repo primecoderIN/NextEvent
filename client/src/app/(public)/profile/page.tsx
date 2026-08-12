@@ -2,6 +2,7 @@ import { useAuth } from "@/features/auth/context/AuthContext"
 import { Navigate } from "react-router-dom"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { User, Mail, Shield, Calendar } from "lucide-react"
+import { MyInvitationsView } from "@/features/organizations/components/MyInvitationsView"
 
 export function ProfilePage() {
   const { user, loading } = useAuth()
@@ -35,6 +36,9 @@ export function ProfilePage() {
             </p>
           </div>
         </div>
+
+        {/* Pending Invitations Section */}
+        <MyInvitationsView />
 
         {/* Roles Section */}
         <div>
