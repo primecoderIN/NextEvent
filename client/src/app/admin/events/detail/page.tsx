@@ -9,19 +9,32 @@ import { EventDetailSkeleton } from "@/app/(public)/event-detail/EventDetailSkel
 import { DeleteEventDialog } from "@/app/(public)/event-detail/DeleteEventDialog"
 import {
   ArrowLeft, ExternalLink, Eye, EyeOff, Trash2,
-  CalendarDays, MapPin, Tag, Building2, Globe, Hash, CheckCircle, XCircle
+  CalendarDays, MapPin, Tag, Building2, Globe, Hash, CheckCircle, XCircle, Flag
 } from "lucide-react"
 import { Button } from "@/shared/ui/button"
 import { Badge } from "@/shared/ui/badge"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { formatEventDate, formatEventTime } from "@/shared/utils/date"
+import { useSuspendEvent } from "@/shared/hooks/useSuspendEvent"
+import { ReportsPanel } from "./ReportsPanel"
+import { Loader2 } from "lucide-react"
 
 export function AdminEventDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { event, loading, error } = useEventDetail(id)
   const { deleteEvent, loading: deleting } = useDeleteEvent()
+  const { suspendEvent, loading: suspending } = useSuspendEvent()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  async function handleSuspend() {
+    if (!id) return
+    const success = await suspendEvent(id)
+    if (success) {
+      // Refresh page or event details to get updated state
+      window.location.reload()
+    }
+  }
 
   async function handleDelete() {
     if (!id) return
@@ -112,7 +125,14 @@ export function AdminEventDetailPage() {
             {/* Status */}
             <div className="rounded-xl border border-border/50 bg-card p-4 space-y-3">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Status</h3>
-              {event.isCancelled ? (
+              {event.isSuspended ? (
+                <div className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-destructive" />
+                  <Badge variant="outline" className="text-destructive bg-destructive/10 border-destructive/20">
+                    Suspended
+                  </Badge>
+                </div>
+              ) : event.isCancelled ? (
                 <div className="flex items-center gap-2">
                   <XCircle className="h-4 w-4 text-destructive" />
                   <Badge variant="outline" className="text-destructive bg-destructive/10 border-destructive/20">
@@ -129,15 +149,20 @@ export function AdminEventDetailPage() {
               )}
 
               <div className="flex gap-2 pt-1">
-                {event.isCancelled ? (
-                  <Button size="sm" variant="outline" className="gap-1.5 flex-1">
-                    <Eye className="h-4 w-4" />
-                    Reinstate Event
+                {event.isSuspended ? (
+                  <Button size="sm" variant="outline" className="gap-1.5 flex-1" disabled>
+                    <EyeOff className="h-4 w-4" />
+                    Suspended (Action final)
+                  </Button>
+                ) : event.isCancelled ? (
+                  <Button size="sm" variant="outline" className="gap-1.5 flex-1" disabled>
+                    <XCircle className="h-4 w-4" />
+                    Cancelled by Organizer
                   </Button>
                 ) : (
-                  <Button size="sm" variant="outline" className="gap-1.5 flex-1 text-amber-600 border-amber-500/30 hover:bg-amber-500/10">
-                    <EyeOff className="h-4 w-4" />
-                    Unpublish Event
+                  <Button size="sm" variant="outline" className="gap-1.5 flex-1 text-amber-600 border-amber-500/30 hover:bg-amber-500/10" onClick={handleSuspend} disabled={suspending}>
+                    {suspending ? <Loader2 className="h-4 w-4 animate-spin" /> : <EyeOff className="h-4 w-4" />}
+                    Suspend Event
                   </Button>
                 )}
               </div>
@@ -207,6 +232,17 @@ export function AdminEventDetailPage() {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Moderation Reports */}
+            <div className="rounded-xl border border-destructive/20 bg-card overflow-hidden flex flex-col">
+              <div className="bg-destructive/5 p-4 border-b border-destructive/10">
+                <h3 className="text-sm font-semibold text-destructive uppercase tracking-wider flex items-center gap-1.5">
+                  <Flag className="h-4 w-4" />
+                  User Reports
+                </h3>
+              </div>
+              <ReportsPanel eventId={event.id} />
             </div>
 
             {/* Location map */}

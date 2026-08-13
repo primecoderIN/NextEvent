@@ -9,12 +9,15 @@ import { LocationCard } from "@/app/(public)/event-detail/LocationCard"
 import { EventDetailSkeleton } from "@/app/(public)/event-detail/EventDetailSkeleton"
 import { ArrowLeft, Share2, Heart } from "lucide-react"
 import { Button } from "@/shared/ui/button"
+import { useAuth } from "@/features/auth/context/AuthContext"
+import { ReportEventModal } from "./ReportEventModal"
 
 export function EventDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { event, loading, error } = useEventDetail(id)
   const { t } = useTranslation(["eventDetail", "common"])
+  const { user } = useAuth()
 
   if (loading) return <EventDetailSkeleton />
 
@@ -54,6 +57,7 @@ export function EventDetailPage() {
           <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
             <Share2 className="h-4 w-4" />
           </Button>
+          {user && event && <ReportEventModal eventId={event.id} />}
         </div>
       </div>
 
@@ -77,6 +81,7 @@ export function EventDetailPage() {
             <Share2 className="h-4 w-4" />
             {t("actions.share")}
           </Button>
+          {user && event && <ReportEventModal eventId={event.id} />}
         </div>
       </div>
 
