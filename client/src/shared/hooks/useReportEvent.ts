@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { type AxiosError } from "axios"
 import { axiosHttpAgent } from "@/shared/lib/axios"
-import { type ApiResponse } from "@/types/ApiResponse"
+import type { ApiResponse } from "@/types/ApiResponse"
 import { toast } from "sonner"
 
 export function useReportEvent() {

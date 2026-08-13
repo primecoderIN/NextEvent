@@ -8,7 +8,7 @@ import { LocationCard } from "@/app/(public)/event-detail/LocationCard"
 import { EventDetailSkeleton } from "@/app/(public)/event-detail/EventDetailSkeleton"
 import { DeleteEventDialog } from "@/app/(public)/event-detail/DeleteEventDialog"
 import {
-  ArrowLeft, ExternalLink, Eye, EyeOff, Trash2,
+  ArrowLeft, ExternalLink, EyeOff, Trash2,
   CalendarDays, MapPin, Tag, Building2, Globe, Hash, CheckCircle, XCircle, Flag
 } from "lucide-react"
 import { Button } from "@/shared/ui/button"

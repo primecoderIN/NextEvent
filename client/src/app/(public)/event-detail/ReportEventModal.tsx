@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { useTranslation } from "react-i18next"
 import { Flag, Loader2 } from "lucide-react"
 import { Button } from "@/shared/ui/button"
 import { Textarea } from "@/shared/ui/textarea"
@@ -19,7 +18,6 @@ interface ReportEventModalProps {
 }
 
 export function ReportEventModal({ eventId }: ReportEventModalProps) {
-  const { t } = useTranslation(["eventDetail"])
   const [open, setOpen] = useState(false)
   const [reason, setReason] = useState("")
   const { reportEvent, loading } = useReportEvent()
