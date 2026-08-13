@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useMyOrganization } from "@/shared/hooks/useMyOrganization"
 import { useMyEvents } from "@/shared/hooks/useMyEvents"
 import { CalendarPlus, MapPin, CalendarDays, ExternalLink, Building2 } from "lucide-react"
@@ -88,7 +88,11 @@ export function OrganizerEventsPage() {
         ) : events.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {events.map((event) => (
-              <div key={event.id} className="group relative bg-card rounded-2xl border shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col">
+              <div
+                key={event.id}
+                onClick={() => navigate(RoutePaths.OrganizerEventDetailLink(event.id))}
+                className="group relative bg-card rounded-2xl border shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col cursor-pointer"
+              >
                 <div className="aspect-video bg-muted relative">
                   <img
                     src={getEventImage(event.category, event.id, "banner")}
@@ -120,14 +124,22 @@ export function OrganizerEventsPage() {
                   
                   <div className="mt-auto flex items-center gap-2 pt-4 border-t">
                     <RequirePermission permission={Permissions.EventsUpdate} resource={event}>
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => navigate(`/organizer/events/${event.id}/edit`)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={(e) => { e.stopPropagation(); navigate(RoutePaths.EventEditLink(event.id)) }}
+                      >
                         Edit
                       </Button>
                     </RequirePermission>
-                    <Button variant="ghost" size="icon" title="View Public Page" asChild>
-                      <Link to={`/events/${event.id}`} target="_blank">
-                        <ExternalLink className="w-4 h-4" />
-                      </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="View Public Page"
+                      onClick={(e) => { e.stopPropagation(); window.open(RoutePaths.EventDetailLink(event.id), "_blank") }}
+                    >
+                      <ExternalLink className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>

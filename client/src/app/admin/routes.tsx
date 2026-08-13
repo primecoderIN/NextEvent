@@ -8,6 +8,8 @@ const AdminDashboardPage = lazy(() => import("./dashboard/page").then((m) => ({ 
 const AdminOrganizationsPage = lazy(() => import("./organizations/page").then((m) => ({ default: m.AdminOrganizationsPage })))
 const AdminOrganizationDetailPage = lazy(() => import("./organizations/detail/page").then((m) => ({ default: m.AdminOrganizationDetailPage })))
 const CreateCategoryPage = lazy(() => import("./categories/page").then((m) => ({ default: m.default })))
+const AdminEventsPage = lazy(() => import("./events/page").then((m) => ({ default: m.AdminEventsPage })))
+const AdminEventDetailPage = lazy(() => import("./events/detail/page").then((m) => ({ default: m.AdminEventDetailPage })))
 
 function AdminPageLoader() {
   return (
@@ -74,6 +76,22 @@ export const adminRoutes: RouteObject[] = [
             element: (
               <Suspense fallback={<PageLoader />}>
                 <CreateCategoryPage />
+              </Suspense>
+            )
+          },
+          {
+            path: "events",
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <AdminEventsPage />
+              </Suspense>
+            )
+          },
+          {
+            path: "events/:id",
+            element: (
+              <Suspense fallback={<PageLoader />}>
+                <AdminEventDetailPage />
               </Suspense>
             )
           },

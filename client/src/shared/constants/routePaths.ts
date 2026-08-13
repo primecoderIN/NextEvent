@@ -18,12 +18,16 @@ export const RoutePaths = {
   OrganizerOrganizationDetail: "/organizer/organizations/:id",
   OrganizerDashboard: "/organizer/dashboard",
   OrganizerEvents: "/organizer/events",
+  OrganizerEventDetail: "/organizer/events/:id",
+  OrganizerEventDetailLink: (id: string) => `/organizer/events/${id}`,
 
   // ─── Admin ──────────────────────────────────────────────────────────────────
   Admin: "/admin",
 
   AdminDashboard: "/admin/dashboard",
   AdminEvents: "/admin/events",
+  AdminEventDetail: "/admin/events/:id",
+  AdminEventDetailLink: (id: string) => `/admin/events/${id}`,
   AdminCategories: "/admin/categories",
   AdminCategoryNew: "/admin/categories/new",
   AdminCategorySuggestions: "/admin/categories/suggestions",

@@ -1,36 +1,20 @@
-import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useEventDetail } from "@/shared/hooks/useEventDetail"
-import { useDeleteEvent } from "@/shared/hooks/useDeleteEvent"
 import { EventDetailHero } from "@/app/(public)/event-detail/EventDetailHero"
 import { EventDetailTabs } from "@/app/(public)/event-detail/EventDetailTabs"
 import { TicketPanel } from "@/app/(public)/event-detail/TicketPanel"
 import { OrganizerCard } from "@/app/(public)/event-detail/OrganizerCard"
 import { LocationCard } from "@/app/(public)/event-detail/LocationCard"
 import { EventDetailSkeleton } from "@/app/(public)/event-detail/EventDetailSkeleton"
-import { DeleteEventDialog } from "@/app/(public)/event-detail/DeleteEventDialog"
 import { ArrowLeft, Share2, Heart } from "lucide-react"
 import { Button } from "@/shared/ui/button"
-import { EventEditAction, EventDeleteAction } from "@/features/events/components/EventActions"
 
 export function EventDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { event, loading, error } = useEventDetail(id)
-  const { deleteEvent, loading: deleting, error: deleteError } = useDeleteEvent()
   const { t } = useTranslation(["eventDetail", "common"])
-
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-
-  async function handleDelete() {
-    if (!id) return
-    const result = await deleteEvent(id)
-    if (result === true) {
-      setShowDeleteDialog(false)
-      navigate("/", { replace: true })
-    }
-  }
 
   if (loading) return <EventDetailSkeleton />
 
@@ -51,14 +35,6 @@ export function EventDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <DeleteEventDialog
-        open={showDeleteDialog}
-        eventTitle={event.title}
-        loading={deleting}
-        error={deleteError}
-        onConfirm={handleDelete}
-        onCancel={() => setShowDeleteDialog(false)}
-      />
 
       {/* ── Top bar (mobile) ── */}
       <div className="flex items-center justify-between px-4 md:px-6 py-4 lg:hidden">
@@ -78,19 +54,6 @@ export function EventDetailPage() {
           <Button variant="outline" size="icon" className="rounded-full h-9 w-9">
             <Share2 className="h-4 w-4" />
           </Button>
-          <EventEditAction 
-            event={event} 
-            iconOnly 
-            className="rounded-full h-9 w-9 border-primary/40 text-primary hover:bg-primary/10" 
-            label={t("actions.editEvent")}
-          />
-          <EventDeleteAction 
-            event={event} 
-            iconOnly 
-            className="rounded-full h-9 w-9 border-destructive/40 text-destructive hover:bg-destructive/10"
-            onClick={() => setShowDeleteDialog(true)} 
-            label={t("actions.deleteEvent")}
-          />
         </div>
       </div>
 
@@ -114,15 +77,6 @@ export function EventDetailPage() {
             <Share2 className="h-4 w-4" />
             {t("actions.share")}
           </Button>
-          <EventEditAction 
-            event={event} 
-            label={t("actions.editEvent")} 
-          />
-          <EventDeleteAction 
-            event={event} 
-            onClick={() => setShowDeleteDialog(true)} 
-            label={t("actions.deleteEvent")} 
-          />
         </div>
       </div>
 

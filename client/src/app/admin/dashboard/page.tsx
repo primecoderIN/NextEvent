@@ -19,7 +19,7 @@ export function AdminDashboardPage() {
   const { data: eventsPage, isFetching } = useAdminEvents({
     page,
     pageSize: 8,
-    search,
+    q: search,
     status: activeTab,
     categoryId: selectedCategory,
   })

@@ -11,6 +11,7 @@ const OrganizerOrganizationDetailPage = lazy(() => import("./organizations/detai
 const OrganizerMyOrganizationPage = lazy(() => import("./organizations/page").then((m) => ({ default: m.OrganizerMyOrganizationPage })))
 const OrganizerDashboardPage = lazy(() => import("./dashboard/page").then((m) => ({ default: m.OrganizerDashboardPage })))
 const OrganizerEventsPage = lazy(() => import("./events/page").then((m) => ({ default: m.OrganizerEventsPage })))
+const OrganizerEventDetailPage = lazy(() => import("./events/detail/page").then((m) => ({ default: m.OrganizerEventDetailPage })))
 
 function PageLoader() {
   return (
@@ -74,6 +75,14 @@ export const organizerRoutes: RouteObject[] = [
     element: (
       <Suspense fallback={<PageLoader />}>
         <OrganizerEventsPage />
+      </Suspense>
+    )
+  },
+  {
+    path: RoutePaths.OrganizerEventDetail,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <OrganizerEventDetailPage />
       </Suspense>
     )
   },
