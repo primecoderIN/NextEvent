@@ -5,6 +5,7 @@ using NextEvent.Modules.Events.Application.Events.Commands.DeleteEvent;
 using NextEvent.Modules.Events.Application.Events.Commands.SuspendEvent;
 using NextEvent.Modules.Events.Application.Events.Commands.ReportEvent;
 using NextEvent.Modules.Events.Application.Events.Queries.GetEventsList;
+using NextEvent.Modules.Events.Application.Events.Queries.GetEventReports;
 using NextEvent.Modules.Events.Application.Events.Queries.GetEventDetailsById;
 using NextEvent.Modules.Events.Application.Events.DTOs;
 using NextEvent.Shared.Pagination;
@@ -220,5 +221,19 @@ public class EventsController(IMediator mediator) : BaseApiController(mediator)
     {
         await Mediator.Send(new ReportEventCommand { Id = id, Reason = dto.Reason }, cancellationToken);
         return OkResponse<object>(null!, "Event reported successfully");
+    }
+
+    /// <summary>
+    /// Gets all reports for a specific event. Restricted to platform admins.
+    /// </summary>
+    [Authorize(Roles = RoleConstants.Admin)]
+    [HttpGet("{id}/reports")]
+    [ProducesResponseType(typeof(ApiResponse<List<EventReportDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<List<EventReportDto>>>> GetEventReports(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var reports = await Mediator.Send(new GetEventReportsQuery { EventId = id }, cancellationToken);
+        return OkResponse(reports);
     }
 }

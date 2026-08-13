@@ -9,6 +9,7 @@ export type Event = {
   city: string;
   venue: string;
   isCancelled: boolean;
+  isSuspended: boolean;
   latitude: number;
   longitude: number;
   organizationId?: string | null;
