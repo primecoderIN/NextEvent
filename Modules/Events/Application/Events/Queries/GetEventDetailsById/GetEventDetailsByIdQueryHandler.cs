@@ -24,6 +24,7 @@ public class GetEventDetailsByIdQueryHandler(ISqlConnectionFactory connectionFac
                    e.City,
                    e.Venue,
                    e.IsCancelled,
+                   e.IsSuspended,
                    e.Latitude,
                    e.Longitude,
                    o.Id AS OrganizationId,

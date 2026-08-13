@@ -11,6 +11,7 @@ public class EventResponseDto
     public string City { get; set; } = string.Empty;
     public string Venue { get; set; } = string.Empty;
     public bool IsCancelled { get; set; }
+    public bool IsSuspended { get; set; }
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     

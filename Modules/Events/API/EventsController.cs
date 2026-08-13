@@ -2,6 +2,8 @@ using NextEvent.Shared.Constants;
 using NextEvent.Modules.Events.Application.Events.Commands.CreateEvent;
 using NextEvent.Modules.Events.Application.Events.Commands.EditEvent;
 using NextEvent.Modules.Events.Application.Events.Commands.DeleteEvent;
+using NextEvent.Modules.Events.Application.Events.Commands.SuspendEvent;
+using NextEvent.Modules.Events.Application.Events.Commands.ReportEvent;
 using NextEvent.Modules.Events.Application.Events.Queries.GetEventsList;
 using NextEvent.Modules.Events.Application.Events.Queries.GetEventDetailsById;
 using NextEvent.Modules.Events.Application.Events.DTOs;
@@ -186,5 +188,37 @@ public class EventsController(IMediator mediator) : BaseApiController(mediator)
             cancellationToken);
 
         return OkResponse<object>(null!, "Event deleted successfully");
+    }
+
+    /// <summary>
+    /// Suspends an event, hiding it from public queries. Restricted to platform admins.
+    /// </summary>
+    [Authorize(Roles = RoleConstants.Admin)]
+    [HttpPost("{id}/suspend")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<object>>> SuspendEvent(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        await Mediator.Send(new SuspendEventCommand { Id = id }, cancellationToken);
+        return OkResponse<object>(null!, "Event suspended successfully");
+    }
+
+    /// <summary>
+    /// Reports an event for moderation. Restricted to logged-in users who are not part of an organization.
+    /// </summary>
+    [Authorize]
+    [HttpPost("{id}/report")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<object>>> ReportEvent(
+        Guid id,
+        [FromBody] ReportEventDto dto,
+        CancellationToken cancellationToken)
+    {
+        await Mediator.Send(new ReportEventCommand { Id = id, Reason = dto.Reason }, cancellationToken);
+        return OkResponse<object>(null!, "Event reported successfully");
     }
 }

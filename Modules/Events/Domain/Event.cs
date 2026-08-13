@@ -50,6 +50,8 @@ public class Event
 
     public bool IsCancelled { get; set; }
 
+    public bool IsSuspended { get; set; }
+
     public double Latitude { get; set; }
 
     public double Longitude { get; set; }
@@ -98,6 +100,11 @@ public class Event
     public void ChangeIsCancelled(bool? value)
     {
         if (value.HasValue) IsCancelled = value.Value;
+    }
+
+    public void ChangeIsSuspended(bool? value)
+    {
+        if (value.HasValue) IsSuspended = value.Value;
     }
 
     public void ChangeLatitude(double? value)

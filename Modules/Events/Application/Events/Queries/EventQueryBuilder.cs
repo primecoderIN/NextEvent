@@ -75,7 +75,7 @@ public class EventQueryBuilder
 
     public EventQueryBuilder WithActiveOnly()
     {
-        _whereClauses.Add("e.IsCancelled = 0");
+        _whereClauses.Add("e.IsCancelled = 0 AND e.IsSuspended = 0");
         return this;
     }
 
@@ -114,6 +114,7 @@ public class EventQueryBuilder
                    e.City,
                    e.Venue,
                    e.IsCancelled,
+                   e.IsSuspended,
                    e.Latitude,
                    e.Longitude,
                    o.Id AS OrganizationId,

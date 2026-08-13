@@ -20,6 +20,7 @@ public class EventsDbContext(DbContextOptions<EventsDbContext> options)
     public DbSet<Event> Events { get; set; } = null!;
     public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<CategorySuggestion> CategorySuggestions { get; set; } = null!;
+    public DbSet<EventReport> EventReports => Set<EventReport>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
