@@ -1,13 +1,10 @@
-import { Building2, CheckCircle, Clock } from "lucide-react"
+import { Building2, Download, Search, Filter } from "lucide-react"
 import { useOrganizations } from "@/shared/hooks/useOrganizations"
 import { useApproveOrganization } from "@/shared/hooks/useApproveOrganization"
-import { Button } from "@/shared/ui/button"
-import { Badge } from "@/shared/ui/badge"
 import { toast } from "sonner"
-import { useNavigate } from "react-router-dom"
+import { OrganizationTable } from "@/features/organizations/components/OrganizationTable"
 
 export function AdminOrganizationsPage() {
-  const navigate = useNavigate()
   const page = 1
   const { data: orgsPage, isFetching } = useOrganizations(page, 10)
   const approveMutation = useApproveOrganization()
@@ -22,85 +19,69 @@ export function AdminOrganizationsPage() {
   }
 
   return (
-    <div className="flex-1 p-6 overflow-auto">
-      <div className="mb-6">
-        <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
-          <Building2 className="h-4 w-4" />
-          <span>Admin / Organizations</span>
+    <div className="flex-1 p-8 overflow-auto bg-background/50">
+      {/* Header section with gradient */}
+      <div className="mb-8 p-6 rounded-2xl border bg-gradient-to-r from-card to-card/50 shadow-sm relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
+        
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
+              <Building2 className="h-4 w-4" />
+              <span>Admin / Organizations</span>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight">Organizations</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage and monitor all organizations across the platform.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-card border hover:bg-accent transition-colors shadow-sm"
+            >
+              <Filter className="h-4 w-4" />
+              Filter
+            </button>
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 shadow-md"
+              style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
+            >
+              <Download className="h-4 w-4" />
+              Export
+            </button>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">Organizations</h1>
       </div>
 
-      <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-muted/50 text-muted-foreground text-xs uppercase">
-              <tr>
-                <th className="px-6 py-3 font-medium">Organization Name</th>
-                <th className="px-6 py-3 font-medium">Owner</th>
-                <th className="px-6 py-3 font-medium">Status</th>
-                <th className="px-6 py-3 font-medium">Created</th>
-                <th className="px-6 py-3 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {isFetching ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-muted-foreground">
-                    Loading organizations...
-                  </td>
-                </tr>
-              ) : orgsPage?.items.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-muted-foreground">
-                    No organizations found.
-                  </td>
-                </tr>
-              ) : (
-                orgsPage?.items.map((org) => (
-                  <tr key={org.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-6 py-4 font-medium">{org.name}</td>
-                    <td className="px-6 py-4">{org.ownerDisplayName || "Unknown"}</td>
-                    <td className="px-6 py-4">
-                      {org.status === "pending_verification" ? (
-                        <Badge variant="outline" className="text-amber-600 bg-amber-500/10 border-amber-500/20">
-                          <Clock className="w-3 h-3 mr-1" /> Pending
-                        </Badge>
-                      ) : org.status === "active" ? (
-                        <Badge variant="outline" className="text-emerald-600 bg-emerald-500/10 border-emerald-500/20">
-                          <CheckCircle className="w-3 h-3 mr-1" /> Active
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">{org.status}</Badge>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-muted-foreground">
-                      {new Date(org.createdAtUtc).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-2">
-                      <Button 
-                        size="sm" 
-                        variant="secondary"
-                        onClick={() => navigate(`/admin/organizations/${org.id}`)}
-                      >
-                        View
-                      </Button>
-                      {org.status === "pending_verification" && (
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleApprove(org.id)}
-                          disabled={approveMutation.isPending}
-                        >
-                          Approve
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      {/* Controls Bar */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input 
+            type="text"
+            placeholder="Search organizations by name or email..."
+            className="w-full pl-9 pr-4 py-2.5 bg-card border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+          />
         </div>
+        <div className="flex items-center gap-3">
+          <select className="px-4 py-2.5 bg-card border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm appearance-none cursor-pointer pr-10 relative">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="pending_verification">Pending</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Table Container */}
+      <div className="bg-card rounded-2xl border shadow-sm overflow-hidden">
+        <OrganizationTable 
+          organizations={orgsPage?.items || []} 
+          isFetching={isFetching}
+          onApprove={handleApprove}
+          isApproving={approveMutation.isPending}
+        />
       </div>
     </div>
   )

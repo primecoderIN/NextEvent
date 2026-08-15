@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, Link } from "react-router-dom"
 import { useEventDetail } from "@/shared/hooks/useEventDetail"
 import { useDeleteEvent } from "@/shared/hooks/useDeleteEvent"
 import { EventDetailHero } from "@/app/(public)/event-detail/EventDetailHero"
@@ -17,6 +17,7 @@ import { RoutePaths } from "@/shared/constants/routePaths"
 import { formatEventDate, formatEventTime } from "@/shared/utils/date"
 import { useSuspendEvent } from "@/shared/hooks/useSuspendEvent"
 import { ReportsPanel } from "./ReportsPanel"
+import { OrganizationEventsPanel } from "./OrganizationEventsPanel"
 import { Loader2 } from "lucide-react"
 
 export function AdminEventDetailPage() {
@@ -215,13 +216,13 @@ export function AdminEventDetailPage() {
                     <span className="text-muted-foreground">Organization ID</span>
                     <span className="text-foreground break-all select-all">{event.organizationId}</span>
                     {event.organizationSlug && (
-                      <a
-                        href={`/admin/organizations`}
+                      <Link
+                        to={`/admin/organizations/${event.organizationId}`}
                         className="flex items-center gap-1 text-primary hover:underline mt-0.5 not-mono"
                       >
                         <Globe className="h-3 w-3" />
                         <span className="font-sans">View Organization</span>
-                      </a>
+                      </Link>
                     )}
                   </div>
                 )}
@@ -233,6 +234,11 @@ export function AdminEventDetailPage() {
                 )}
               </div>
             </div>
+
+            {/* Other Events by Organization */}
+            {event.organizationId && (
+              <OrganizationEventsPanel organizationId={event.organizationId} currentEventId={event.id} />
+            )}
 
             {/* Moderation Reports */}
             <div className="rounded-xl border border-destructive/20 bg-card overflow-hidden flex flex-col">

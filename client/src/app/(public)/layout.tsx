@@ -29,9 +29,9 @@ export function PublicLayout() {
   }), [searchParams])
 
   const location = useLocation()
-  const isOrganizerRoute = location.pathname.startsWith("/organizer")
+  const isHomeRoute = location.pathname === RoutePaths.Home
 
-  const { events } = useEvents(filters, { enabled: !isOrganizerRoute })
+  const { events } = useEvents(filters, { enabled: isHomeRoute })
   const { user, loading } = useAuth()
 
   // While auth is resolving, keep layout stable to avoid shift
@@ -43,8 +43,8 @@ export function PublicLayout() {
         {/* Left sidebar — only for authenticated users */}
         {isAuthenticated && <DesktopSidebar />}
 
-        {/* Right sidebar — shown for all users on xl+ */}
-        {!isOrganizerRoute && <RightSidebar events={events} />}
+        {/* Right sidebar — shown for all users on xl+ but only on Home page */}
+        {isHomeRoute && <RightSidebar events={events} />}
 
         {/* Main content area
             - Authenticated: offset by left sidebar (lg:ml-56) + right sidebar (xl:mr-80)
@@ -52,7 +52,7 @@ export function PublicLayout() {
         <div
           className={`${
             isAuthenticated ? "lg:ml-56" : ""
-          } ${!isOrganizerRoute ? "xl:mr-80" : ""} flex flex-col min-h-screen`}
+          } ${isHomeRoute ? "xl:mr-80" : ""} flex flex-col min-h-screen`}
         >
           {/* Top navbar:
               - Authenticated: mobile only (desktop uses DesktopSidebar)

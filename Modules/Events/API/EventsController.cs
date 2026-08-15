@@ -14,6 +14,7 @@ using NextEvent.Modules.Identity.Domain;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using NextEvent.Shared.Exceptions;
 
 namespace NextEvent.Modules.Events.API;
 // Using explicit routing ("api/events") rather than "[controller]" prevents 
@@ -112,6 +113,18 @@ public class EventsController(IMediator mediator) : BaseApiController(mediator)
         var eventEntity = await Mediator.Send(
             new GetEventDetailsByIdQuery { Id = id },
             cancellationToken);
+
+        if (eventEntity.IsSuspended)
+        {
+            var isUserAdmin = User.IsInRole(RoleConstants.Admin);
+            var userOrgIdClaim = User.Claims.FirstOrDefault(c => c.Type == "OrganizationId")?.Value;
+            var isUserOrganizer = eventEntity.OrganizationId != null && userOrgIdClaim == eventEntity.OrganizationId.ToString();
+            
+            if (!isUserAdmin && !isUserOrganizer)
+            {
+                throw new NotFoundException("Event", id);
+            }
+        }
 
         return OkResponse(eventEntity, "Event retrieved successfully");
     }

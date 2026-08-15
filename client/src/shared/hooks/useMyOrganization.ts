@@ -16,7 +16,7 @@ export function useMyOrganization() {
   return useQuery({
     queryKey: MY_ORGANIZATION_QUERY_KEY,
     queryFn: fetchMyOrganization,
-    enabled: !!user,
+    enabled: !!user && user.activeProfile === "Organizer",
     retry: false, // Don't retry if it fails (e.g. 404 because user doesn't have an org)
   })
 }

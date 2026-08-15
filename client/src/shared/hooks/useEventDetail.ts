@@ -17,6 +17,7 @@ export function useEventDetail(id: string | undefined) {
     queryKey: eventDetailQueryKey(id!),
     queryFn: () => fetchEventDetail(id!),
     enabled: !!id,
+    retry: false,
   })
 
   return { event: event ?? null, loading: isPending, error: isError }

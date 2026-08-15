@@ -21,7 +21,7 @@ export function EventDetailPage() {
 
   if (loading) return <EventDetailSkeleton />
 
-  if (error || !event) {
+  if (error || !event || event.isSuspended) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6">
         <div className="text-6xl">😕</div>

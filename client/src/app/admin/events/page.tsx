@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import { useAdminEvents, type EventStatusFilter } from "@/shared/hooks/useAdminEvents"
 import { useCategories } from "@/shared/hooks/useCategories"
 import { useOrganizations } from "@/shared/hooks/useOrganizations"
@@ -6,9 +7,12 @@ import { useDebounce } from "@/shared/hooks/useDebounce"
 import { EventsTable } from "@/features/events/components/EventTable"
 
 export function AdminEventsPage() {
+  const [searchParams] = useSearchParams()
+  const initialOrganizationId = searchParams.get("organizationId") || ""
+
   const [activeTab, setActiveTab] = useState<string>("all")
   const [selectedCategory, setSelectedCategory] = useState("")
-  const [selectedOrganization, setSelectedOrganization] = useState("")
+  const [selectedOrganization, setSelectedOrganization] = useState(initialOrganizationId)
   const [selectedCity, setSelectedCity] = useState("")
   const [searchRaw, setSearchRaw] = useState("")
   const [page, setPage] = useState(1)
