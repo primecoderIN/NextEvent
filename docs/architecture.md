@@ -17,6 +17,42 @@ NextEvent/
 Each module follows **Clean Architecture**: `Domain → Application → Persistence → API`.
 Modules share the same SQL Server database but use **isolated schemas** (`evt`, `org`, `identity`).
 
+### Architecture Dependency Map
+
+```mermaid
+graph TD
+    classDef client fill:#e0f7fa,stroke:#006064,stroke-width:2px;
+    classDef host fill:#ede7f6,stroke:#311b92,stroke-width:2px;
+    classDef module fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+    classDef shared fill:#f1f8e9,stroke:#33691e,stroke-width:2px;
+
+    React[React 19 SPA]:::client
+    API[API Host / Composition Root]:::host
+    
+    subgraph Modules [Isolated Business Modules]
+        Events[Events Module<br>evt schema]:::module
+        Orgs[Organizations Module<br>org schema]:::module
+        Identity[Identity Module<br>identity schema]:::module
+        AI[AI Module]:::module
+    end
+    
+    Shared[Shared Library]:::shared
+    
+    React -->|HTTP / JSON| API
+    API --> Events
+    API --> Orgs
+    API --> Identity
+    API --> AI
+    
+    Events -.->|No Project Reference| Orgs
+    Events -.->|No Project Reference| Identity
+    
+    Events ===> Shared
+    Orgs ===> Shared
+    Identity ===> Shared
+    AI ===> Shared
+```
+
 ---
 
 ## 2. Backend Architecture
@@ -36,6 +72,40 @@ Controllers never contain business logic. Every request is dispatched via `IMedi
 ### 2.3 MediatR Pipeline Behaviors
 Requests pass through behaviors before reaching handlers:
 1. **`ValidationBehavior<TRequest, TResponse>`** — runs registered FluentValidation validators. Throws `ValidationException` on failure. Handlers never see invalid data.
+
+### Request Lifecycle Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client
+    participant Controller as API Controller
+    participant MediatR as MediatR Pipeline
+    participant Validator as FluentValidation
+    participant Handler as Command Handler
+    participant DB as SQL Server (EF/Dapper)
+    participant Middleware as Exception Middleware
+
+    Client->>Controller: HTTP Request (e.g. POST /api/events)
+    Controller->>MediatR: Send Command/Query
+    Note over MediatR: Pipeline runs ValidationBehavior
+    MediatR->>Validator: Execute Validation Rules
+    
+    alt Validation Fails
+        Validator-->>MediatR: Return Validation Errors
+        MediatR-->>Controller: Throw ValidationException
+        Controller-->>Middleware: Catch Exception
+        Middleware-->>Client: Standardized ApiResponse (400 Bad Request)
+    else Validation Passes
+        Validator-->>MediatR: Validation OK
+        MediatR->>Handler: Dispatch to Handler
+        Handler->>DB: Query or Mutate Data
+        DB-->>Handler: Data Result
+        Handler-->>MediatR: CommandResult / DTO
+        MediatR-->>Controller: Return Result
+        Controller-->>Client: Standardized ApiResponse (200/201 Success)
+    end
+```
 
 ### 2.4 Security Architecture
 

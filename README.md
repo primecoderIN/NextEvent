@@ -95,10 +95,13 @@ You can log in to explore the different portal experiences:
 
 For a deeper dive into the architectural decisions, database schema, and API contracts, please refer to the dedicated documentation files:
 
-* [**Backend Architecture Guide**](./docs/architecture.md) — CQRS, Dependency Flow, Security Patterns, and Error Envelopes.
-* [**Database Schema & Entity Relationships**](./docs/database-schema.md) — Detailed overview of schemas, FKs, and Soft Delete strategies.
-* [**API Endpoints Catalog**](./docs/api-endpoints.md) — Route summaries and authorization requirements.
-* [**Backend Onboarding Guide**](./docs/backend-onboarding.md) — .NET crash course for developers coming from other ecosystems.
+* [**General Onboarding & Setup**](./docs/ONBOARDING.md) — Quick-start guide, local environment configuration, and test account credentials.
+* [**Project Folder Structure**](./docs/folder-structure.md) — Complete annotated directory tree of the backend modules and frontend features.
+* [**Backend Architecture & Patterns**](./docs/architecture.md) — MediatR request lifecycles, security patterns (BOLA/BFLA prevention), and project dependency rules.
+* [**Backend Onboarding & .NET Course**](./docs/backend-onboarding.md) — In-depth C#/.NET crash course for developers transitioning from JS/Go/Python.
+* [**Frontend Onboarding Guide**](./docs/frontend-onboarding.md) — React 19 architecture, routing, custom React Query hooks, form diffing, and translation structures.
+* [**API Endpoints Catalog**](./docs/api-endpoints.md) — A comprehensive list of routes, parameters, authorization checks, and standard envelopes.
+* [**Database Schema & Migrations**](./docs/database-schema.md) — Detailed mapping of module schemas, indexes, soft delete behaviors, and migration histories.
 
 ---
 
