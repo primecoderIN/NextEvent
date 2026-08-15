@@ -3,6 +3,7 @@ using NextEvent.Modules.Events.Application.Events.Commands.CreateEvent;
 using NextEvent.Modules.Events.Application.Events.Commands.EditEvent;
 using NextEvent.Modules.Events.Application.Events.Commands.DeleteEvent;
 using NextEvent.Modules.Events.Application.Events.Commands.SuspendEvent;
+using NextEvent.Modules.Events.Application.Events.Commands.UnsuspendEvent;
 using NextEvent.Modules.Events.Application.Events.Commands.ReportEvent;
 using NextEvent.Modules.Events.Application.Events.Queries.GetEventsList;
 using NextEvent.Modules.Events.Application.Events.Queries.GetEventReports;
@@ -205,6 +206,21 @@ public class EventsController(IMediator mediator) : BaseApiController(mediator)
     {
         await Mediator.Send(new SuspendEventCommand { Id = id }, cancellationToken);
         return OkResponse<object>(null!, "Event suspended successfully");
+    }
+
+    /// <summary>
+    /// Unsuspends an event, making it visible to public queries again. Restricted to platform admins.
+    /// </summary>
+    [Authorize(Roles = RoleConstants.Admin)]
+    [HttpPost("{id}/unsuspend")]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse<object>>> UnsuspendEvent(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        await Mediator.Send(new UnsuspendEventCommand { Id = id }, cancellationToken);
+        return OkResponse<object>(null!, "Event suspension revoked successfully");
     }
 
     /// <summary>

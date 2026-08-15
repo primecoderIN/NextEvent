@@ -1,8 +1,11 @@
-import { Search, ChevronDown, Download, Calendar, ChevronLeft, ChevronRight } from "lucide-react"
-import { EventViewAction, EventEditAction, EventBanAction } from "@/features/events/components/EventActions"
+import { Search, ChevronDown, Download, Calendar, ChevronLeft, ChevronRight, EyeOff, Eye } from "lucide-react"
 import { StatusBadge } from "../EventStatusBadge"
 import { CategoryBadge } from "@/features/categories/components/CategoryBadge"
 import { formatEventDate, formatEventTime } from "@/shared/utils/date"
+import { useSuspendEvent } from "@/shared/hooks/useSuspendEvent"
+import { useUnsuspendEvent } from "@/shared/hooks/useUnsuspendEvent"
+import { Link } from "react-router-dom"
+import { RoutePaths } from "@/shared/constants/routePaths"
 
 const STATUS_TABS: { label: string; value: string }[] = [
   { label: "All Events", value: "all" },
@@ -25,6 +28,11 @@ export interface EventsTableProps {
   selectedCategory: string
   setSelectedCategory: (val: string) => void
   categories?: any[]
+  selectedOrganization?: string
+  setSelectedOrganization?: (val: string) => void
+  organizations?: any[]
+  selectedCity?: string
+  setSelectedCity?: (val: string) => void
 }
 
 export function EventsTable({
@@ -41,7 +49,15 @@ export function EventsTable({
   selectedCategory,
   setSelectedCategory,
   categories,
+  selectedOrganization,
+  setSelectedOrganization,
+  organizations,
+  selectedCity,
+  setSelectedCity,
 }: EventsTableProps) {
+  const { suspendEvent, loading: suspending } = useSuspendEvent()
+  const { unsuspendEvent, loading: unsuspending } = useUnsuspendEvent()
+
   const handleTabChange = (tab: string) => {
     setActiveTab(tab)
     setPage(1)
@@ -112,6 +128,41 @@ export function EventsTable({
           <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
         </div>
 
+        {setSelectedOrganization && organizations && (
+          <div className="relative">
+            <select
+              value={selectedOrganization || ""}
+              onChange={(e) => { setSelectedOrganization(e.target.value); setPage(1) }}
+              className="appearance-none pl-3 pr-8 py-1.5 text-sm bg-muted/50 border border-border/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+            >
+              <option value="">All Organizations</option>
+              {organizations.map((o) => (
+                <option key={o.id} value={o.id}>{o.name}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          </div>
+        )}
+
+        {setSelectedCity && (
+          <div className="relative">
+            <select
+              value={selectedCity || ""}
+              onChange={(e) => { setSelectedCity(e.target.value); setPage(1) }}
+              className="appearance-none pl-3 pr-8 py-1.5 text-sm bg-muted/50 border border-border/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+            >
+              <option value="">All Cities</option>
+              <option value="Bangalore">Bangalore</option>
+              <option value="Mumbai">Mumbai</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Hyderabad">Hyderabad</option>
+              <option value="Chennai">Chennai</option>
+              <option value="Pune">Pune</option>
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          </div>
+        )}
+
         <button
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
           style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)" }}
@@ -131,28 +182,30 @@ export function EventsTable({
               <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Category</th>
               <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Date</th>
               <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
-              <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Actions</th>
+              <th className="text-center px-4 py-3 font-semibold text-muted-foreground">Reports</th>
+              <th className="text-right px-4 py-3 font-semibold text-muted-foreground">Action</th>
             </tr>
           </thead>
           <tbody className={`divide-y divide-border/30 transition-opacity duration-150 ${isFetching ? "opacity-60" : "opacity-100"}`}>
             {events.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
                   {isFetching ? "Loading…" : "No events found."}
                 </td>
               </tr>
             ) : (
-              events.map((event, idx) => {
+              events.map((event) => {
                 const dateStr = formatEventDate(event.date, event.timeZoneId)
                 const timeStr = formatEventTime(event.date, event.timeZoneId)
-                const status = event.isCancelled ? "unpublished" : "published"
-                const shortId = `EVT-${String(idx + 1 + (page - 1) * 8).padStart(4, "0")}`
+                const status = event.isSuspended ? "unpublished" : event.isCancelled ? "cancelled" : "published"
+                const shortId = `EVT-${event.id.substring(0, 6).toUpperCase()}`
+                const isReported = event.reportCount > 0
 
                 return (
-                  <tr key={event.id} className="hover:bg-muted/30 transition-colors group">
+                  <tr key={event.id} className={`hover:bg-muted/30 transition-colors group ${isReported ? "border-l-4 border-l-red-500" : "border-l-4 border-l-transparent"}`}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0 overflow-hidden">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
                           <Calendar className="h-5 w-5 text-primary/60" />
                         </div>
                         <div>
@@ -163,7 +216,7 @@ export function EventsTable({
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{event.venue || "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{event.organizationName || "—"}</td>
                     <td className="px-4 py-3">
                       <CategoryBadge name={event.category} />
                     </td>
@@ -174,23 +227,45 @@ export function EventsTable({
                     <td className="px-4 py-3">
                       <StatusBadge status={status} />
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
-                        <EventViewAction 
-                          event={event as any} 
-                          iconOnly 
-                          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border-0" 
-                        />
-                        <EventEditAction 
-                          event={event as any} 
-                          iconOnly 
-                          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border-0" 
-                        />
-                        <EventBanAction 
-                          event={event as any} 
-                          iconOnly 
-                          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors border-0" 
-                        />
+                    <td className="px-4 py-3 text-center">
+                      <span className={`font-semibold ${event.reportCount > 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                        {event.reportCount || 0}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          to={RoutePaths.AdminEventDetailLink(event.id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center h-7 w-7 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                          title="View Event Details (Opens in new tab)"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                        {!event.isCancelled && (
+                          event.isSuspended ? (
+                            <button
+                              onClick={() => unsuspendEvent(event.id)}
+                              disabled={unsuspending}
+                              className="inline-flex items-center justify-center gap-1.5 w-28 py-1.5 text-xs font-medium rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Publish Event"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              Publish
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => suspendEvent(event.id)}
+                              disabled={suspending}
+                              className="inline-flex items-center justify-center gap-1.5 w-28 py-1.5 text-xs font-medium rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Unpublish Event"
+                            >
+                              <EyeOff className="h-3.5 w-3.5" />
+                              Unpublish
+                            </button>
+                          )
+                        )}
                       </div>
                     </td>
                   </tr>

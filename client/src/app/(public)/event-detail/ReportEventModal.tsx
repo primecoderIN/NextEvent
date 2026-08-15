@@ -41,7 +41,7 @@ export function ReportEventModal({ eventId }: ReportEventModalProps) {
           Report Event
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Report Event</DialogTitle>
@@ -54,7 +54,7 @@ export function ReportEventModal({ eventId }: ReportEventModalProps) {
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="E.g. Inappropriate content, spam, fake event..."
-              className="col-span-3 min-h-[100px]"
+              className="col-span-3 min-h-24"
               required
             />
           </div>

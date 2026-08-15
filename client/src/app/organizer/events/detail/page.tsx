@@ -47,7 +47,7 @@ export function OrganizerEventDetailPage() {
             My Events
           </Button>
           <span className="text-muted-foreground">/</span>
-          <span className="text-sm font-medium truncate max-w-[200px]">{event.title}</span>
+          <span className="text-sm font-medium truncate max-w-52">{event.title}</span>
         </div>
 
         <div className="flex items-center gap-2">
