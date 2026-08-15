@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="./client/public/logo.svg" alt="NextEvent Logo" width="100" />
   <h1>NextEvent</h1>
   <p><strong>A Next-Generation Event Discovery & Management Platform</strong></p>
 
@@ -11,6 +10,10 @@
     <img src="https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
   </p>
 </div>
+
+<br />
+
+![NextEvent Application Preview](./docs/images/preview.png)
 
 <br />
 
