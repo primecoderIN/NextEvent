@@ -1,112 +1,142 @@
 # Architecture Guide
 
-This section explains the core architectural decisions made in the NextEvent platform, covering both the **Backend** (ASP.NET Core Web API) and **Frontend** (React SPA). It is designed to answer the "Why" and "How" for developers working on the codebase.
+## 1. Solution Structure
 
-## 1. Backend Architecture (ASP.NET Core)
-
-The backend is structured using **Clean Architecture** combined with the **CQRS (Command Query Responsibility Segregation)** pattern.
-
-### 1.1 Clean Architecture Layers & Dependency Flow
-The core principle of Clean Architecture is **Dependency Inversion**: the inner layers (containing business rules) must never depend on outer layers (containing infrastructure, frameworks, or databases). Source code dependencies can only point *inward*.
-* **Domain (`Domain`)**: At the absolute center of the application. It contains the core business entities (e.g., `Event`, `User`), value objects, and domain logic. It has zero dependencies on other projects. This ensures business entities remain pure and untied to specific database technologies (like EF Core), allowing raw business rules to be tested instantly without mocking a database.
-* **Application (`Application`)**: Contains the business use cases (Commands and Queries) and defines the interfaces for external services (e.g., `IAppDBContext`). It depends only on the Domain layer. The Application layer defines *what* happens without caring *how* data is saved (SQL vs NoSQL) or requested (HTTP vs gRPC).
-* **Persistence (`Persistence`)**: The infrastructure layer responsible for data access. It implements the interfaces defined by the Application layer (e.g., `AppDBContext` implements `IAppDBContext`). It depends on the Application layer. This decoupling means swapping from SQL Server to PostgreSQL only requires changing this layer.
-* **API (`API`)**: The presentation layer. It acts as the "Composition Root" in `Program.cs`, wiring up the Dependency Injection (DI) container. It depends on the Application and Persistence layers to dispatch HTTP requests via MediatR and register the DB context.
-
-### 1.2 CQRS with MediatR
-Instead of traditional fat controllers or sprawling service classes, we use **CQRS** implemented via **MediatR**.
-* **Commands**: Actions that mutate state (e.g., `CreateEventCommand`, `DeleteEventCommand`).
-* **Queries**: Actions that retrieve state without mutating it (e.g., `GetEventsListQuery`).
-* **Why:** Each handler has exactly one reason to change (Single Responsibility). Code is organized by feature rather than technical concern. Cross-cutting concerns are handled via MediatR pipeline behaviors.
-
-### 1.3 Validation Pipeline Behavior
-We use **FluentValidation** to validate requests. However, validators are *never* explicitly invoked inside the handlers.
-* **How:** An open generic MediatR `ValidationBehavior<TRequest, TResponse>` intercepts requests before they reach the handler. If validation fails, it throws a `ValidationException`.
-* **Why:** Handlers remain pure. They assume the data is valid by the time it reaches them.
-
-### 1.4 Global Exception Handling (ExceptionMiddleware)
-The API uses a custom middleware (`ExceptionMiddleware.cs`) that wraps the entire HTTP pipeline in a `try/catch` block.
-* **How:** It catches domain exceptions like `ValidationException`, `NotFoundException`, and `BusinessRuleException` and maps them to appropriate HTTP status codes (`400`, `404`, `409`) with a standardized JSON response envelope (`ApiResponse<T>`).
-* **Why:** Controllers do not need to contain `try/catch` blocks or return `BadRequest()` manually.
-
-### 1.5 Explicit Routing & Controller Base
-Controllers inherit from `BaseApiController`, but routing is explicitly defined on each class (e.g., `[Route("api/events")]`).
-* **Why:** Implicit routing based on class names is brittle. Explicit routing ensures URLs are decoupled from C# class names, preventing silent contract breaks when refactoring.
-
-### 1.6 Entity Framework & Guid Primary Keys
-The `Event` entity uses a `Guid` as its primary key (`Id`).
-* **Why:** `Guid` is natively supported by most databases, allows the Application layer to generate IDs *before* saving, and prevents predictability (unlike integers).
-
----
-
-## 2. Frontend Architecture (React SPA)
-
-The frontend is a Single Page Application (SPA) built for performance, modularity, and modern aesthetics.
-
-### 2.1 Core Framework (React 19 + Vite)
-* **React 19**: Used for building the UI component tree.
-* **Vite**: Replaces Create React App/Webpack. It uses native ES modules for near-instant dev server startup and extremely fast Hot Module Replacement (HMR).
-
-### 2.2 Routing (React Router v7 Data Router)
-We use the **React Router v7 Data Router** (`createBrowserRouter`) to manage client-side navigation. 
-* **Decentralized Configuration:** Routing is implemented using a **Feature-Sliced Design (FSD)** approach. Each portal (`admin`, `organizer`, `public`) owns its specific `routes.tsx` configuration array. The global router securely composes the top-level route tree.
-* **Why:** The object-based Data Router unlocks advanced features like parallel data loading, actions, and strict error boundary isolation.
-
-### 2.3 Styling Strategy (Tailwind CSS v4 + Radix UI)
-The project eschews heavy component libraries in favor of a **hand-rolled, utility-first** approach.
-* **Tailwind CSS**: Utility classes allow for rapid styling directly in the markup.
-* **Radix UI**: Provides unstyled, accessible primitives (Dialogs, Selects, Popovers) handling complex ARIA attributes and focus management.
-* **shadcn-style Architecture**: The `components/ui/` folder contains reusable components that wrap Radix primitives with Tailwind classes.
-* **Why:** Maximum customizability. We own the component code entirely without fighting a vendor library's internal CSS specificity.
-
-### 2.4 State Management & Data Fetching (React Query)
-**TanStack React Query** is the primary driver for fetching, caching, and updating asynchronous data from the API.
-* **Why:** It abstract away race conditions, manual caching, and loading/error state management inherent in traditional `useEffect` fetching.
-* **Note on isolation:** Data fetching hooks are strictly isolated by bounded context (e.g., `useEvents` for public, `useMyEvents` for organizers, `useAdminEvents` for admins). This prevents data leakage and ensures clean frontend components that don't juggle roles.
-
-### 2.5 Form Handling (React Hook Form + Zod)
-Forms are managed using **React Hook Form** coupled with **Zod** schema validation.
-* **Why:** React Hook Form minimizes re-renders, while Zod provides strict TypeScript type-safety ensuring form data matches the expected API shape.
-
-### 2.6 Localization (i18next)
-The client uses `react-i18next` for internationalization.
-* **Why:** Allows dynamic UI translation via HTTP backend loading and automatic browser language detection.
-
----
-
-## 3. API Response Envelope
-
-Every endpoint returns the same JSON shape regardless of outcome:
-
-```json
-{
-  "success": true,
-  "message": "Request completed successfully",
-  "data": { ... },
-  "errors": {}
-}
+```
+NextEvent/
+├── API/                    # ASP.NET Core Web API — Composition Root
+├── Modules/
+│   ├── Events/             # Events, Categories, CategorySuggestions, EventReports
+│   ├── Organizations/      # Organizations, Members, Roles, Permissions
+│   ├── Identity/           # Users, Auth, JWT, RefreshToken, SwitchProfile
+│   └── AI/                 # Gemini Pro description generation
+├── Shared/                 # Cross-cutting library (exceptions, pagination, constants)
+└── client/                 # React 19 + TypeScript + Vite 8 SPA
 ```
 
-| Field | Type | Description |
-|---|---|---|
-| `success` | `bool` | `true` for 2xx responses, `false` for all errors |
-| `message` | `string` | Human-readable summary |
-| `data` | `T \| null` | Response payload (null on error) |
-| `errors` | `{ [field]: string[] }` | Validation errors keyed by property name |
-
-### Error HTTP Status Codes
-
-| Exception | HTTP Status | Scenario |
-|---|---|---|
-| `ValidationException` | `400 Bad Request` | FluentValidation failures |
-| `NotFoundException` | `404 Not Found` | Resource does not exist |
-| `BusinessRuleException` | `409 Conflict` | Domain rule violated |
-| Unhandled `Exception` | `500 Internal Server Error` | Unexpected server error |
+Each module follows **Clean Architecture**: `Domain → Application → Persistence → API`.
+Modules share the same SQL Server database but use **isolated schemas** (`evt`, `org`, `identity`).
 
 ---
 
-## 4. Validation
+## 2. Backend Architecture
 
-Validation is handled automatically via a **MediatR pipeline behavior** (`ValidationBehavior<TRequest, TResponse>`). Every command/query is validated against its registered FluentValidation validator before reaching the handler — no manual wiring needed in individual handlers.
+### 2.1 Modular Monolith
+Every business domain lives in its own self-contained module under `Modules/`.
 
-Validation error codes are centralised in `Application/Events/Constants/ValidationErrors.cs` as constants (e.g. `TITLE_REQUIRED`, `LATITUDE_OUT_OF_RANGE`) so the frontend can rely on stable, localisation-friendly keys rather than free-form messages.
+- **Isolated DbContexts**: `EventsDbContext`, `OrganizationsDbContext`, `IdentityDbContext` — each owns its schema and migrations independently.
+- **Cross-Schema Navigation**: Cross-module FK relationships (e.g. `Event.OrganizationId → org.Organizations`) are mapped using `.ToTable(..., t => t.ExcludeFromMigrations())` — allowing EF Core navigation without duplicate migration scripts.
+- **Multi-Assembly DI**: MediatR handlers, FluentValidation validators, and Swagger XML comments are registered dynamically by scanning all module assemblies at startup.
+
+### 2.2 CQRS with MediatR
+Controllers never contain business logic. Every request is dispatched via `IMediator`:
+- **Commands** — mutate state: `CreateEvent`, `EditEvent`, `DeleteEvent`, `SuspendEvent`, `UnsuspendEvent`, `ReportEvent`, `CreateOrganization`, `ApproveOrganization`, `InviteOrganizationMember`, `AcceptOrganizationInvitation`, `Login`, `Register`, `SwitchProfile`, etc.
+- **Queries** — read state: `GetEventsList`, `GetMyEventsList`, `GetAdminEventsList`, `GetEventDetailsById`, `GetEventReports`, `GetMyOrganization`, `GetOrganizationMembers`, `GetMyInvitations`, etc.
+
+### 2.3 MediatR Pipeline Behaviors
+Requests pass through behaviors before reaching handlers:
+1. **`ValidationBehavior<TRequest, TResponse>`** — runs registered FluentValidation validators. Throws `ValidationException` on failure. Handlers never see invalid data.
+
+### 2.4 Security Architecture
+
+#### BFLA Prevention (Broken Function Level Authorization)
+All organizer mutation endpoints are gated at the controller level with `[Authorize(Policy = "ActiveOrganizer")]`. This requires both the `Organizer` ASP.NET Identity role AND the `Organizer` active profile claim in the JWT — instantly rejecting members or anonymous callers before any handler logic executes.
+
+#### BOLA Prevention (Broken Object Level Authorization)
+Mutation handlers (`EditEvent`, `DeleteEvent`, etc.) do **not** trust user-provided organization IDs. They load the target resource from the database, extract its true `OrganizationId`, and verify the caller's permissions against that — preventing cross-tenant manipulation.
+
+#### Tenant Isolation
+List endpoints like `GET /events/my` inherently scope queries to the caller's organization, ignoring any malicious query parameters attempting to cross tenant boundaries.
+
+#### Suspended Event Security
+`GET /events/{id}` returns `404 Not Found` (not `403`) for suspended events when accessed by non-admin, non-organizer callers. This prevents resource enumeration while giving admins and the owning organizer full visibility.
+
+### 2.5 Profile Isolation (ActiveProfile)
+Users maintain an `ActiveProfile` state (`"Member"` or `"Organizer"`) stored on the User entity and embedded as a JWT claim. The `ActiveOrganizer` authorization policy requires both the Organizer role AND the Organizer profile claim. Profile switching via `POST /account/switch-profile` issues a fresh JWT without requiring multiple accounts.
+
+### 2.6 Date & Time Convention
+- All timestamps stored in UTC as `datetime2(3)` (millisecond precision — saves 2 bytes vs default precision 7).
+- Business event dates store the UTC point-in-time (`Date`) plus an IANA timezone ID (`TimeZoneId`) separately.
+- A global EF Core `UtcDateTimeConverter` and Dapper `UtcDateTimeHandler` force `DateTimeKind.Utc` on all dates read from the database, guaranteeing the `Z` suffix in all JSON responses.
+- The frontend derives local display time client-side using `Date + TimeZoneId`.
+
+### 2.7 Optimistic Concurrency
+`Organizations` uses a `rowversion` column as a concurrency token. EF Core automatically includes it in UPDATE/DELETE WHERE clauses, throwing `DbUpdateConcurrencyException` on conflicts.
+
+### 2.8 Global Exception Handling
+`ExceptionMiddleware` wraps the entire pipeline in a `try/catch` and maps domain exceptions to HTTP responses:
+
+| Exception | HTTP Status |
+|---|---|
+| `ValidationException` | `400 Bad Request` |
+| `UnauthorizedException` | `401 Unauthorized` |
+| `NotFoundException` | `404 Not Found` |
+| `BusinessRuleException` | `409 Conflict` |
+| Unhandled `Exception` | `500 Internal Server Error` |
+
+All responses use the `ApiResponse<T>` envelope: `{ success, message, data, errors }`.
+
+### 2.9 Rate Limiting
+Auth endpoints (`/account/register`, `/account/login`, `/account/refresh-token`) are protected with the `"Auth"` rate limiting policy via `[EnableRateLimiting("Auth")]`.
+
+---
+
+## 3. Frontend Architecture
+
+### 3.1 Routing — React Router v7 Data Router
+Each portal owns its route configuration:
+- `app/(public)/routes.tsx` — Home, Event Detail, Organization Profile
+- `app/organizer/routes.tsx` — Dashboard, Create/Edit Event, Roles, Organization Settings
+- `app/admin/routes.tsx` — Admin Dashboard, Events, Organizations, Categories
+
+The global router composes these into a protected top-level tree.
+
+### 3.2 Authorization Guards
+- `<RequireRole role="Admin" />` — redirects non-admins
+- `<RequireProfile profile="Organizer" />` — redirects non-organizers
+- `<RequirePermission permission="events.create" />` — checks granular org permission
+
+### 3.3 Data Fetching — TanStack Query (React Query v5)
+26 custom hooks in `shared/hooks/` cover all API interactions. Hooks are strictly scoped by bounded context:
+
+| Hook | Scope |
+|---|---|
+| `useEvents` | Public event listing (Home only — disabled on other pages) |
+| `useMyEvents` | Organizer's own events |
+| `useAdminEvents` | Admin all-events view |
+| `useEventDetail` | Single event detail (`retry: false` to prevent 404 hammering) |
+| `useSuspendEvent` / `useUnsuspendEvent` | Admin event moderation |
+| `useEventReports` | Admin view of reports per event |
+| `useReportEvent` | Member event reporting |
+| `useMyOrganization` | Only enabled when `activeProfile === "Organizer"` |
+| `useOrganizationMembers` | Members list + role mutations |
+
+### 3.4 Layout Optimization
+`PublicLayout` only fetches events and renders the `RightSidebar` (Upcoming Events widget) when `pathname === "/"`. All other public pages (Login, Event Details, Organization Profile) get a clean, full-width layout with zero redundant API calls.
+
+### 3.5 Form Handling — Frontend Diffing
+Edit forms (Event Updates, Role Management) diff the current values against `defaultValues` and send only the changed fields. The backend handles these as true partial updates — omitted fields are not touched.
+
+### 3.6 Internationalization (i18next)
+Full `react-i18next` setup. Zod validation schemas are dynamically regenerated on language switch to immediately reflect localized error messages.
+
+### 3.7 Theming
+Dark/Light mode via `next-themes` + Tailwind CSS v4 CSS variables. Respects system preferences and persists the user's manual selection.
+
+---
+
+## 4. Infrastructure
+
+### Docker Compose Services
+| Service | Image | Port |
+|---|---|---|
+| `sqlserver` | `mcr.microsoft.com/mssql/server:2022-latest` | `1433` |
+| `rabbitmq` | `rabbitmq:3-management` | `5672`, `15672` |
+| `redis` | `redis:7-alpine` | `6379` |
+| `api` | Custom multi-stage .NET build | `5000` |
+| `client` | Custom multi-stage Nginx build | `3000` |
+
+The API container waits for SQL Server health before starting. Database migrations and seeding run automatically on startup via `Program.cs`.
+
+### Messaging — MassTransit
+MassTransit with the **Transactional Outbox Pattern** is configured per DbContext (`EventsDbContext`, `OrganizationsDbContext`). Messages are written to the outbox table within the same database transaction, guaranteeing at-least-once delivery even if RabbitMQ is temporarily unavailable.

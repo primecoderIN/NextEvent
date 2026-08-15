@@ -1,56 +1,51 @@
-## Database Schema & Entity Relationships
+# Database Schema & Entity Relationships
 
-This section documents every domain entity, its columns, foreign key relationships, delete behaviors, and index strategy. Keep this updated whenever a migration is added.
-
-> **Convention:** All deletes are **soft deletes** (`IsDeleted = true`). Hard deletes are never performed. FKs that point to `AspNetUsers` use `Restrict` (cannot delete a user who is referenced) unless otherwise noted.
-
----
-
-### Entities at a Glance
-
-| Table | PK type | Soft delete | Hard delete | Row-version | Notes |
-|---|---|---|---|---|---|
-| `AspNetUsers` | `nvarchar(450)` | ❌ | ✅ | ❌ | Managed by ASP.NET Identity |
-| `Events` | `uniqueidentifier` | ❌ | ✅ | ❌ | Core event listing |
-| `Categories` | `uniqueidentifier` | ❌ | ✅ | ❌ | Event taxonomy |
-| `CategorySuggestions` | `uniqueidentifier` | ❌ | ✅ | ❌ | Community proposals |
-| `Organizations` | `uniqueidentifier` | ✅ | ❌ | ✅ | Organizer entity |
-| `OrganizationMembers` | `uniqueidentifier` | ✅ | ❌ | ❌ | User ↔ Organization join |
-| `Permissions` | `uniqueidentifier` | ❌ | ✅ | ❌ | System permissions (events.read) |
-| `OrganizationRoles` | `uniqueidentifier` | ✅ | ❌ | ❌ | Roles scoped to an Organization |
-| `OrganizationRolePermissions` | `(RoleId, PermId)` | ❌ | ✅ | ❌ | Role ↔ Permission join |
-| `OrganizationMemberRoles` | `(MemberId, RoleId)` | ❌ | ✅ | ❌ | Member ↔ Role join |
+> **Conventions:**
+> - All primary keys are `uniqueidentifier` (GUID), client-generated unless noted.
+> - Audit timestamps are `datetime2(3)` — UTC, millisecond precision.
+> - Cross-module foreign keys are mapped with `.ExcludeFromMigrations()` to allow EF Core navigation without duplicating table definitions across DbContexts.
+> - All deletes on Organizations and Members are **soft deletes** (`IsDeleted = true`). Events and Categories use **hard deletes**.
 
 ---
 
-### Entity Details
+## Module: Events (`evt` schema)
 
-#### `Events`
+### `Events`
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
 | `Id` | `uniqueidentifier` | ❌ | PK, client-generated |
-| `OrganizationId` | `uniqueidentifier` | ✅ | FK → `Organizations.Id` (`Restrict`). Required via Validation if created by Organizer |
 | `Title` | `nvarchar` | ❌ | Required |
 | `Description` | `nvarchar` | ❌ | Required |
+| `CategoryId` | `uniqueidentifier` | ✅ | FK → `Categories.Id` (`SetNull`) |
+| `OrganizationId` | `uniqueidentifier` | ✅ | FK → `org.Organizations.Id` (`Restrict`). Nullable for backward compat & future platform-level events |
+| `CreatedByUserId` | `nvarchar(450)` | ✅ | FK → `identity.AspNetUsers.Id` (`Restrict`) |
+| `Date` | `datetime2(3)` | ❌ | UTC event start time |
+| `TimeZoneId` | `nvarchar` | ❌ | IANA timezone ID (e.g. `"Asia/Kolkata"`). Default `"UTC"` |
 | `City` | `nvarchar` | ❌ | |
 | `Venue` | `nvarchar` | ❌ | |
-| `CategoryId` | `uniqueidentifier` | ✅ | FK → `Categories.Id` (`SetNull` on delete) |
-| `Date`, `Latitude`, `Longitude`, … | various | varies | |
+| `Latitude` | `float` | ❌ | |
+| `Longitude` | `float` | ❌ | |
+| `IsCancelled` | `bit` | ❌ | Default `false` |
+| `IsSuspended` | `bit` | ❌ | Default `false`. Set by Admin. Hides event from public/member queries |
+| `CreatedAtUtc` | `datetime2(3)` | ❌ | |
+| `UpdatedAtUtc` | `datetime2(3)` | ✅ | |
 
 **Relationships:**
-- `OrganizationId` → `Organizations.Id` — `Restrict` (cannot delete org if it has events)
-- `CategoryId` → `Categories.Id` — `SetNull` (event stays valid if category is deleted)
+- `CategoryId` → `Categories.Id` — `SetNull` (event remains valid if category is deleted)
+- `OrganizationId` → `org.Organizations.Id` — `Restrict` (cannot delete org with events)
 
-> **Design Note:** Why is `OrganizationId` nullable in the DB if it is mandatory to provide one when creating an event?
-> 1. **Backward Compatibility:** Older events existed in the database before the Organizations feature was built. A `NOT NULL` constraint would have broken the database migration.
-> 2. **Future Flexibility:** Allows the system administrators to create global, platform-level events that do not belong to any specific third-party organization.
-> The API layer (`CreateEventCommandValidator`) strictly enforces that all user-created events must have an organization.
+**Indexes:**
+| Name | Column(s) | Purpose |
+|---|---|---|
+| `IX_Events_Date` | `Date` | Fast sorting and filtering by event date |
+| `IX_Events_OrganizationId` | `OrganizationId` | List events by organization |
 
+> **Why is `OrganizationId` nullable?** Backward compatibility with events that predate the Organizations feature, plus reserved for future platform-level events not owned by any organization. The API `CreateEventCommandValidator` strictly requires it for all user-created events.
 
 ---
 
-#### `Categories`
+### `Categories`
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
@@ -67,7 +62,7 @@ This section documents every domain entity, its columns, foreign key relationshi
 
 ---
 
-#### `CategorySuggestions`
+### `CategorySuggestions`
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
@@ -76,29 +71,43 @@ This section documents every domain entity, its columns, foreign key relationshi
 | `Slug` | `varchar(200)` | ❌ | |
 | `Description` | `nvarchar(2000)` | ✅ | |
 | `Status` | `int` | ❌ | Enum: `Pending=0`, `Approved=1`, `Rejected=2` |
-| `SuggestedById` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `ReviewedById` | `nvarchar(450)` | ✅ | FK → `AspNetUsers.Id` (`Restrict`) |
+| `SuggestedById` | `nvarchar(450)` | ❌ | FK → `identity.AspNetUsers.Id` (`Restrict`) |
+| `ReviewedById` | `nvarchar(450)` | ✅ | FK → `identity.AspNetUsers.Id` (`Restrict`) |
 | `ReviewedAt` | `datetime2(3)` | ✅ | |
 | `RejectionReason` | `nvarchar` | ✅ | |
 | `ApprovedCategoryId` | `uniqueidentifier` | ✅ | FK → `Categories.Id` (`SetNull`) |
-| `OrganizationId` | `uniqueidentifier` | ✅ | Reserved for future use |
 | `CreatedAtUtc` | `datetime2(3)` | ❌ | |
 | `UpdatedAtUtc` | `datetime2(3)` | ❌ | |
-
-**Relationships:**
-- `SuggestedById` → `AspNetUsers.Id` — `Restrict`
-- `ReviewedById` → `AspNetUsers.Id` — `Restrict` (nullable)
-- `ApprovedCategoryId` → `Categories.Id` — `SetNull` (nullable)
 
 **Indexes:** `IX_CategorySuggestions_Status`
 
 ---
 
-#### `Organizations`
+### `EventReports`
+
+Introduced in migration `AddEventSuspendAndReport` (2026-08-13).
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
-| `Id` | `uniqueidentifier` | ❌ | PK, client-generated |
+| `Id` | `uniqueidentifier` | ❌ | PK |
+| `EventId` | `uniqueidentifier` | ❌ | FK → `Events.Id` (`Cascade`) |
+| `ReportedById` | `nvarchar(450)` | ❌ | FK → `identity.AspNetUsers.Id` (`Restrict`) |
+| `Reason` | `nvarchar` | ❌ | The reason the user submitted |
+| `CreatedAt` | `datetime2` | ❌ | UTC timestamp of report submission |
+
+**Relationships:**
+- `EventId` → `Events.Id` — `Cascade` (deleting an event removes its reports)
+- `ReportedById` → `AspNetUsers.Id` — `Restrict`
+
+---
+
+## Module: Organizations (`org` schema)
+
+### `Organizations`
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `Id` | `uniqueidentifier` | ❌ | PK |
 | `Name` | `varchar(160)` | ❌ | |
 | `Slug` | `varchar(180)` | ❌ | **Unique** (`UX_Organizations_Slug`) |
 | `Description` | `nvarchar(max)` | ✅ | |
@@ -108,22 +117,15 @@ This section documents every domain entity, its columns, foreign key relationshi
 | `ContactEmail` | `varchar(256)` | ✅ | |
 | `ContactPhone` | `varchar(40)` | ✅ | |
 | `Status` | `varchar(30)` | ❌ | `pending_verification` \| `active` \| `suspended` \| `rejected` |
-| `OwnerUserId` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `VerifiedAtUtc` | `datetime2(3)` | ✅ | Set by Admin on approval |
-| `VerifiedByUserId` | `nvarchar(450)` | ✅ | FK → `AspNetUsers.Id` (`Restrict`) |
+| `OwnerUserId` | `nvarchar(450)` | ❌ | FK → `identity.AspNetUsers.Id` (`Restrict`) |
+| `VerifiedAtUtc` | `datetime2(3)` | ✅ | Set on admin approval |
+| `VerifiedByUserId` | `nvarchar(450)` | ✅ | FK → `identity.AspNetUsers.Id` (`Restrict`) |
 | `CreatedAtUtc` | `datetime2(3)` | ❌ | |
-| `CreatedByUserId` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) — immutable |
+| `CreatedByUserId` | `nvarchar(450)` | ❌ | FK → `identity.AspNetUsers.Id` (`Restrict`) |
 | `UpdatedAtUtc` | `datetime2(3)` | ✅ | |
-| `UpdatedByUserId` | `nvarchar(max)` | ✅ | |
-| `IsDeleted` | `bit` | ❌ | Default `false` |
+| `IsDeleted` | `bit` | ❌ | Default `false` — soft delete |
 | `DeletedAtUtc` | `datetime2(3)` | ✅ | |
-| `DeletedByUserId` | `nvarchar(max)` | ✅ | |
-| `RowVersion` | `rowversion` | ❌ | Auto-managed optimistic-concurrency token |
-
-**Relationships:**
-- `OwnerUserId` → `AspNetUsers.Id` — `Restrict`
-- `VerifiedByUserId` → `AspNetUsers.Id` — `Restrict` (nullable)
-- `CreatedByUserId` → `AspNetUsers.Id` — `Restrict`
+| `RowVersion` | `rowversion` | ❌ | Optimistic concurrency token |
 
 **Indexes:**
 | Name | Columns | Unique |
@@ -134,41 +136,27 @@ This section documents every domain entity, its columns, foreign key relationshi
 
 ---
 
-#### `OrganizationMembers`
+### `OrganizationMembers`
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
-| `Id` | `uniqueidentifier` | ❌ | PK, client-generated |
+| `Id` | `uniqueidentifier` | ❌ | PK |
 | `OrganizationId` | `uniqueidentifier` | ❌ | FK → `Organizations.Id` (`Cascade`) |
-| `UserId` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `Status` | `int` | ❌ | Enum: `Invited=0`, `Active=1`, `Declined=2`, `Removed=3`. Default `0` |
-| `JoinedAtUtc` | `datetime2(3)` | ✅ | Set when `Status` transitions to `Active` |
+| `UserId` | `nvarchar(450)` | ❌ | FK → `identity.AspNetUsers.Id` (`Restrict`) |
+| `Status` | `int` | ❌ | `Invited=0`, `Active=1`, `Declined=2`, `Removed=3` |
+| `JoinedAtUtc` | `datetime2(3)` | ✅ | Set when Status → Active |
 | `CreatedAtUtc` | `datetime2(3)` | ❌ | |
-| `CreatedByUserId` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) — immutable |
-| `IsDeleted` | `bit` | ❌ | Default `false` |
-| `DeletedAtUtc` | `datetime2(3)` | ✅ | |
-| `DeletedByUserId` | `nvarchar(max)` | ✅ | |
-
-**Relationships:**
-- `OrganizationId` → `Organizations.Id` — `Cascade` (safety net; orgs are soft-deleted)
-- `UserId` → `AspNetUsers.Id` — `Restrict`
-- `CreatedByUserId` → `AspNetUsers.Id` — `Restrict`
+| `CreatedByUserId` | `nvarchar(450)` | ❌ | |
+| `IsDeleted` | `bit` | ❌ | Soft delete |
 
 **Indexes:**
-| Name | Columns | Unique | Filter | Purpose |
-|---|---|---|---|---|
-| `IX_OrganizationMembers_OrganizationId` | `OrganizationId` | ❌ | — | List all members of an org |
-| `IX_OrganizationMembers_UserId` | `UserId` | ❌ | — | List all orgs a user belongs to |
-| `UX_OrganizationMembers_Active` | `(OrganizationId, UserId)` | ✅ | `[Status]=1 AND [IsDeleted]=0` | **One active membership per user per org** |
+| Name | Columns | Unique | Filter |
+|---|---|---|---|
+| `IX_OrganizationMembers_OrganizationId` | `OrganizationId` | ❌ | — |
+| `IX_OrganizationMembers_UserId` | `UserId` | ❌ | — |
+| `UX_OrganizationMembers_Active` | `(OrganizationId, UserId)` | ✅ | `[Status]=1 AND [IsDeleted]=0` |
 
-**Uniqueness rule — `UX_OrganizationMembers_Active` (filtered unique index)**
-
-A user may hold **at most one `Active` membership** per organization at any point in time. This is enforced at the database level by the filtered unique index above — not a composite primary key — for two reasons:
-
-1. **Audit trail:** Historical rows (`Declined`, `Removed`) must be retained. A composite PK on `(OrganizationId, UserId)` would permanently prevent re-inviting a user after they leave.
-2. **Soft deletes:** Soft-deleted rows (`IsDeleted = 1`) are excluded from the filter, so an archived record never blocks a new membership.
-
-The filter `[Status] = 1 AND [IsDeleted] = 0` means only currently-active, non-deleted rows participate in uniqueness. Any attempt to `INSERT` or `UPDATE` a second active membership for the same `(OrganizationId, UserId)` pair is rejected by SQL Server before it reaches the application layer.
+> **Why a filtered unique index?** Historical rows (Declined, Removed) must be kept for the audit trail. A composite PK would permanently block re-inviting a user. The filter ensures only one *active* membership per user per org at any time.
 
 **State machine:**
 ```
@@ -178,19 +166,7 @@ Invited (0) ──► Active (1) ──► Removed (3)
 
 ---
 
-#### `Permissions`
-
-| Column | Type | Nullable | Notes |
-|---|---|---|---|
-| `Id` | `uniqueidentifier` | ❌ | PK |
-| `Code` | `varchar(120)` | ❌ | **Unique** (`UX_Permissions_Code`) |
-| `Name` | `varchar(120)` | ❌ | |
-| `Description` | `nvarchar` | ✅ | |
-| `Category` | `varchar(80)` | ❌ | |
-
----
-
-#### `OrganizationRoles`
+### `OrganizationRoles`
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
@@ -198,51 +174,82 @@ Invited (0) ──► Active (1) ──► Removed (3)
 | `OrganizationId` | `uniqueidentifier` | ❌ | FK → `Organizations.Id` (`Cascade`) |
 | `Name` | `varchar(80)` | ❌ | |
 | `Description` | `nvarchar` | ✅ | |
-| `IsSystemRole` | `bit` | ❌ | Default `false` |
+| `IsSystemRole` | `bit` | ❌ | Default `false`. System roles (Owner, Admin, etc.) cannot be deleted |
 | `CreatedAtUtc` | `datetime2(3)` | ❌ | |
-| `CreatedByUserId` | `nvarchar(450)` | ❌ | FK → `AspNetUsers.Id` (`Restrict`) |
+| `CreatedByUserId` | `nvarchar(450)` | ❌ | |
 | `UpdatedAtUtc` | `datetime2(3)` | ✅ | |
-| `UpdatedByUserId` | `nvarchar(450)` | ✅ | FK → `AspNetUsers.Id` (`Restrict`) |
-| `IsDeleted` | `bit` | ❌ | Default `false` |
+| `IsDeleted` | `bit` | ❌ | Soft delete |
 
 **Indexes:** `UX_OrganizationRoles_OrganizationId_Name` (unique composite)
 
 ---
 
-#### `OrganizationRolePermissions`
+### `Permissions`
 
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
-| `OrganizationRoleId` | `uniqueidentifier` | ❌ | PK Part, FK → `OrganizationRoles.Id` (`Cascade`) |
-| `PermissionId` | `uniqueidentifier` | ❌ | PK Part, FK → `Permissions.Id` (`Cascade`) |
+| `Id` | `uniqueidentifier` | ❌ | PK |
+| `Code` | `varchar(120)` | ❌ | **Unique** e.g. `events.create`, `roles.manage`, `members.invite` |
+| `Name` | `varchar(120)` | ❌ | |
+| `Description` | `nvarchar` | ✅ | |
+| `Category` | `varchar(80)` | ❌ | Groups permissions by domain |
 
 ---
 
-#### `OrganizationMemberRoles`
+### `OrganizationRolePermissions`
 
-| Column | Type | Nullable | Notes |
-|---|---|---|---|
-| `OrganizationMemberId` | `uniqueidentifier` | ❌ | PK Part, FK → `OrganizationMembers.Id` (`Cascade`) |
-| `OrganizationRoleId` | `uniqueidentifier` | ❌ | PK Part, FK → `OrganizationRoles.Id` (`Cascade`) |
+| Column | Type | Notes |
+|---|---|---|
+| `OrganizationRoleId` | PK + FK → `OrganizationRoles.Id` (`Cascade`) |
+| `PermissionId` | PK + FK → `Permissions.Id` (`Cascade`) |
 
 ---
 
-### Migration History
+### `OrganizationMemberRoles`
 
+| Column | Type | Notes |
+|---|---|---|
+| `OrganizationMemberId` | PK + FK → `OrganizationMembers.Id` (`Cascade`) |
+| `OrganizationRoleId` | PK + FK → `OrganizationRoles.Id` (`Cascade`) |
+
+---
+
+## Module: Identity (`identity` schema)
+
+Managed by ASP.NET Core Identity. Key tables: `AspNetUsers`, `AspNetRoles`, `AspNetUserRoles`.
+
+**Platform Roles:**
+- `Admin` — Full platform access
+- `Organizer` — Granted when their organization is approved. Enables the `ActiveOrganizer` policy
+
+**Custom User Columns:**
+| Column | Notes |
+|---|---|
+| `ActiveProfile` | `"Member"` or `"Organizer"`. Embedded in JWT as a claim. Drives the `ActiveOrganizer` policy |
+| `RefreshToken` | Hashed refresh token stored on the user record |
+| `RefreshTokenExpiresAt` | UTC expiry for the refresh token |
+
+---
+
+## Migration History
+
+### Events Module
 | Migration | Date | Description |
 |---|---|---|
-| `InitialCreate` | 2026-06-28 | Identity tables + `Events` |
-| `AddCategory` | 2026-07-03 | `Categories` table |
-| `AddCategoryReferenceToEvent` | 2026-07-03 | `Events.CategoryId` FK |
-| `RemoveEventCategoryString` | 2026-07-03 | Dropped legacy string category column |
-| `CategorySuggestions` | 2026-07-04 | `CategorySuggestions` table |
-| `AddOrganization` | 2026-07-12 | `Organizations` table |
-| `AddOrganizationMember` | 2026-07-13 | `OrganizationMembers` table + filtered unique index |
-| `UpdateTodatetime2(3)` | 2026-07-14 | Migrated DateTime to datetime2(3) globally |
-| `AddOrganizationRBAC` | 2026-07-14 | `Permissions`, `OrganizationRoles`, and RBAC join tables |
-| `AddOrganizationIdToEvents` | 2026-07-16 | Added `OrganizationId` FK to `Events` table |
+| `InitialEvents` | 2026-07-31 | Core Events, Categories, CategorySuggestions tables + MassTransit Outbox |
+| `FixMassTransitDowngrade2` | 2026-07-31 | MassTransit schema compatibility fix |
+| `FixUserTableMapping` | 2026-07-31 | Cross-module Identity table mapping |
+| `RestoreEventConstraints` | 2026-08-01 | Restored FK constraints and indexes |
+| `UpdateEventsModelSnapshot` | 2026-08-01 | Model snapshot reconciliation |
+| `AddEventsDateIndex` | 2026-08-02 | Added `IX_Events_Date` index for sort performance |
+| `AddEventSuspendAndReport` | 2026-08-13 | Added `IsSuspended` to Events; new `EventReports` table |
 
-
----
-
-
+### Organizations Module
+| Migration | Date | Description |
+|---|---|---|
+| `InitialOrganizations` | 2026-07-31 | Full Organizations RBAC schema: Organizations, Members, Roles, Permissions, join tables |
+| `FixMassTransitDowngrade2` | 2026-07-31 | MassTransit compatibility fix |
+| `FixOrgContextBase` | 2026-07-31 | Base context table mapping fixes |
+| `FixShadowFKColumns` | 2026-07-31 | Shadow FK column cleanup |
+| `FixOrgMemberFKColumns` | 2026-07-31 | OrganizationMember FK column fixes |
+| `RestoreOrgConstraints` | 2026-08-01 | Restored all FK constraints and unique indexes |

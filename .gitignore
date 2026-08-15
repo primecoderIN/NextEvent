@@ -496,3 +496,4 @@ API/nextevents.db
 *.db-wal
 *.db-shm
 docker-notes.md
+modular-monolith.md

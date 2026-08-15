@@ -92,10 +92,10 @@ You can log in to explore the different portal experiences:
 
 For a deeper dive into the architectural decisions, database schema, and API contracts, please refer to the dedicated documentation files:
 
-* [**Backend Architecture Guide**](./docs/architecture.md) — CQRS, Dependency Flow, Date/Time Conventions, and Error Envelopes.
+* [**Backend Architecture Guide**](./docs/architecture.md) — CQRS, Dependency Flow, Security Patterns, and Error Envelopes.
 * [**Database Schema & Entity Relationships**](./docs/database-schema.md) — Detailed overview of schemas, FKs, and Soft Delete strategies.
 * [**API Endpoints Catalog**](./docs/api-endpoints.md) — Route summaries and authorization requirements.
-* [**Docker & Deployment Setup**](./docs/docker-notes.md) — Multi-stage builds and container networking.
+* [**Backend Onboarding Guide**](./docs/backend-onboarding.md) — .NET crash course for developers coming from other ecosystems.
 
 ---
 
