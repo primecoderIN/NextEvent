@@ -8,10 +8,12 @@ import { organizerRoutes } from "@/app/organizer/routes"
 import { OrganizerLayout } from "@/app/organizer/layout"
 import { RequireProfile } from "@/authorization"
 import { NotFoundPage } from "@/app/not-found/page"
+import { GlobalErrorBoundary } from "@/shared/ui/GlobalErrorBoundary"
 
 export const router = createBrowserRouter([
   {
     element: <AppRoot />,
+    errorElement: <GlobalErrorBoundary />,
     children: [
       ...adminRoutes,
       {
