@@ -25,4 +25,7 @@ public class GetEventsQueryDto : PaginationParams
 
     /// <summary>Optional organization ID filter.</summary>
     public Guid? OrganizationId { get; set; }
+
+    /// <summary>Optional status filter (e.g., "published", "unpublished", "reported").</summary>
+    public string? Status { get; set; }
 }

@@ -20,4 +20,5 @@ public class EventResponseDto
     public string? OrganizationName { get; set; }
     public string? OrganizationSlug { get; set; }
     public string? OrganizationLogoUrl { get; set; }
+    public int ReportCount { get; set; }
 }

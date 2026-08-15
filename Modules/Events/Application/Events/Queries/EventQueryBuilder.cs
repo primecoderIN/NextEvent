@@ -73,6 +73,26 @@ public class EventQueryBuilder
         return this;
     }
 
+    public EventQueryBuilder WithStatus(string? status)
+    {
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            if (status.Equals("published", StringComparison.OrdinalIgnoreCase))
+            {
+                _whereClauses.Add("e.IsCancelled = 0 AND e.IsSuspended = 0");
+            }
+            else if (status.Equals("unpublished", StringComparison.OrdinalIgnoreCase))
+            {
+                _whereClauses.Add("(e.IsCancelled = 1 OR e.IsSuspended = 1)");
+            }
+            else if (status.Equals("reported", StringComparison.OrdinalIgnoreCase))
+            {
+                _whereClauses.Add("EXISTS (SELECT 1 FROM [evt].[EventReports] r WHERE r.EventId = e.Id)");
+            }
+        }
+        return this;
+    }
+
     public EventQueryBuilder WithActiveOnly()
     {
         _whereClauses.Add("e.IsCancelled = 0 AND e.IsSuspended = 0");
@@ -120,7 +140,8 @@ public class EventQueryBuilder
                    o.Id AS OrganizationId,
                    o.Name AS OrganizationName,
                    o.Slug AS OrganizationSlug,
-                   o.LogoUrl AS OrganizationLogoUrl
+                   o.LogoUrl AS OrganizationLogoUrl,
+                   (SELECT COUNT(Id) FROM [evt].[EventReports] r WHERE r.EventId = e.Id) AS ReportCount
             FROM [evt].[Events] e
             LEFT JOIN [evt].[Categories] c ON e.CategoryId = c.Id
             LEFT JOIN [org].[Organizations] o ON e.OrganizationId = o.Id

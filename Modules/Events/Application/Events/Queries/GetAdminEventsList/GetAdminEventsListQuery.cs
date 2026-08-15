@@ -11,4 +11,5 @@ public class GetAdminEventsListQuery : PaginationParams, IRequest<PagedList<Even
     public DateTime? DateFrom { get; init; }
     public DateTime? DateTo { get; init; }
     public Guid? OrganizationId { get; init; }
+    public string? Status { get; init; }
 }

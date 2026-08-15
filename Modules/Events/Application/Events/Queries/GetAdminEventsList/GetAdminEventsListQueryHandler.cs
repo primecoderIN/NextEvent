@@ -18,6 +18,7 @@ public class GetAdminEventsListQueryHandler(ISqlConnectionFactory connectionFact
             .WithCity(request.City)
             .WithDateRange(request.DateFrom, request.DateTo)
             .WithOrganization(request.OrganizationId)
+            .WithStatus(request.Status)
             // Admin sees all events, so no WithActiveOnly() is called.
             .Build(orderDescending: true);
             

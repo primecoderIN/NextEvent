@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import {
   Tag, Building2, MapPin, Clock, CalendarDays,
-  Loader2, X, Eye, EyeOff, Trash2, MoreVertical
+  Loader2, X, Eye, EyeOff, MoreVertical, AlertTriangle
 } from "lucide-react"
 import { useInfiniteAdminEvents, type EventStatusFilter } from "@/shared/hooks/useAdminEvents"
 import { useCategories } from "@/shared/hooks/useCategories"
@@ -69,14 +69,6 @@ function RowActionsMenu({ event }: { event: Event }) {
           >
             <EyeOff className="h-4 w-4 text-muted-foreground" />
             Unpublish event
-          </button>
-          <div className="my-1 h-px bg-border" />
-          <button
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete event
           </button>
         </div>
       )}
@@ -333,6 +325,9 @@ export function AdminEventsPage() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Status
                 </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Reports
+                </th>
                 <th className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Actions
                 </th>
@@ -341,7 +336,7 @@ export function AdminEventsPage() {
             <tbody className="divide-y divide-border/40">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-16 text-center text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin text-primary" />
                       Loading events…
@@ -350,13 +345,13 @@ export function AdminEventsPage() {
                 </tr>
               ) : isError ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center text-destructive">
+                  <td colSpan={8} className="py-16 text-center text-destructive">
                     Failed to load events.
                   </td>
                 </tr>
               ) : allEvents.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-16 text-center text-muted-foreground">
                     No events found.
                   </td>
                 </tr>
@@ -444,7 +439,12 @@ export function AdminEventsPage() {
 
                       {/* Status */}
                       <td className="px-4 py-3.5">
-                        {event.isCancelled ? (
+                        {event.isSuspended ? (
+                          <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <span className="h-2 w-2 rounded-full bg-muted-foreground shrink-0" />
+                            Unpublished
+                          </span>
+                        ) : event.isCancelled ? (
                           <span className="inline-flex items-center gap-1.5 text-sm text-destructive">
                             <span className="h-2 w-2 rounded-full bg-destructive shrink-0" />
                             Cancelled
@@ -452,8 +452,20 @@ export function AdminEventsPage() {
                         ) : (
                           <span className="inline-flex items-center gap-1.5 text-sm text-emerald-600">
                             <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
-                            Active
+                            Published
                           </span>
+                        )}
+                      </td>
+
+                      {/* Reports */}
+                      <td className="px-4 py-3.5">
+                        {event.reportCount > 0 ? (
+                          <span className="inline-flex items-center gap-1.5 text-sm text-amber-600 font-medium">
+                            <AlertTriangle className="h-4 w-4" />
+                            {event.reportCount} {event.reportCount === 1 ? 'Report' : 'Reports'}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">—</span>
                         )}
                       </td>
 

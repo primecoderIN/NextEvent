@@ -88,6 +88,7 @@ public class EventsController(IMediator mediator) : BaseApiController(mediator)
             DateFrom = queryDto.DateFrom,
             DateTo = queryDto.DateTo,
             OrganizationId = queryDto.OrganizationId,
+            Status = queryDto.Status,
             PageNumber = queryDto.PageNumber, 
             PageSize = queryDto.PageSize 
         };

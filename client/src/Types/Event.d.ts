@@ -16,4 +16,5 @@ export type Event = {
   organizationName?: string | null;
   organizationSlug?: string | null;
   organizationLogoUrl?: string | null;
+  reportCount: number;
 }
