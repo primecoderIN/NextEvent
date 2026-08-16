@@ -98,6 +98,7 @@ For a deeper dive into the architectural decisions, database schema, and API con
 * [**General Onboarding & Setup**](./docs/ONBOARDING.md) — Quick-start guide, local environment configuration, and test account credentials.
 * [**Project Folder Structure**](./docs/folder-structure.md) — Complete annotated directory tree of the backend modules and frontend features.
 * [**Backend Architecture & Patterns**](./docs/architecture.md) — MediatR request lifecycles, security patterns (BOLA/BFLA prevention), and project dependency rules.
+* [**Authorization & Security Guide**](./docs/authorization.md) — Comprehensive guide to BOLA and BFLA mitigation and the tenant-level RBAC matrices.
 * [**Backend Onboarding & .NET Course**](./docs/backend-onboarding.md) — In-depth C#/.NET crash course for developers transitioning from JS/Go/Python.
 * [**Frontend Onboarding Guide**](./docs/frontend-onboarding.md) — React 19 architecture, routing, custom React Query hooks, form diffing, and translation structures.
 * [**API Endpoints Catalog**](./docs/api-endpoints.md) — A comprehensive list of routes, parameters, authorization checks, and standard envelopes.
