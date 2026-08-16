@@ -5,6 +5,7 @@ import { Badge } from "@/shared/ui/badge"
 import { Button } from "@/shared/ui/button"
 import { toast } from "sonner"
 import { Input } from "@/shared/ui/input"
+import { Checkbox } from "@/shared/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/ui/dialog"
 import { useOrganizationMembersList, useUpdateOrganizationMemberRoles, useInviteOrganizationMember } from "@/shared/hooks/useOrganizationMembers"
 import { useOrganizationRolesList } from "@/shared/hooks/useOrganizationRoles"
@@ -154,11 +155,9 @@ export function OrganizationMembersView({ organization }: OrganizationMembersVie
                       <div className="flex flex-col gap-2">
                         {roles?.map(role => (
                           <label key={role.id} className="flex items-center gap-2 text-sm cursor-pointer">
-                            <input 
-                              type="checkbox" 
-                              className="rounded border-input text-primary focus:ring-primary"
+                            <Checkbox
                               checked={selectedRoles.includes(role.id)}
-                              onChange={() => handleRoleToggle(role.id)}
+                              onCheckedChange={() => handleRoleToggle(role.id)}
                               disabled={isUpdating}
                             />
                             <span>{role.name}</span>

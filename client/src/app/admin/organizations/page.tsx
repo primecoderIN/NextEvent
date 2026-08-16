@@ -3,6 +3,8 @@ import { useOrganizations } from "@/shared/hooks/useOrganizations"
 import { useApproveOrganization } from "@/shared/hooks/useApproveOrganization"
 import { toast } from "sonner"
 import { OrganizationTable } from "@/features/organizations/components/OrganizationTable"
+import { Input } from "@/shared/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
 
 export function AdminOrganizationsPage() {
   const page = 1
@@ -57,20 +59,25 @@ export function AdminOrganizationsPage() {
       {/* Controls Bar */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input 
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+          <Input 
             type="text"
             placeholder="Search organizations by name or email..."
-            className="w-full pl-9 pr-4 py-2.5 bg-card border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+            className="w-full pl-9 h-10 bg-card rounded-xl shadow-sm"
           />
         </div>
         <div className="flex items-center gap-3">
-          <select className="px-4 py-2.5 bg-card border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm appearance-none cursor-pointer pr-10 relative">
-            <option value="">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="pending_verification">Pending</option>
-            <option value="suspended">Suspended</option>
-          </select>
+          <Select defaultValue="">
+            <SelectTrigger className="w-[180px] h-10 bg-card rounded-xl shadow-sm">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="pending_verification">Pending</SelectItem>
+              <SelectItem value="suspended">Suspended</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

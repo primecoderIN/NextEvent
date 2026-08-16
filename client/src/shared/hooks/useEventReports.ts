@@ -26,6 +26,7 @@ export function useEventReports(eventId: string) {
 
   useEffect(() => {
     if (eventId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchReports()
     }
   }, [eventId, fetchReports])

@@ -14,7 +14,7 @@ export function formatEventDate(utcDateStr: string, timeZoneId?: string): string
       month: "short",
       year: "numeric"
     })
-  } catch (error) {
+  } catch {
     // If timeZoneId is invalid (e.g. outdated browser data), fallback to browser local
     return date.toLocaleDateString("en-US", {
       day: "2-digit",
@@ -35,7 +35,7 @@ export function formatEventTime(utcDateStr: string, timeZoneId?: string): string
       hour: "2-digit",
       minute: "2-digit"
     })
-  } catch (error) {
+  } catch {
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit"

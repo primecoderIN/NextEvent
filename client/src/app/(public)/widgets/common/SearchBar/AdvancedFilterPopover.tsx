@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom"
 import { Filter } from "lucide-react"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
+import { DatePicker } from "@/shared/ui/date-picker"
 import { Label } from "@/shared/ui/label"
 import {
   Popover,
@@ -85,22 +86,20 @@ export function AdvancedFilterPopover() {
             </div>
             
             <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 flex flex-col">
                 <Label htmlFor="dateFrom">From</Label>
-                <Input 
-                  id="dateFrom" 
-                  type="date"
+                <DatePicker
+                  id="dateFrom"
                   value={dateFrom}
-                  onChange={e => setDateFrom(e.target.value)}
+                  onChange={setDateFrom}
                 />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 flex flex-col">
                 <Label htmlFor="dateTo">To</Label>
-                <Input 
-                  id="dateTo" 
-                  type="date"
+                <DatePicker
+                  id="dateTo"
                   value={dateTo}
-                  onChange={e => setDateTo(e.target.value)}
+                  onChange={setDateTo}
                 />
               </div>
             </div>

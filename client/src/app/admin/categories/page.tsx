@@ -8,6 +8,8 @@ import { useCreateCategory } from "@/shared/hooks/useCreateCategory";
 import { Roles } from "@/shared/constants/roles";
 import { RequireRole } from "@/authorization";
 import { toast } from "sonner";
+import { Input } from "@/shared/ui/input";
+import { Textarea } from "@/shared/ui/textarea";
 
 export default function CreateCategoryPage() {
   return (
@@ -41,19 +43,19 @@ function CreateCategoryForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block text-sm font-medium">{t("name", { ns: "admin" })}</label>
-          <input {...register("name")} className="mt-1 block w-full" />
+          <Input {...register("name")} className="mt-1" />
           <p className="text-xs text-destructive">{errors.name?.message as any}</p>
         </div>
 
         <div>
           <label className="block text-sm font-medium">{t("slug", { ns: "admin" })}</label>
-          <input {...register("slug")} className="mt-1 block w-full" />
+          <Input {...register("slug")} className="mt-1" />
           <p className="text-xs text-destructive">{errors.slug?.message as any}</p>
         </div>
 
         <div>
           <label className="block text-sm font-medium">{t("description", { ns: "admin" })}</label>
-          <textarea {...register("description")} className="mt-1 block w-full" />
+          <Textarea {...register("description")} className="mt-1" />
           <p className="text-xs text-destructive">{errors.description?.message as any}</p>
         </div>
 

@@ -5,6 +5,7 @@ import { useAuth } from "@/features/auth/context/AuthContext"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { AdminSidebar } from "./layouts/AdminSidebar"
 import { NavLink } from "react-router-dom"
+import { Input } from "@/shared/ui/input"
 import {
   LayoutDashboard,
   Calendar,
@@ -101,11 +102,11 @@ export function AdminLayout() {
           {/* Search */}
           <div className="flex-1 max-w-lg">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <Input
                 type="search"
                 placeholder="Search events, users, categories..."
-                className="w-full pl-9 pr-4 py-2 text-sm bg-muted/50 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition"
+                className="w-full pl-9 h-10 bg-muted/50 rounded-xl"
               />
             </div>
           </div>

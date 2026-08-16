@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { getCreateCategorySchema, type CreateCategoryFormValues } from "@/app/admin/types"
 import { useCreateCategory } from "@/shared/hooks/useCreateCategory"
+import { Input } from "@/shared/ui/input"
 
 export function CreateCategoryWidget() {
   const { t } = useTranslation(["admin", "common"])
@@ -32,10 +33,10 @@ export function CreateCategoryWidget() {
           <label className="block text-xs font-medium text-muted-foreground mb-1">
             Category Name
           </label>
-          <input
+          <Input
             {...register("name")}
             placeholder="Enter category name"
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-10 bg-muted/50 rounded-xl"
           />
           {errors.name && (
             <p className="text-xs text-destructive mt-1">{errors.name.message as string}</p>
@@ -46,10 +47,10 @@ export function CreateCategoryWidget() {
           <label className="block text-xs font-medium text-muted-foreground mb-1">
             Description <span className="text-muted-foreground/60">(Optional)</span>
           </label>
-          <input
+          <Input
             {...register("description")}
             placeholder="Enter description"
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-10 bg-muted/50 rounded-xl"
           />
         </div>
 
@@ -57,10 +58,10 @@ export function CreateCategoryWidget() {
           <label className="block text-xs font-medium text-muted-foreground mb-1">
             Slug
           </label>
-          <input
+          <Input
             {...register("slug")}
             placeholder="e.g. tech-conference"
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-10 bg-muted/50 rounded-xl"
           />
           {errors.slug && (
             <p className="text-xs text-destructive mt-1">{errors.slug.message as string}</p>
