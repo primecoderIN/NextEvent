@@ -25,24 +25,20 @@ public class OrganizationAuthorizationService(
     : IOrganizationAuthorizationService
 {
     /// <summary>
-    /// Evaluates whether the current authenticated user holds a role that grants the specified permission code
-    /// within the given organization. Returns true or false without throwing exceptions.
+    /// Gets all permission codes the current user has within the specified organization.
     /// </summary>
-    public async Task<bool> HasPermissionAsync(
-        Guid organizationId,
-        string permissionCode,
-        CancellationToken cancellationToken = default)
+    public async Task<List<string>> GetUserPermissionsAsync(Guid organizationId, CancellationToken cancellationToken = default)
     {
         var userId = currentUserService.GetCurrentUserId();
         if (userId is null)
-            return false;
+            return new List<string>();
 
         // ── 1. Try the Redis cache first ──────────────────────────────────────
         var cachedPermissions = await permissionCache.GetPermissionsAsync(userId, organizationId, cancellationToken);
         if (cachedPermissions is not null)
         {
             // Cache HIT — no DB query needed
-            return cachedPermissions.Contains(permissionCode);
+            return cachedPermissions.ToList();
         }
 
         // ── 2. Cache MISS — resolve from DB via the 4-level EF join ──────────
@@ -66,6 +62,19 @@ public class OrganizationAuthorizationService(
         // ── 3. Populate cache so subsequent calls in this and future requests skip the DB ──
         await permissionCache.SetPermissionsAsync(userId, organizationId, permissionCodes, cancellationToken);
 
+        return permissionCodes;
+    }
+
+    /// <summary>
+    /// Evaluates whether the current authenticated user holds a role that grants the specified permission code
+    /// within the given organization. Returns true or false without throwing exceptions.
+    /// </summary>
+    public async Task<bool> HasPermissionAsync(
+        Guid organizationId,
+        string permissionCode,
+        CancellationToken cancellationToken = default)
+    {
+        var permissionCodes = await GetUserPermissionsAsync(organizationId, cancellationToken);
         return permissionCodes.Contains(permissionCode, StringComparer.OrdinalIgnoreCase);
     }
 

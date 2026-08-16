@@ -1,13 +1,33 @@
+import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useOrganizationDetail } from "@/shared/hooks/useOrganizationDetail"
-import { Building2, ArrowLeft } from "lucide-react"
+import { useAdminEvents, type EventStatusFilter } from "@/shared/hooks/useAdminEvents"
+import { Building2, ArrowLeft, Users, CalendarDays, FileText } from "lucide-react"
 import { OrganizationDetailsView } from "@/features/organizations/components/OrganizationDetailsView"
+import { OrganizationMembersView } from "@/features/organizations/components/OrganizationMembersView"
+import { EventsTable } from "@/features/events/components/EventTable"
 import { Button } from "@/shared/ui/button"
 
 export function AdminOrganizationDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  
+  // Events State
+  const [eventsPage, setEventsPage] = useState(1)
+  const [eventsSearch, setEventsSearch] = useState("")
+  const [eventsStatus, setEventsStatus] = useState<EventStatusFilter>("all")
+  const [eventsCategory, setEventsCategory] = useState("")
+
   const { data: organization, isLoading, isError } = useOrganizationDetail(id)
+  
+  const { data: eventsData, isFetching: eventsFetching } = useAdminEvents({
+    page: eventsPage,
+    pageSize: 8,
+    q: eventsSearch,
+    status: eventsStatus,
+    categoryId: eventsCategory,
+    organizationId: id,
+  })
 
   if (isLoading) {
     return (
@@ -47,7 +67,54 @@ export function AdminOrganizationDetailPage() {
         </div>
       </div>
 
-      <OrganizationDetailsView organization={organization} />
+      <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        
+        {/* Overview Section */}
+        <section>
+          <div className="flex items-center gap-2 mb-4 text-lg font-semibold">
+            <FileText className="w-5 h-5 text-primary" />
+            <h2>Overview</h2>
+          </div>
+          <OrganizationDetailsView organization={organization} />
+        </section>
+        
+        {/* Members Section */}
+        <section>
+          <div className="flex items-center gap-2 mb-4 text-lg font-semibold">
+            <Users className="w-5 h-5 text-primary" />
+            <h2>Members</h2>
+          </div>
+          <div className="bg-card border border-border/40 rounded-2xl overflow-hidden">
+             <OrganizationMembersView organization={organization} />
+          </div>
+        </section>
+        
+        {/* Events Section */}
+        <section>
+          <div className="flex items-center gap-2 mb-4 text-lg font-semibold">
+            <CalendarDays className="w-5 h-5 text-primary" />
+            <h2>Events</h2>
+          </div>
+          <EventsTable
+            events={eventsData?.items || []}
+            isFetching={eventsFetching}
+            page={eventsPage}
+            setPage={setEventsPage}
+            totalPages={eventsData?.totalPages || 1}
+            totalCount={eventsData?.totalCount || 0}
+            searchRaw={eventsSearch}
+            setSearchRaw={setEventsSearch}
+            activeTab={eventsStatus}
+            setActiveTab={(val) => setEventsStatus(val as EventStatusFilter)}
+            selectedCategory={eventsCategory}
+            setSelectedCategory={setEventsCategory}
+            selectedOrganization={undefined}
+            setSelectedOrganization={undefined}
+            organizations={[]}
+          />
+        </section>
+
+      </div>
     </div>
   )
 }

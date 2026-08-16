@@ -37,14 +37,16 @@ All URLs are **lowercase**. All responses use **camelCase** JSON and the `ApiRes
 | `GET` | `/organizations` | Admin | Paginated list of all organizations on the platform |
 | `POST` | `/organizations` | Authenticated | Create a new organization. Status starts as `pending_verification`. Seeds 5 default system roles |
 | `GET` | `/organizations/{id}` | Authenticated | Get organization detail by ID |
+| `GET` | `/organizations/{id}/my-permissions` | Authenticated | Retrieves all dynamic permission codes the current authenticated user holds within the specified organization |
 | `GET` | `/organizations/my` | Authenticated (Organizer only) | Get the organization owned by the current user |
 | `GET` | `/organizations/my-invitations` | Authenticated | Get all pending organization invitations for the current user |
 | `GET` | `/organizations/{slug}/profile` | Anonymous | Get public profile of an active organization by slug, including upcoming events |
 | `POST` | `/organizations/{id}/approve` | Admin | Approve a pending organization and grant the owner the Organizer role |
-| `GET` | `/organizations/{id}/members` | Authenticated | List all members of an organization |
+| `GET` | `/organizations/{id}/members` | Authenticated (Org Member) / Admin | List all members of an organization |
 | `PUT` | `/organizations/{id}/members/{memberId}/roles` | Authenticated | Update role assignments for a member |
 | `POST` | `/organizations/{id}/members/invite` | Authenticated (members.invite permission) | Invite a user by email |
 | `POST` | `/organizations/{id}/members/accept-invite` | Authenticated | Accept a pending invitation |
+| `GET` | `/organizations/{id}/roles` | Authenticated (Org Member) / Admin | List all roles in the organization |
 
 ---
 

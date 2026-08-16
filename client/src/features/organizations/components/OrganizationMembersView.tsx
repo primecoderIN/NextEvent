@@ -10,9 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table"
 import { useOrganizationMembersList, useUpdateOrganizationMemberRoles, useInviteOrganizationMember } from "@/shared/hooks/useOrganizationMembers"
 import { useOrganizationRolesList } from "@/shared/hooks/useOrganizationRoles"
-import { useAuthorization } from "@/authorization/useAuthorization"
 import { Permissions } from "@/shared/constants/permissions"
 import { useTranslation } from "react-i18next"
+
+import { useOrganizationPermissions } from "@/shared/hooks/useOrganizationPermissions"
 
 interface OrganizationMembersViewProps {
   organization: Organization;
@@ -23,7 +24,7 @@ export function OrganizationMembersView({ organization }: OrganizationMembersVie
   const { data: members, isLoading: isLoadingMembers } = useOrganizationMembersList(organization.id)
   const { data: roles, isLoading: isLoadingRoles } = useOrganizationRolesList(organization.id)
   const { mutate: updateRoles, isPending: isUpdating } = useUpdateOrganizationMemberRoles()
-  const { can } = useAuthorization()
+  const { can } = useOrganizationPermissions(organization.id)
 
   const canManageRoles = can(Permissions.OrganizationRolesManage)
   const canInviteMembers = can(Permissions.OrganizationMembersInvite)

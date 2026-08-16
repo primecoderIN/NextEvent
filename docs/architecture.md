@@ -113,7 +113,7 @@ sequenceDiagram
 All organizer mutation endpoints are gated at the controller level with `[Authorize(Policy = "ActiveOrganizer")]`. This requires both the `Organizer` ASP.NET Identity role AND the `Organizer` active profile claim in the JWT — instantly rejecting members or anonymous callers before any handler logic executes.
 
 #### BOLA Prevention (Broken Object Level Authorization)
-Mutation handlers (`EditEvent`, `DeleteEvent`, etc.) do **not** trust user-provided organization IDs. They load the target resource from the database, extract its true `OrganizationId`, and verify the caller's permissions against that — preventing cross-tenant manipulation.
+Mutation handlers (`EditEvent`, `DeleteEvent`, etc.) do **not** trust user-provided organization IDs. They load the target resource from the database, extract its true `OrganizationId`, and verify the caller's permissions against that — preventing cross-tenant manipulation. *Note: Platform Admins globally bypass BOLA restrictions for read operations (like viewing organization members or roles), but they do not automatically bypass organization-level mutation permissions. All organization-level permissions are dynamically resolved from the database via a highly-optimized, Redis-backed 4-level EF join (`GetUserPermissionsAsync`).*
 
 #### Tenant Isolation
 List endpoints like `GET /events/my` inherently scope queries to the caller's organization, ignoring any malicious query parameters attempting to cross tenant boundaries.
@@ -180,7 +180,7 @@ The global router composes these into a protected top-level tree.
 ### 3.2 Authorization Guards
 - `<RequireRole role="Admin" />` — redirects non-admins
 - `<RequireProfile profile="Organizer" />` — redirects non-organizers
-- `<RequirePermission permission="events.create" />` — checks granular org permission
+- **Dynamic Org Permissions**: The frontend implements strict organization-level RBAC via `useOrganizationPermissions()`. Instead of using hardcoded global role maps, it dynamically fetches the exact permission codes (e.g., `events.create`, `members.invite`) the user holds in the specific organization to render UI elements (like Edit/Invite buttons).
 
 ### 3.3 Data Fetching — TanStack Query (React Query v5)
 26 custom hooks in `shared/hooks/` cover all API interactions. Hooks are strictly scoped by bounded context:
@@ -195,6 +195,7 @@ The global router composes these into a protected top-level tree.
 | `useEventReports` | Admin view of reports per event |
 | `useReportEvent` | Member event reporting |
 | `useMyOrganization` | Only enabled when `activeProfile === "Organizer"` |
+| `useOrganizationPermissions` | Fetches dynamic, organization-level RBAC permissions |
 | `useOrganizationMembers` | Members list + role mutations |
 | `useUsers` | Admin view of all platform users and registrations |
 

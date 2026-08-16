@@ -22,8 +22,7 @@ export function AdminOrganizationsPage() {
 
   return (
     <div className="flex-1 p-8 overflow-auto bg-background/50">
-      {/* Header section with gradient */}
-      <div className="mb-8 p-6 rounded-2xl border bg-gradient-to-r from-card to-card/50 shadow-sm relative overflow-hidden">
+      <div className="mb-8 p-6 rounded-2xl border bg-linear-to-r from-card to-card/50 shadow-sm relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
         
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -68,7 +67,7 @@ export function AdminOrganizationsPage() {
         </div>
         <div className="flex items-center gap-3">
           <Select defaultValue="">
-            <SelectTrigger className="w-[180px] h-10 bg-card rounded-xl shadow-sm">
+            <SelectTrigger className="w-45 h-10 bg-card rounded-xl shadow-sm">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>

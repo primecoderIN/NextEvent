@@ -9,12 +9,17 @@ namespace NextEvent.Modules.Organizations.Application.Organizations.Queries.GetO
 
 public class GetOrganizationMembersQueryHandler(
     OrganizationsDbContext context,
-    IOrganizationAuthorizationService authorizationService) : IRequestHandler<GetOrganizationMembersQuery, List<OrganizationMemberDto>>
+    IOrganizationAuthorizationService authorizationService,
+    ICurrentUserService currentUserService) : IRequestHandler<GetOrganizationMembersQuery, List<OrganizationMemberDto>>
 {
     public async Task<List<OrganizationMemberDto>> Handle(GetOrganizationMembersQuery request, CancellationToken cancellationToken)
     {
         // BOLA / BFLA: Authorize that the caller has access to view this organization
-        await authorizationService.AuthorizeAsync(request.OrganizationId, PermissionConstants.OrganizationView, cancellationToken);
+        // Admins are globally authorized to view any organization's members.
+        if (!currentUserService.HasRole(RoleConstants.Admin))
+        {
+            await authorizationService.AuthorizeAsync(request.OrganizationId, PermissionConstants.OrganizationView, cancellationToken);
+        }
 
         var members = await context.OrganizationMembers
             .Include(m => m.User)

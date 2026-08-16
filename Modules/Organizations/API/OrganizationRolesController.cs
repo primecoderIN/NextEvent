@@ -10,10 +10,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace NextEvent.Modules.Organizations.API;
 [Route(ApiRouteConstants.Organizations.Base)]
-// SECURITY (BFLA): The 'ActiveOrganizer' policy guarantees that ONLY users with an active organizer profile
-// can reach ANY endpoint in this controller. This prevents basic members or anonymous users from executing 
-// mutating actions or viewing roles (Broken Function Level Authorization).
-[Authorize(Policy = "ActiveOrganizer")]
+// SECURITY: Handlers internally enforce BOLA and BFLA by strictly validating the caller 
+// against the target OrganizationId using IOrganizationAuthorizationService.
+[Authorize]
 public class OrganizationRolesController(IMediator mediator) : BaseApiController(mediator)
 {
     /// <summary>

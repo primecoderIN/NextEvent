@@ -105,7 +105,7 @@ export function EventsTable({
 
         <div className="relative">
           <Select value={activeTab} onValueChange={(val) => handleTabChange(val)}>
-            <SelectTrigger className="w-[140px] h-8 bg-muted/50 rounded-lg text-sm">
+            <SelectTrigger className="w-35 h-8 bg-muted/50 rounded-lg text-sm">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
@@ -119,7 +119,7 @@ export function EventsTable({
 
         <div className="relative">
           <Select value={selectedCategory || "all"} onValueChange={(val) => { setSelectedCategory(val === "all" ? "" : val); setPage(1) }}>
-            <SelectTrigger className="w-[150px] h-8 bg-muted/50 rounded-lg text-sm">
+            <SelectTrigger className="w-37.5 h-8 bg-muted/50 rounded-lg text-sm">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
@@ -134,7 +134,7 @@ export function EventsTable({
         {setSelectedOrganization && organizations && (
           <div className="relative">
             <Select value={selectedOrganization || "all"} onValueChange={(val) => { setSelectedOrganization(val === "all" ? "" : val); setPage(1) }}>
-              <SelectTrigger className="w-[160px] h-8 bg-muted/50 rounded-lg text-sm">
+              <SelectTrigger className="w-40 h-8 bg-muted/50 rounded-lg text-sm">
                 <SelectValue placeholder="All Organizations" />
               </SelectTrigger>
               <SelectContent>
@@ -150,7 +150,7 @@ export function EventsTable({
         {setSelectedCity && (
           <div className="relative">
             <Select value={selectedCity || "all"} onValueChange={(val) => { setSelectedCity(val === "all" ? "" : val); setPage(1) }}>
-              <SelectTrigger className="w-[130px] h-8 bg-muted/50 rounded-lg text-sm">
+              <SelectTrigger className="w-32.5 h-8 bg-muted/50 rounded-lg text-sm">
                 <SelectValue placeholder="All Cities" />
               </SelectTrigger>
               <SelectContent>

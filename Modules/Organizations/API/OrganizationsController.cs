@@ -132,6 +132,23 @@ public class OrganizationsController(IMediator mediator) : BaseApiController(med
     }
 
     /// <summary>
+    /// Retrieves all dynamic permission codes the current authenticated user holds within the specified organization.
+    /// </summary>
+    /// <response code="200">Permissions retrieved.</response>
+    /// <response code="401">No valid JWT supplied.</response>
+    [Authorize]
+    [HttpGet("{id:guid}/my-permissions")]
+    [ProducesResponseType(typeof(ApiResponse<List<string>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<ApiResponse<List<string>>>> GetMyOrganizationPermissions(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var permissions = await Mediator.Send(new NextEvent.Modules.Organizations.Application.Organizations.Queries.GetMyOrganizationPermissions.GetMyOrganizationPermissionsQuery { OrganizationId = id }, cancellationToken);
+        return OkResponse(permissions, "Permissions retrieved successfully.");
+    }
+
+    /// <summary>
     /// Approves a pending organization.
     /// Sets status to <c>active</c> and grants the ASP.NET Identity
     /// <c>Organizer</c> platform role to the organization's owner.

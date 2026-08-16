@@ -22,7 +22,8 @@ import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher"
 import { useAuth } from "@/features/auth/context/AuthContext"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { Roles } from "@/shared/constants/roles"
-import { RequireRole, useAuthorization } from "@/authorization"
+import { RequireRole } from "@/authorization"
+import { useOrganizationPermissions } from "@/shared/hooks/useOrganizationPermissions"
 import { Permissions } from "@/shared/constants/permissions"
 import { useMyOrganization } from "@/shared/hooks/useMyOrganization"
 
@@ -39,8 +40,9 @@ export const Navbar = () => {
   const navigate = useNavigate()
   const { t } = useTranslation(["nav", "common"])
   const { user, logout, switchProfile } = useAuth()
-  const { can } = useAuthorization()
   const { data: myOrg } = useMyOrganization()
+  const { can } = useOrganizationPermissions(myOrg?.id)
+  
   const canCreateEvents = can(Permissions.EventsCreate)
 
   return (

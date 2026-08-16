@@ -17,4 +17,9 @@ public interface IOrganizationAuthorizationService
     /// Throws a ForbiddenAccessException if the user does not have the permission.
     /// </summary>
     Task AuthorizeAsync(Guid organizationId, string permissionCode, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all permission codes the current user has within the specified organization.
+    /// </summary>
+    Task<List<string>> GetUserPermissionsAsync(Guid organizationId, CancellationToken cancellationToken = default);
 }

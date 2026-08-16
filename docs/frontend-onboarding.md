@@ -59,6 +59,9 @@ Three guards live in `src/authorization/`:
 <RequirePermission permission="events.create">
   <CreateEventPage />
 </RequirePermission>
+
+**Note on Dynamic Organization Permissions:** 
+The `<RequirePermission />` guard and the `can()` function exposed by `useOrganizationPermissions(organizationId)` strictly evaluate permissions dynamically fetched from the backend (`GET /organizations/{id}/my-permissions`). They do not provide automatic bypasses based on global roles like `Admin`. This enforces strict BOLA compliance on the frontend.
 ```
 
 ---

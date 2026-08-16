@@ -90,7 +90,7 @@ export function AdminCategorySuggestionsPage() {
                       <TableCell>
                         <div className="font-medium text-foreground">{suggestion.name}</div>
                         {suggestion.description && (
-                          <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1 max-w-[250px]">
+                          <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1 max-w-62.5">
                             {suggestion.description}
                           </div>
                         )}

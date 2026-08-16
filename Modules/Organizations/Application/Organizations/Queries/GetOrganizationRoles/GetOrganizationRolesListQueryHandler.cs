@@ -8,14 +8,18 @@ namespace NextEvent.Modules.Organizations.Application.Organizations.Queries.GetO
 
 public class GetOrganizationRolesListQueryHandler(
     ISqlConnectionFactory connectionFactory,
-    IOrganizationAuthorizationService authorizationService)
+    IOrganizationAuthorizationService authorizationService,
+    ICurrentUserService currentUserService)
     : IRequestHandler<GetOrganizationRolesListQuery, List<OrganizationRoleDto>>
 {
     public async Task<List<OrganizationRoleDto>> Handle(
         GetOrganizationRolesListQuery request,
         CancellationToken cancellationToken)
     {
-        await authorizationService.AuthorizeAsync(request.OrganizationId, PermissionConstants.RolesManage, cancellationToken);
+        if (!currentUserService.HasRole(RoleConstants.Admin))
+        {
+            await authorizationService.AuthorizeAsync(request.OrganizationId, PermissionConstants.RolesManage, cancellationToken);
+        }
 
         using var connection = connectionFactory.CreateConnection();
 

@@ -10,5 +10,4 @@ export interface PermissionsContextType {
   isLoading: boolean;
   hasRole: (role: RoleName) => boolean;
   hasAnyRole: (roles: RoleName[]) => boolean;
-  can: (permission: Permission, resource?: any) => boolean;
 }

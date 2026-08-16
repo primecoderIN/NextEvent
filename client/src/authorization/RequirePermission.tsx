@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuthorization } from "./useAuthorization";
+import { useMyOrganization } from "@/shared/hooks/useMyOrganization";
+import { useOrganizationPermissions } from "@/shared/hooks/useOrganizationPermissions";
 import type { Permission } from "./types";
 
 interface RequirePermissionProps {
@@ -29,7 +31,13 @@ export function RequirePermission({
   redirectTo,
 }: RequirePermissionProps) {
   const location = useLocation();
-  const { can, isAuthenticated, isLoading } = useAuthorization();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuthorization();
+  const { data: myOrg } = useMyOrganization();
+  
+  const orgId = (resource as any)?.organizationId ?? myOrg?.id;
+  const { can, isLoading: isPermissionsLoading } = useOrganizationPermissions(orgId);
+
+  const isLoading = isAuthLoading || isPermissionsLoading;
 
   if (isLoading) return <>{loadingFallback}</>;
 
@@ -37,7 +45,7 @@ export function RequirePermission({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  if (!can(permission, resource)) return <>{fallback}</>;
+  if (!can(permission)) return <>{fallback}</>;
 
   return <>{children}</>;
 }
