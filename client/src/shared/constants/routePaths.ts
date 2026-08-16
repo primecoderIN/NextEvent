@@ -30,7 +30,7 @@ export const RoutePaths = {
   AdminEventDetailLink: (id: string) => `/admin/events/${id}`,
   AdminCategories: "/admin/categories",
   AdminCategoryNew: "/admin/categories/new",
-  AdminCategorySuggestions: "/admin/categories/suggestions",
+  AdminCategorySuggestions: "/admin/category-suggestions",
   AdminUsers: "/admin/users",
   AdminOrganizations: "/admin/organizations",
   AdminOrganizationDetail: "/admin/organizations/:id",
