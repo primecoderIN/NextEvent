@@ -121,10 +121,25 @@ List endpoints like `GET /events/my` inherently scope queries to the caller's or
 #### Suspended Event Security
 `GET /events/{id}` returns `404 Not Found` (not `403`) for suspended events when accessed by non-admin, non-organizer callers. This prevents resource enumeration while giving admins and the owning organizer full visibility.
 
+#### Event Reporting Constraints
+- Users who belong to an organization cannot report events (e.g., to prevent competitors from falsely flagging events).
+- The same user cannot report an event multiple times (enforced in business logic and via a unique database index `UX_EventReports_Event_Reporter`).
+
+#### Organization Owner Protections
+The system specifically protects the `Owner` role. Handlers ensure that the original owner of an organization cannot accidentally or maliciously have their `Owner` system role removed, and permission caches are eagerly invalidated upon any role updates.
+
+#### Pagination Guardrails
+All list queries use `PaginationParams`, which strictly enforces a minimum `PageSize` of 1 (defaulting to 10 if a value less than 1 is provided), preventing negative offset queries or division-by-zero errors in the database.
+
+#### Network & Transport Security
+- **Proxy Support**: The API uses `UseForwardedHeaders` to correctly resolve client IPs and schemes when running behind a reverse proxy (e.g., Nginx, Cloudflare).
+- **HSTS**: `UseHsts()` and `UseHttpsRedirection()` are strictly enforced in production to ensure secure transport.
+
 ### 2.5 Profile Isolation (ActiveProfile)
 Users maintain an `ActiveProfile` state (`"Member"` or `"Organizer"`) stored on the User entity and embedded as a JWT claim. The `ActiveOrganizer` authorization policy requires both the Organizer role AND the Organizer profile claim. Profile switching via `POST /account/switch-profile` issues a fresh JWT without requiring multiple accounts.
 
 ### 2.6 Date & Time Convention
+- **Time Abstraction**: Across all command handlers and controllers, `DateTime.UtcNow` is never used directly. Instead, an injected `IDateTimeProvider` is used. This is a best practice that makes time-dependent logic deterministically unit-testable.
 - All timestamps stored in UTC as `datetime2(3)` (millisecond precision — saves 2 bytes vs default precision 7).
 - Business event dates store the UTC point-in-time (`Date`) plus an IANA timezone ID (`TimeZoneId`) separately.
 - A global EF Core `UtcDateTimeConverter` and Dapper `UtcDateTimeHandler` force `DateTimeKind.Utc` on all dates read from the database, guaranteeing the `Z` suffix in all JSON responses.
@@ -147,7 +162,8 @@ Users maintain an `ActiveProfile` state (`"Member"` or `"Organizer"`) stored on 
 All responses use the `ApiResponse<T>` envelope: `{ success, message, data, errors }`.
 
 ### 2.9 Rate Limiting
-Auth endpoints (`/account/register`, `/account/login`, `/account/refresh-token`) are protected with the `"Auth"` rate limiting policy via `[EnableRateLimiting("Auth")]`.
+- Auth endpoints (`/account/register`, `/account/login`, `/account/refresh-token`) are protected with the `"Auth"` rate limiting policy via `[EnableRateLimiting("Auth")]`.
+- Event reporting endpoints (`POST /events/{id}/report`) are protected with the `"Reports"` rate limiting policy (10 requests per 10 minutes) to prevent abuse or spamming.
 
 ---
 
@@ -184,8 +200,9 @@ The global router composes these into a protected top-level tree.
 ### 3.4 Layout Optimization
 `PublicLayout` only fetches events and renders the `RightSidebar` (Upcoming Events widget) when `pathname === "/"`. All other public pages (Login, Event Details, Organization Profile) get a clean, full-width layout with zero redundant API calls.
 
-### 3.5 Form Handling — Frontend Diffing
-Edit forms (Event Updates, Role Management) diff the current values against `defaultValues` and send only the changed fields. The backend handles these as true partial updates — omitted fields are not touched.
+### 3.5 Form Handling — Frontend Diffing & Optimization
+- Edit forms (Event Updates, Role Management) diff the current values against `defaultValues` and send only the changed fields. The backend handles these as true partial updates — omitted fields are not touched.
+- For dynamic form updates, `useWatch` is preferred over `watch()` from `react-hook-form` to isolate re-renders to specific UI components rather than re-rendering the entire form on every keystroke.
 
 ### 3.6 Internationalization (i18next)
 Full `react-i18next` setup. Zod validation schemas are dynamically regenerated on language switch to immediately reflect localized error messages.
