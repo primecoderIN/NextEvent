@@ -7,6 +7,12 @@
   "categoryManagement": "Category Management",
   "categoryManagementSub": "Manage global taxonomy categories and review user-submitted suggestions.",
   "createCategory": "Create Category",
+  "name": "Name",
+  "slug": "Slug",
+  "description": "Description",
   "suggestions": "Suggestions",
-  "systemDashboard": "System Dashboard"
+  "systemDashboard": "System Dashboard",
+  "creating": "Creating…",
+  "create": "Create",
+  "categoryCreated": "Category created successfully"
 }

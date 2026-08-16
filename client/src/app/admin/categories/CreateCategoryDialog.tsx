@@ -24,7 +24,7 @@ export function CreateCategoryDialog({ open, onOpenChange }: CreateCategoryDialo
     resolver: zodResolver(schema),
   })
   
-  const { createCategory, loading, error } = useCreateCategory()
+  const { createCategory, loading } = useCreateCategory()
   const [dialogError, setDialogError] = useState<string | null>(null)
 
   const onSubmit = async (values: CreateCategoryFormValues) => {
