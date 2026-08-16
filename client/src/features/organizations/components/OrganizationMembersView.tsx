@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { Input } from "@/shared/ui/input"
 import { Checkbox } from "@/shared/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/ui/dialog"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table"
 import { useOrganizationMembersList, useUpdateOrganizationMemberRoles, useInviteOrganizationMember } from "@/shared/hooks/useOrganizationMembers"
 import { useOrganizationRolesList } from "@/shared/hooks/useOrganizationRoles"
 import { useAuthorization } from "@/authorization/useAuthorization"
@@ -126,31 +127,31 @@ export function OrganizationMembersView({ organization }: OrganizationMembersVie
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs uppercase bg-muted/50 text-muted-foreground border-b">
-              <tr>
-                <th className="px-6 py-4 font-medium">{t("tableUser")}</th>
-                <th className="px-6 py-4 font-medium">{t("tableStatus")}</th>
-                <th className="px-6 py-4 font-medium">{t("tableRoles")}</th>
-                <th className="px-6 py-4 font-medium text-right">{t("tableActions")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow>
+                <TableHead>{t("tableUser")}</TableHead>
+                <TableHead>{t("tableStatus")}</TableHead>
+                <TableHead>{t("tableRoles")}</TableHead>
+                <TableHead className="text-right">{t("tableActions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {members?.map(member => (
-                <tr key={member.id} className="bg-card hover:bg-muted/30 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                <TableRow key={member.id} className="bg-card hover:bg-muted/30 transition-colors">
+                  <TableCell>
                     <div className="font-medium">{member.userName}</div>
                     <div className="text-muted-foreground text-xs">{member.userEmail}</div>
-                  </td>
-                  <td className="px-6 py-4">
+                  </TableCell>
+                  <TableCell>
                     <Badge variant={member.status === "Active" ? "default" : "outline"} className={
                       member.status === "Active" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : ""
                     }>
                       {member.status === "Active" ? <CheckCircle className="w-3 h-3 mr-1" /> : <Clock className="w-3 h-3 mr-1" />}
                       {member.status === "Active" ? t("statusActive") : t("statusPending")}
                     </Badge>
-                  </td>
-                  <td className="px-6 py-4">
+                  </TableCell>
+                  <TableCell>
                     {editingMemberId === member.id ? (
                       <div className="flex flex-col gap-2">
                         {roles?.map(role => (
@@ -177,8 +178,8 @@ export function OrganizationMembersView({ organization }: OrganizationMembersVie
                         )}
                       </div>
                     )}
-                  </td>
-                  <td className="px-6 py-4 text-right">
+                  </TableCell>
+                  <TableCell className="text-right">
                     {canManageRoles && (
                       editingMemberId === member.id ? (
                         <div className="flex justify-end gap-2">
@@ -195,18 +196,18 @@ export function OrganizationMembersView({ organization }: OrganizationMembersVie
                         </Button>
                       )
                     )}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
               {members?.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground italic">
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center text-muted-foreground italic">
                     {t("noMembersFound")}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>

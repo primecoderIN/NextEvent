@@ -8,6 +8,7 @@ import { Link } from "react-router-dom"
 import { RoutePaths } from "@/shared/constants/routePaths"
 import { Input } from "@/shared/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table"
 
 const STATUS_TABS: { label: string; value: string }[] = [
   { label: "All Events", value: "all" },
@@ -176,29 +177,29 @@ export function EventsTable({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border/40 bg-muted/30">
-              <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Event</th>
-              <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Organizer</th>
-              <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Category</th>
-              <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Date</th>
-              <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
-              <th className="text-center px-4 py-3 font-semibold text-muted-foreground">Reports</th>
-              <th className="text-right px-4 py-3 font-semibold text-muted-foreground">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/30 transition-opacity duration-150">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/30">
+              <TableHead>Event</TableHead>
+              <TableHead>Organizer</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-center">Reports</TableHead>
+              <TableHead className="text-right">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="transition-opacity duration-150">
             {isFetching ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <EventTableRowSkeleton key={i} />
               ))
             ) : events.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center">
                   No events found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               events.map((event) => {
                 const dateStr = formatEventDate(event.date, event.timeZoneId)
@@ -208,8 +209,8 @@ export function EventsTable({
                 const isReported = event.reportCount > 0
 
                 return (
-                  <tr key={event.id} className={`hover:bg-muted/30 transition-colors group ${isReported ? "border-l-4 border-l-red-500" : "border-l-4 border-l-transparent"}`}>
-                    <td className="px-4 py-3">
+                  <TableRow key={event.id} className={`group ${isReported ? "border-l-4 border-l-red-500" : "border-l-4 border-l-transparent"}`}>
+                    <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
                           <Calendar className="h-5 w-5 text-primary/60" />
@@ -221,24 +222,24 @@ export function EventsTable({
                           <p className="text-xs text-muted-foreground">ID: {shortId}</p>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{event.organizationName || "—"}</td>
-                    <td className="px-4 py-3">
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{event.organizationName || "—"}</TableCell>
+                    <TableCell>
                       <CategoryBadge name={event.category} />
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
                       <p className="text-foreground font-medium">{dateStr}</p>
                       <p className="text-xs">{timeStr}</p>
-                    </td>
-                    <td className="px-4 py-3">
+                    </TableCell>
+                    <TableCell>
                       <StatusBadge status={status} />
-                    </td>
-                    <td className="px-4 py-3 text-center">
+                    </TableCell>
+                    <TableCell className="text-center">
                       <span className={`font-semibold ${event.reportCount > 0 ? "text-destructive" : "text-muted-foreground"}`}>
                         {event.reportCount || 0}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
+                    </TableCell>
+                    <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           to={RoutePaths.AdminEventDetailLink(event.id)}
@@ -273,13 +274,13 @@ export function EventsTable({
                           )
                         )}
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )
               })
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Pagination */}
@@ -342,8 +343,8 @@ export function EventsTable({
 
 export function EventTableRowSkeleton() {
   return (
-    <tr className="hover:bg-muted/30 transition-colors border-l-4 border-l-transparent animate-pulse">
-      <td className="px-4 py-3">
+    <TableRow className="border-l-4 border-l-transparent animate-pulse">
+      <TableCell>
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-muted shrink-0" />
           <div className="space-y-2">
@@ -351,31 +352,31 @@ export function EventTableRowSkeleton() {
             <div className="h-3 w-16 bg-muted rounded" />
           </div>
         </div>
-      </td>
-      <td className="px-4 py-3">
+      </TableCell>
+      <TableCell>
         <div className="h-4 w-24 bg-muted rounded" />
-      </td>
-      <td className="px-4 py-3">
+      </TableCell>
+      <TableCell>
         <div className="h-6 w-20 bg-muted rounded-full" />
-      </td>
-      <td className="px-4 py-3">
+      </TableCell>
+      <TableCell>
         <div className="space-y-2">
           <div className="h-4 w-24 bg-muted rounded" />
           <div className="h-3 w-12 bg-muted rounded" />
         </div>
-      </td>
-      <td className="px-4 py-3">
+      </TableCell>
+      <TableCell>
         <div className="h-6 w-20 bg-muted rounded-full" />
-      </td>
-      <td className="px-4 py-3 text-center">
+      </TableCell>
+      <TableCell className="text-center">
         <div className="h-4 w-6 mx-auto bg-muted rounded" />
-      </td>
-      <td className="px-4 py-3 text-right">
+      </TableCell>
+      <TableCell className="text-right">
         <div className="flex items-center justify-end gap-2">
           <div className="h-7 w-7 rounded-lg bg-muted" />
           <div className="h-7 w-28 rounded-lg bg-muted" />
         </div>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   )
 }

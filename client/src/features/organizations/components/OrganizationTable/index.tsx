@@ -2,6 +2,7 @@ import { Link } from "react-router-dom"
 import { Eye, ShieldCheck, Clock, CheckCircle, Ban } from "lucide-react"
 
 import type { Organization } from "@/types/Organization"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table"
 
 interface OrganizationTableProps {
   organizations: Organization[]
@@ -13,23 +14,23 @@ interface OrganizationTableProps {
 export function OrganizationTable({ organizations, isFetching, onApprove, isApproving }: OrganizationTableProps) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border/40 bg-muted/30">
-            <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Organization</th>
-            <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Owner</th>
-            <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
-            <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Created</th>
-            <th className="text-right px-4 py-3 font-semibold text-muted-foreground">Actions</th>
-          </tr>
-        </thead>
-        <tbody className={`divide-y divide-border/30 transition-opacity duration-150 ${isFetching ? "opacity-60" : "opacity-100"}`}>
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/30 hover:bg-muted/30">
+            <TableHead>Organization</TableHead>
+            <TableHead>Owner</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className={`transition-opacity duration-150 ${isFetching ? "opacity-60" : "opacity-100"}`}>
           {organizations.length === 0 ? (
-            <tr>
-              <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">
+            <TableRow>
+              <TableCell colSpan={5} className="h-24 text-center">
                 {isFetching ? "Loading…" : "No organizations found."}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ) : (
             organizations.map((org) => {
               const initials = org.name.substring(0, 2).toUpperCase()
@@ -38,8 +39,8 @@ export function OrganizationTable({ organizations, isFetching, onApprove, isAppr
               })
 
               return (
-                <tr key={org.id} className="hover:bg-muted/30 transition-colors group border-l-4 border-l-transparent">
-                  <td className="px-4 py-3">
+                <TableRow key={org.id} className="group border-l-4 border-l-transparent">
+                  <TableCell>
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden text-primary font-bold">
                         {initials}
@@ -53,12 +54,12 @@ export function OrganizationTable({ organizations, isFetching, onApprove, isAppr
                         </p>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
                     <p className="text-foreground font-medium">{org.ownerDisplayName || "Unknown"}</p>
                     <p className="text-xs truncate max-w-48" title={org.contactEmail || ""}>{org.contactEmail || "—"}</p>
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell>
                     {org.status === "pending_verification" && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 border border-amber-500/20">
                         <Clock className="h-3 w-3" />
@@ -83,11 +84,11 @@ export function OrganizationTable({ organizations, isFetching, onApprove, isAppr
                         Rejected
                       </span>
                     )}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
                     {createdDate}
-                  </td>
-                  <td className="px-4 py-3 text-right">
+                  </TableCell>
+                  <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Link
                         to={`/admin/organizations/${org.id}`}
@@ -109,13 +110,13 @@ export function OrganizationTable({ organizations, isFetching, onApprove, isAppr
                         </button>
                       )}
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )
             })
           )}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   )
 }
