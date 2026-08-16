@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { useForm } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Building2, ArrowRight, CheckCircle2, Clock } from "lucide-react"
@@ -40,7 +40,7 @@ export function StartOrganizerPage() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(organizationSchema),
@@ -54,7 +54,7 @@ export function StartOrganizerPage() {
     }
   })
 
-  const currentSlug = watch("slug")
+  const currentSlug = useWatch({ control, name: "slug" })
 
   const onSubmit = async (data: FormData) => {
     try {

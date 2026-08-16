@@ -26,6 +26,21 @@ public static class RateLimiterServiceExtensions
                     Window = TimeSpan.FromMinutes(1)
                 });
             });
+
+            // Rate limit policy for reporting events to prevent spam/abuse.
+            // Limits users (or IPs if unauthenticated, though this endpoint requires auth) to 10 reports per 10 minutes.
+            options.AddPolicy("Reports", httpContext =>
+            {
+                var userId = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var partitionKey = userId ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+                return RateLimitPartition.GetFixedWindowLimiter(partitionKey, partition => new FixedWindowRateLimiterOptions
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 10,
+                    Window = TimeSpan.FromMinutes(10)
+                });
+            });
         });
 
         return services;

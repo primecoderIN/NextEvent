@@ -2,6 +2,13 @@ import axios from "axios";
 import type { ApiResponse } from "@/types/ApiResponse";
 import type { UserDTO } from "@/features/auth/types";
 
+// Store access token in memory rather than localStorage to mitigate XSS vulnerabilities.
+let accessToken: string | null = null;
+
+export const setAccessToken = (token: string | null) => {
+  accessToken = token;
+};
+
 const sleep = (delay: number) => {
   return new Promise((resolve) => {
     setTimeout(resolve, delay);
@@ -14,9 +21,8 @@ export const axiosHttpAgent = axios.create({
 });
 
 axiosHttpAgent.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
   return config;
 });
@@ -51,11 +57,11 @@ axiosHttpAgent.interceptors.response.use(
           { withCredentials: true }
         );
         const user = response.data.data!;
-        localStorage.setItem("token", user.token);
+        setAccessToken(user.token);
         originalRequest.headers.Authorization = `Bearer ${user.token}`;
         return axiosHttpAgent(originalRequest);
       } catch (refreshError) {
-        localStorage.removeItem("token");
+        setAccessToken(null);
         return Promise.reject(refreshError);
       }
     }

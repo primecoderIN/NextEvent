@@ -10,7 +10,8 @@ namespace NextEvent.Modules.Organizations.Application.Organizations.Commands.Cre
 public class CreateOrganizationRoleCommandHandler(
     OrganizationsDbContext context,
     ICurrentUserService currentUserService,
-    IOrganizationAuthorizationService authorizationService)
+    IOrganizationAuthorizationService authorizationService,
+    IDateTimeProvider dateTimeProvider)
     : IRequestHandler<CreateOrganizationRoleCommand, Guid>
 {
     public async Task<Guid> Handle(
@@ -48,7 +49,7 @@ public class CreateOrganizationRoleCommandHandler(
             throw new BusinessRuleException($"The following permission codes are invalid: {string.Join(", ", missingPermissions)}");
         }
 
-        var now = DateTime.UtcNow;
+        var now = dateTimeProvider.UtcNow;
 
         // 4. Create the role
         var newRole = new OrganizationRole

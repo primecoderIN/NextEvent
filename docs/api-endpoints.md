@@ -54,7 +54,7 @@ All URLs are **lowercase**. All responses use **camelCase** JSON and the `ApiRes
 |---|---|---|---|
 | `POST` | `/account/register` | Anonymous | Register a new user. Sets `refreshToken` HttpOnly cookie |
 | `POST` | `/account/login` | Anonymous | Login. Sets `refreshToken` HttpOnly cookie |
-| `POST` | `/account/refresh-token` | Anonymous | Issue new access token from `refreshToken` cookie (or body) |
+| `POST` | `/account/refresh-token` | Anonymous | Issue new access token using `refreshToken` HTTP-only cookie |
 | `POST` | `/account/logout` | Authenticated | Invalidate refresh token and clear cookie |
 | `POST` | `/account/switch-profile` | Authenticated | Switch active profile between `Member` and `Organizer`. Returns new JWT |
 

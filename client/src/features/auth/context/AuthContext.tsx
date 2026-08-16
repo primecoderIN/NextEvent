@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { UserDTOWithRoles, LoginFormValues, RegisterFormValues } from "../types";
 import type { ApiResponse } from "@/types/ApiResponse";
-import { axiosHttpAgent } from "@/shared/lib/axios";
+import { axiosHttpAgent, setAccessToken } from "@/shared/lib/axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -30,10 +30,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Response is now ApiResponse<UserDTO> — payload lives in .data.data
       const response = await axiosHttpAgent.post<ApiResponse<UserDTOWithRoles>>("/account/refresh-token");
       const user = response.data.data!;
-      localStorage.setItem("token", user.token);
+      setAccessToken(user.token);
       setUser(user);
-    } catch (error) {
-      localStorage.removeItem("token");
+    } catch {
+      setAccessToken(null);
       setUser(null);
     } finally {
       setLoading(false);
@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [loadUser]);
 
   const setToken = (token: string) => {
-    localStorage.setItem("token", token);
+    setAccessToken(token);
   };
 
   const login = async (data: LoginFormValues): Promise<UserDTOWithRoles> => {
@@ -84,10 +84,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       await axiosHttpAgent.post("/account/logout");
-    } catch(err) {
+    } catch {
       // Ignore errors on logout
     } finally {
-      localStorage.removeItem("token");
+      setAccessToken(null);
       setUser(null);
       queryClient.clear();
       navigate("/");

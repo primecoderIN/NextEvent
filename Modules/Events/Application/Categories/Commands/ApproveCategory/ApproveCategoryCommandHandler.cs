@@ -15,7 +15,8 @@ namespace NextEvent.Modules.Events.Application.Categories.Commands.ApproveCatego
 /// </summary>
 public class ApproveCategoryCommandHandler(
     EventsDbContext context,
-    ICurrentUserService currentUserService)
+    ICurrentUserService currentUserService,
+    IDateTimeProvider dateTimeProvider)
     : IRequestHandler<ApproveCategoryCommand, CategoryDto>
 {
     public async Task<CategoryDto> Handle(ApproveCategoryCommand request, CancellationToken cancellationToken)
@@ -46,6 +47,8 @@ public class ApproveCategoryCommandHandler(
         if (slugExists)
             throw new BusinessRuleException($"A category with slug '{suggestion.Slug}' already exists.");
 
+        var now = dateTimeProvider.UtcNow;
+
         // Create the real Category
         var category = new Category
         {
@@ -53,8 +56,8 @@ public class ApproveCategoryCommandHandler(
             Slug        = suggestion.Slug,
             Description = suggestion.Description,
             IsActive    = true,
-            CreatedAtUtc = DateTime.UtcNow,
-            UpdatedAtUtc = DateTime.UtcNow,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
         };
 
         context.Categories.Add(category);
@@ -62,9 +65,9 @@ public class ApproveCategoryCommandHandler(
         // Update suggestion metadata
         suggestion.Status             = CategorySuggestionStatus.Approved;
         suggestion.ReviewedById       = reviewerId;
-        suggestion.ReviewedAt         = DateTime.UtcNow;
+        suggestion.ReviewedAt         = now;
         suggestion.ApprovedCategoryId = category.Id;
-        suggestion.UpdatedAtUtc       = DateTime.UtcNow;
+        suggestion.UpdatedAtUtc       = now;
 
         await context.SaveChangesAsync(cancellationToken);
 

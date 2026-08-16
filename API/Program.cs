@@ -2,6 +2,7 @@ using API.Extensions;
 using API.Middleware;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using NextEvent.Modules.Identity.Persistence;
 using NextEvent.Modules.Identity.Domain;
 using NextEvent.Modules.Identity.Persistence.Seeders;
@@ -29,12 +30,25 @@ builder.Services.AddRateLimiterServices();
 
 var app = builder.Build();
 
+// Required to properly resolve client IP and scheme when running behind a reverse proxy (e.g. Nginx/Cloudflare)
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 // Enable Swagger only in Development environment
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    // Enforce HTTP Strict Transport Security (HSTS) and redirect HTTP to HTTPS in production
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
+
 
 // -----------------------------------------------------------------------
 // Global exception handling middleware

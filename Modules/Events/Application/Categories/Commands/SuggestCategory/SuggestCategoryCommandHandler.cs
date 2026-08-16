@@ -13,7 +13,8 @@ namespace NextEvent.Modules.Events.Application.Categories.Commands.SuggestCatego
 /// </summary>
 public class SuggestCategoryCommandHandler(
     EventsDbContext context,
-    ICurrentUserService currentUserService)
+    ICurrentUserService currentUserService,
+    IDateTimeProvider dateTimeProvider)
     : IRequestHandler<SuggestCategoryCommand, CategoryDto>
 {
     public async Task<CategoryDto> Handle(SuggestCategoryCommand request, CancellationToken cancellationToken)
@@ -25,6 +26,8 @@ public class SuggestCategoryCommandHandler(
             ? GenerateSlug(request.Name)
             : NormalizeSlug(request.Slug);
 
+        var now = dateTimeProvider.UtcNow;
+
         var suggestion = new CategorySuggestion
         {
             Name          = request.Name,
@@ -32,8 +35,8 @@ public class SuggestCategoryCommandHandler(
             Description   = request.Description,
             SuggestedById = userId,
             Status        = CategorySuggestionStatus.Pending,
-            CreatedAtUtc  = DateTime.UtcNow,
-            UpdatedAtUtc  = DateTime.UtcNow,
+            CreatedAtUtc  = now,
+            UpdatedAtUtc  = now,
         };
 
         context.CategorySuggestions.Add(suggestion);

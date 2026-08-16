@@ -8,10 +8,11 @@ using NextEvent.Modules.Identity.Application.Authentication.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using NextEvent.Shared.Interfaces;
 
 namespace NextEvent.Modules.Identity.API;
 [Route(ApiRouteConstants.Account.Base)]
-public class AccountController(IMediator mediator) : BaseApiController(mediator)
+public class AccountController(IMediator mediator, IDateTimeProvider dateTimeProvider) : BaseApiController(mediator)
 {
     /// <summary>
     /// Registers a new user account and sets a refresh token.
@@ -51,13 +52,8 @@ public class AccountController(IMediator mediator) : BaseApiController(mediator)
         return OkResponse(result.User, "Logged in successfully");
     }
 
-public class RefreshTokenRequestDto
-{
-    public string? RefreshToken { get; set; }
-}
-
     /// <summary>
-    /// Issues a new JWT access token using the refresh token cookie or request body.
+    /// Issues a new JWT access token using the refresh token cookie.
     /// </summary>
     /// <response code="200">Token refreshed successfully.</response>
     /// <response code="401">Refresh token is missing or invalid.</response>
@@ -66,14 +62,15 @@ public class RefreshTokenRequestDto
     [HttpPost(ApiRouteConstants.Account.RefreshToken)]
     [ProducesResponseType(typeof(ApiResponse<LoginResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<ApiResponse<LoginResponseDto>>> RefreshToken([FromBody] RefreshTokenRequestDto? body = null)
+    public async Task<ActionResult<ApiResponse<LoginResponseDto>>> RefreshToken(CancellationToken cancellationToken)
     {
-        var refreshToken = Request.Cookies["refreshToken"] ?? body?.RefreshToken;
+        // Read refresh token from HTTP-only cookie for enhanced security against XSS attacks
+        var refreshToken = Request.Cookies["refreshToken"];
 
         if (string.IsNullOrEmpty(refreshToken))
             return Unauthorized(ApiResponse.Fail("Refresh token is missing"));
 
-        var result = await Mediator.Send(new RefreshTokenCommand { Token = refreshToken });
+        var result = await Mediator.Send(new RefreshTokenCommand { Token = refreshToken }, cancellationToken);
         SetRefreshTokenCookie(result.RefreshToken);
         return OkResponse(result.User, "Token refreshed successfully");
     }
@@ -121,7 +118,7 @@ public class RefreshTokenRequestDto
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Expires  = DateTime.UtcNow.AddDays(7),
+            Expires  = dateTimeProvider.UtcNow.AddDays(7),
             Secure   = isHttps,
             SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
             Path     = "/"

@@ -23,7 +23,8 @@ namespace NextEvent.Modules.Organizations.Application.Organizations.Commands.Cre
 public class CreateOrganizationCommandHandler(
     OrganizationsDbContext context,
     ICurrentUserService currentUserService,
-    IOrganizationMemberService memberService)
+    IOrganizationMemberService memberService,
+    IDateTimeProvider dateTimeProvider)
     : IRequestHandler<CreateOrganizationCommand, Guid>
 {
     public async Task<Guid> Handle(
@@ -48,7 +49,7 @@ public class CreateOrganizationCommandHandler(
         if (slugTaken)
             throw new BusinessRuleException($"The slug '{dto.Slug}' is already taken. Please choose a different slug.");
 
-        var now = DateTime.UtcNow;
+        var now = dateTimeProvider.UtcNow;
 
         // ── 2. Create Organization ────────────────────────────────────────────
         var organization = new Organization(

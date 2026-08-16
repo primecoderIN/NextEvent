@@ -11,7 +11,8 @@ public class AcceptOrganizationInvitationCommandHandler(
     OrganizationsDbContext context,
     ICurrentUserService currentUserService,
     IOrganizationMemberService memberService,
-    UserManager<Identity.Domain.User> userManager) : IRequestHandler<AcceptOrganizationInvitationCommand>
+    UserManager<Identity.Domain.User> userManager,
+    IDateTimeProvider dateTimeProvider) : IRequestHandler<AcceptOrganizationInvitationCommand>
 {
     public async Task Handle(
         AcceptOrganizationInvitationCommand request,
@@ -37,7 +38,7 @@ public class AcceptOrganizationInvitationCommandHandler(
             throw new BusinessRuleException("This invitation is no longer valid.");
 
         membership.Status = OrganizationMemberStatus.Active;
-        membership.JoinedAtUtc = DateTime.UtcNow;
+        membership.JoinedAtUtc = dateTimeProvider.UtcNow;
 
         // 3. Remove/Decline all other pending invitations for this user
         var otherInvitations = await context.OrganizationMembers

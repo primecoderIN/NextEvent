@@ -11,7 +11,8 @@ public class UpdateOrganizationRoleCommandHandler(
     OrganizationsDbContext context,
     ICurrentUserService currentUserService,
     IOrganizationAuthorizationService authorizationService,
-    IPermissionCacheService permissionCache)
+    IPermissionCacheService permissionCache,
+    IDateTimeProvider dateTimeProvider)
     : IRequestHandler<UpdateOrganizationRoleCommand>
 {
     public async Task Handle(
@@ -109,7 +110,7 @@ public class UpdateOrganizationRoleCommandHandler(
             }
         }
 
-        role.UpdatedAtUtc = DateTime.UtcNow;
+        role.UpdatedAtUtc = dateTimeProvider.UtcNow;
         role.UpdatedByUserId = userId;
 
         await context.SaveChangesAsync(cancellationToken);

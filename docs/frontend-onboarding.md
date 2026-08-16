@@ -147,8 +147,8 @@ const { user, loading, logout } = useAuth()
 // }
 ```
 
-The Axios agent (`src/shared/lib/agent.ts`) automatically:
-- Attaches the JWT `Authorization: Bearer` header on every request
+The Axios instance (`src/shared/lib/axios.tsx`) automatically:
+- Attaches the JWT `Authorization: Bearer` header on every request (using an in-memory access token, not `localStorage` to prevent XSS)
 - Intercepts `401` responses and calls `POST /account/refresh-token`
 - Retries the original request with the new token
 

@@ -32,7 +32,7 @@ export function AdminCategorySuggestionsPage() {
     try {
       await approve(id)
       toast.success("Category suggestion approved!")
-    } catch (error) {
+    } catch {
       toast.error("Failed to approve suggestion")
     }
   }
@@ -41,7 +41,7 @@ export function AdminCategorySuggestionsPage() {
     try {
       await reject(id)
       toast.success("Category suggestion rejected!")
-    } catch (error) {
+    } catch {
       toast.error("Failed to reject suggestion")
     }
   }

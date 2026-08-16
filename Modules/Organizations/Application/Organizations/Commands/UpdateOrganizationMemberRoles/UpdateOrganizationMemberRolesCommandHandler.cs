@@ -10,7 +10,8 @@ namespace NextEvent.Modules.Organizations.Application.Organizations.Commands.Upd
 
 public class UpdateOrganizationMemberRolesCommandHandler(
     OrganizationsDbContext context,
-    IOrganizationAuthorizationService authorizationService) : IRequestHandler<UpdateOrganizationMemberRolesCommand>
+    IOrganizationAuthorizationService authorizationService,
+    IPermissionCacheService permissionCache) : IRequestHandler<UpdateOrganizationMemberRolesCommand>
 {
     public async Task Handle(UpdateOrganizationMemberRolesCommand request, CancellationToken cancellationToken)
     {
@@ -19,6 +20,7 @@ public class UpdateOrganizationMemberRolesCommandHandler(
 
         var member = await context.OrganizationMembers
             .Include(m => m.MemberRoles)
+            .Include(m => m.Organization)
             .FirstOrDefaultAsync(m => m.Id == request.MemberId && m.OrganizationId == request.OrganizationId && !m.IsDeleted, cancellationToken);
 
         if (member == null)
@@ -36,9 +38,23 @@ public class UpdateOrganizationMemberRolesCommandHandler(
             throw new BusinessRuleException("One or more roles do not exist or belong to a different organization.");
         }
 
-        // The owner must always have the Owner role (if they are the owner)
-        // Wait, ownership is typically tracked by Organization.OwnerUserId, we should make sure we aren't removing the owner's "Owner" role
-        // For simplicity, we just clear and add roles.
+        // The owner of the organization must always retain the system 'Owner' role.
+        if (member.Organization?.OwnerUserId == member.UserId)
+        {
+            var ownerRoleId = await context.OrganizationRoles
+                .Where(r => r.OrganizationId == request.OrganizationId
+                         && r.Name == OrganizationRoleConstants.Owner
+                         && r.IsSystemRole
+                         && !r.IsDeleted)
+                .Select(r => r.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (ownerRoleId == Guid.Empty || !request.RoleIds.Contains(ownerRoleId))
+            {
+                throw new BusinessRuleException("The organization owner must keep the Owner role.");
+            }
+        }
+
         // Clear existing roles
         member.MemberRoles.Clear();
 
@@ -53,5 +69,6 @@ public class UpdateOrganizationMemberRolesCommandHandler(
         }
 
         await context.SaveChangesAsync(cancellationToken);
+        await permissionCache.InvalidateOrganizationAsync(request.OrganizationId, cancellationToken);
     }
 }

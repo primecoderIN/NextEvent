@@ -9,7 +9,8 @@ using Microsoft.EntityFrameworkCore;
 namespace NextEvent.Modules.Events.Application.Categories.Commands.RejectCategory;
 public class RejectCategoryCommandHandler(
     EventsDbContext context,
-    ICurrentUserService currentUserService)
+    ICurrentUserService currentUserService,
+    IDateTimeProvider dateTimeProvider)
     : IRequestHandler<RejectCategoryCommand, CategorySuggestionDto>
 {
     public async Task<CategorySuggestionDto> Handle(RejectCategoryCommand request, CancellationToken cancellationToken)
@@ -27,11 +28,13 @@ public class RejectCategoryCommandHandler(
         if (suggestion.Status != CategorySuggestionStatus.Pending)
             throw new BusinessRuleException("Only Pending suggestions can be rejected.");
 
+        var now = dateTimeProvider.UtcNow;
+
         suggestion.Status           = CategorySuggestionStatus.Rejected;
         suggestion.ReviewedById     = reviewerId;
-        suggestion.ReviewedAt       = DateTime.UtcNow;
+        suggestion.ReviewedAt       = now;
         suggestion.RejectionReason  = request.RejectionReason;
-        suggestion.UpdatedAtUtc     = DateTime.UtcNow;
+        suggestion.UpdatedAtUtc     = now;
 
         await context.SaveChangesAsync(cancellationToken);
 

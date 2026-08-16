@@ -14,6 +14,7 @@ using NextEvent.Modules.Identity.Domain;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using NextEvent.Shared.Exceptions;
 
 namespace NextEvent.Modules.Events.API;
@@ -240,6 +241,7 @@ public class EventsController(IMediator mediator) : BaseApiController(mediator)
     /// Reports an event for moderation. Restricted to logged-in users who are not part of an organization.
     /// </summary>
     [Authorize]
+    [EnableRateLimiting("Reports")]
     [HttpPost("{id}/report")]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]

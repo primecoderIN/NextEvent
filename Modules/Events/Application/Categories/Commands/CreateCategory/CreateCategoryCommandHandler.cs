@@ -1,12 +1,15 @@
 using NextEvent.Modules.Events.Persistence.Contexts;
 using NextEvent.Modules.Events.Application.Categories.DTOs;
 using NextEvent.Shared.Exceptions;
+using NextEvent.Shared.Interfaces;
 using NextEvent.Modules.Identity.Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace NextEvent.Modules.Events.Application.Categories.Commands.CreateCategory;
-public class CreateCategoryCommandHandler(EventsDbContext context) : IRequestHandler<CreateCategoryCommand, CategoryDto>
+public class CreateCategoryCommandHandler(
+    EventsDbContext context,
+    IDateTimeProvider dateTimeProvider) : IRequestHandler<CreateCategoryCommand, CategoryDto>
 {
     public async Task<CategoryDto> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
@@ -15,13 +18,15 @@ public class CreateCategoryCommandHandler(EventsDbContext context) : IRequestHan
         if (exists)
             throw new BusinessRuleException("A category with the specified slug already exists.");
 
+        var now = dateTimeProvider.UtcNow;
+
         var cat = new Category
         {
             Name = request.Name,
             Slug = request.Slug,
             Description = request.Description,
-            CreatedAtUtc = DateTime.UtcNow,
-            UpdatedAtUtc = DateTime.UtcNow,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
         };
 
         context.Categories.Add(cat);
