@@ -29,7 +29,7 @@ export function CategorySuggestionsWidget() {
       ) : (
         <div className="space-y-3">
           {suggestions.slice(0, 5).map((s) => {
-            const ago = new Date(s.createdAt).toLocaleDateString("en-US", {
+            const ago = new Date(s.createdAtUtc).toLocaleDateString("en-US", {
               month: "short", day: "numeric",
             })
             return (

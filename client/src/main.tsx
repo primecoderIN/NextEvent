@@ -4,10 +4,14 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { initI18n } from "@/i18n/index";
 import { RouterProvider } from "react-router-dom";
 import { router } from "@/app/router";
+import { setupGlobalErrorHandlers } from "@/shared/lib/errorHandler";
 
 import "./app/layout/style.css";
 
 export const queryCient = new QueryClient();
+
+// Setup global error handlers for unhandled rejections and errors
+setupGlobalErrorHandlers()
 
 
 Promise.all([

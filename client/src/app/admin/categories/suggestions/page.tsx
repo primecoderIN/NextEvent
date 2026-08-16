@@ -99,7 +99,7 @@ export function AdminCategorySuggestionsPage() {
                         {suggestion.suggestedByDisplayName || "Unknown"}
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
-                        {formatDistanceToNow(new Date(suggestion.createdAt), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(suggestion.createdAtUtc), { addSuffix: true })}
                       </TableCell>
                       <TableCell>
                         <Badge 

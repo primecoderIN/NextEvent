@@ -8,7 +8,7 @@ export interface CategorySuggestion {
   name: string
   description?: string
   suggestedByDisplayName: string
-  createdAt: string
+  createdAtUtc: string
   status: "Pending" | "Approved" | "Rejected"
 }
 
