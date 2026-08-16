@@ -1,22 +1,31 @@
-import { Calendar, Tag, Lightbulb } from "lucide-react"
+import { Calendar, Tag, Lightbulb, Users } from "lucide-react"
 import { StatCard } from "./StatCard"
 import { useAdminEvents } from "@/shared/hooks/useAdminEvents"
 import { useCategories } from "@/shared/hooks/useCategories"
 import { useCategorySuggestions } from "@/shared/hooks/useCategorySuggestions"
+import { useUsers } from "@/shared/hooks/useUsers"
 
 export function DashboardStats() {
   const { data: eventsPage } = useAdminEvents({ page: 1, pageSize: 1 }) // Just need totalCount
   const { data: categories } = useCategories()
   const { suggestions } = useCategorySuggestions()
+  const { data: usersPage } = useUsers(1, 1)
 
   const stats = {
     totalEvents: eventsPage?.totalCount ?? 0,
     categories: categories?.length ?? 0,
     pendingSuggestions: suggestions.filter((s) => s.status === "Pending").length,
+    totalUsers: usersPage?.totalCount ?? 0,
   }
 
   return (
     <div className="flex flex-wrap gap-3 mb-6">
+      <StatCard
+        iconBg="bg-blue-500/10"
+        icon={<Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
+        label="Total Users"
+        value={stats.totalUsers.toLocaleString()}
+      />
       <StatCard
         iconBg="bg-violet-500/10"
         icon={<Calendar className="h-5 w-5 text-violet-600 dark:text-violet-400" />}

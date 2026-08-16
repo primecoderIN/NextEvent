@@ -67,7 +67,7 @@ Every business domain lives in its own self-contained module under `Modules/`.
 ### 2.2 CQRS with MediatR
 Controllers never contain business logic. Every request is dispatched via `IMediator`:
 - **Commands** — mutate state: `CreateEvent`, `EditEvent`, `DeleteEvent`, `SuspendEvent`, `UnsuspendEvent`, `ReportEvent`, `CreateOrganization`, `ApproveOrganization`, `InviteOrganizationMember`, `AcceptOrganizationInvitation`, `Login`, `Register`, `SwitchProfile`, etc.
-- **Queries** — read state: `GetEventsList`, `GetMyEventsList`, `GetAdminEventsList`, `GetEventDetailsById`, `GetEventReports`, `GetMyOrganization`, `GetOrganizationMembers`, `GetMyInvitations`, etc.
+- **Queries** — read state: `GetEventsList`, `GetMyEventsList`, `GetAdminEventsList`, `GetEventDetailsById`, `GetEventReports`, `GetMyOrganization`, `GetOrganizationMembers`, `GetMyInvitations`, `GetUsersQuery`, etc.
 
 ### 2.3 MediatR Pipeline Behaviors
 Requests pass through behaviors before reaching handlers:
@@ -196,6 +196,7 @@ The global router composes these into a protected top-level tree.
 | `useReportEvent` | Member event reporting |
 | `useMyOrganization` | Only enabled when `activeProfile === "Organizer"` |
 | `useOrganizationMembers` | Members list + role mutations |
+| `useUsers` | Admin view of all platform users and registrations |
 
 ### 3.4 Layout Optimization
 `PublicLayout` only fetches events and renders the `RightSidebar` (Upcoming Events widget) when `pathname === "/"`. All other public pages (Login, Event Details, Organization Profile) get a clean, full-width layout with zero redundant API calls.

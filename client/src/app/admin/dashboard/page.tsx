@@ -2,7 +2,8 @@ import { useState } from "react"
 import { LayoutDashboard } from "lucide-react"
 import { DashboardStats } from "./DashboardStats"
 import { EventsTable } from "@/features/events/components/EventTable"
-import { CreateCategoryWidget } from "./CreateCategoryWidget"
+import { RecentOrganizationsWidget } from "./RecentOrganizationsWidget"
+import { RecentUsersWidget } from "./RecentUsersWidget"
 import { CategorySuggestionsWidget } from "./CategorySuggestionsWidget"
 import { useAdminEvents, type EventStatusFilter } from "@/shared/hooks/useAdminEvents"
 import { useCategories } from "@/shared/hooks/useCategories"
@@ -62,7 +63,8 @@ export function AdminDashboardPage() {
 
       {/* ── Right Panel ── */}
       <aside className="hidden xl:flex flex-col w-80 shrink-0 border-l border-border/40 p-5 gap-6 overflow-y-auto">
-        <CreateCategoryWidget />
+        <RecentUsersWidget />
+        <RecentOrganizationsWidget />
         <CategorySuggestionsWidget />
       </aside>
     </div>

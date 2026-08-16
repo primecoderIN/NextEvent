@@ -20,4 +20,5 @@ public class User : IdentityUser
 
     public string ActiveProfile { get; set; } = "Member";
 
+    public DateTime CreatedAtUtc { get; set; }
 }

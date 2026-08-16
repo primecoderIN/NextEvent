@@ -228,6 +228,7 @@ Managed by ASP.NET Core Identity. Key tables: `AspNetUsers`, `AspNetRoles`, `Asp
 | `ActiveProfile` | `"Member"` or `"Organizer"`. Embedded in JWT as a claim. Drives the `ActiveOrganizer` policy |
 | `RefreshToken` | Hashed refresh token stored on the user record |
 | `RefreshTokenExpiresAt` | UTC expiry for the refresh token |
+| `CreatedAtUtc` | Exact UTC timestamp of user registration |
 
 ---
 

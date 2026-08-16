@@ -60,6 +60,14 @@ All URLs are **lowercase**. All responses use **camelCase** JSON and the `ApiRes
 
 ---
 
+## 👥 Users
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/users` | Admin | Paginated list of all users on the platform, ordered by most recently registered. |
+
+---
+
 ## 🏷️ Categories
 
 | Method | Endpoint | Auth | Description |

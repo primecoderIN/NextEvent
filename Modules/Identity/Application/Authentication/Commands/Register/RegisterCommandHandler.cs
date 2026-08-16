@@ -34,7 +34,8 @@ public class RegisterCommandHandler(UserManager<User> userManager, ITokenService
         {
             DisplayName = request.DisplayName,
             Email = request.Email,
-            UserName = request.UserName
+            UserName = request.UserName,
+            CreatedAtUtc = dateTimeProvider.UtcNow
         };
 
         var result = await userManager.CreateAsync(user, request.Password);
