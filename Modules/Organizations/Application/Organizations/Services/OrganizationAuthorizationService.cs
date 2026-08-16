@@ -50,6 +50,10 @@ public class OrganizationAuthorizationService(
             .Where(m => m.OrganizationId == organizationId
                      && m.UserId == userId
                      && m.Status == Domain.OrganizationMemberStatus.Active)
+            .Include(m => m.MemberRoles)
+            .ThenInclude(mr => mr.Role!)
+            .ThenInclude(r => r.RolePermissions)
+            .ThenInclude(rp => rp.Permission!)
             .SelectMany(m => m.MemberRoles)
             .Select(mr => mr.Role!)
             .SelectMany(r => r.RolePermissions)

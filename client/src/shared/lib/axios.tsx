@@ -24,7 +24,9 @@ axiosHttpAgent.interceptors.request.use((config) => {
 axiosHttpAgent.interceptors.response.use(
   async (response) => {
     // Add artificial delay for dev
-    await sleep(1000);
+    if (import.meta.env.DEV) {
+      await sleep(1000);
+    }
     return response;
   },
   async (error) => {

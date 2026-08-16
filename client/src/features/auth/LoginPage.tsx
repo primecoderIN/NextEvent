@@ -61,14 +61,15 @@ export function LoginPage() {
 
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 md:px-6 py-12 relative">
-      <div className="absolute top-4 right-4 md:top-8 md:right-8">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2 bg-background/50 backdrop-blur-sm shadow-sm">
-              <Info className="h-4 w-4 text-primary" />
-              Test Credentials
-            </Button>
-          </DialogTrigger>
+      {import.meta.env.DEV && (
+        <div className="absolute top-4 right-4 md:top-8 md:right-8">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2 bg-background/50 backdrop-blur-sm shadow-sm">
+                <Info className="h-4 w-4 text-primary" />
+                Test Credentials
+              </Button>
+            </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Test Accounts</DialogTitle>
@@ -98,7 +99,8 @@ export function LoginPage() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
+        </div>
+      )}
       <div className="w-full max-w-md space-y-8 bg-background">
         <div>
           <Button
