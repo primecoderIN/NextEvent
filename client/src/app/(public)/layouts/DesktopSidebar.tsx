@@ -123,7 +123,7 @@ export function DesktopSidebar() {
 
         <RequireRole role={Roles.Admin}>
           <button
-            onClick={() => navigate(RoutePaths.AdminCategoryNew)}
+            onClick={() => navigate(RoutePaths.AdminCategories)}
             className="w-full mt-2 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border border-border/50"
           >
             {t("createCategory", { ns: "admin" })}

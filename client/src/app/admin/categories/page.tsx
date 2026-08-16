@@ -1,20 +1,21 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { Plus, Tag, ChevronLeft, ChevronRight } from "lucide-react"
 
 import { useCategories } from "@/shared/hooks/useCategories"
 import { Roles } from "@/shared/constants/roles"
 import { RequireRole } from "@/authorization"
-import { RoutePaths } from "@/shared/constants/routePaths"
+import { CreateCategoryDialog } from "./CreateCategoryDialog"
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table"
+import { Button } from "@/shared/ui/button"
 
 export function AdminCategoriesPage() {
   const { t } = useTranslation(["admin", "common"])
   const { data: categories = [], isLoading } = useCategories()
 
   const [page, setPage] = useState(1)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const pageSize = 10
 
   const totalPages = Math.ceil(categories.length / pageSize)
@@ -31,13 +32,13 @@ export function AdminCategoriesPage() {
               Manage event categories
             </p>
           </div>
-          <Link
-            to={RoutePaths.AdminCategoryNew}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+          <Button 
+            onClick={() => setDialogOpen(true)}
+            className="gap-2"
           >
             <Plus className="h-4 w-4" />
             {t("createCategory", { ns: "admin", defaultValue: "Create Category" })}
-          </Link>
+          </Button>
         </div>
 
         <div className="bg-card border border-border/40 rounded-2xl overflow-hidden">
@@ -136,6 +137,8 @@ export function AdminCategoriesPage() {
           )}
         </div>
       </div>
+
+      <CreateCategoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </RequireRole>
   )
 }
